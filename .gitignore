@@ -1,0 +1,7 @@
+# precompiled python
+*.pyc
+
+# editor leftovers
+*~
+.*.sw*
+
