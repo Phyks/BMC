@@ -91,14 +91,14 @@ def download(phenny, input, verbose=True):
 
                 data = response.content
 
+                # grr..
+                title = title.encode("ascii", "ignore")
+
                 path = os.path.join("/home/bryan/public_html/papers2/paperbot/", title + ".pdf")
 
                 file_handler = open(path, "w")
                 file_handler.write(data)
                 file_handler.close()
-
-                # grr..
-                title = title.encode("ascii", "ignore")
 
                 filename = requests.utils.quote(title)
                 url = "http://diyhpl.us/~bryan/papers2/paperbot/" + filename + ".pdf"
