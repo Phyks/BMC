@@ -4,6 +4,7 @@ Fetches papers.
 
 import os
 import json
+import random
 import requests
 
 def download(phenny, input, verbose=True):
@@ -106,22 +107,50 @@ def download(phenny, input, verbose=True):
                 return
             elif verbose and explicit:
                 phenny.say("error: didn't find any pdfs on " + line)
+                phenny.say(download_url(line))
                 return
         elif verbose and explicit:
             phenny.say("error: dunno how to find the pdf on " + line)
+            phenny.say(download_url(line))
             return
     elif verbose and explicit:
         if response.status_code == 501:
             if verbose:
-                phenny.say("error: HTTP " + str(response.status_code) + " " + line + " (battle station not fully operational)")
+                phenny.say("no translator available, raw dump: " + download_url(line))
                 return
         else:
             if verbose:
-                phenny.say("error: HTTP " + str(response.status_code) + " " + line)
+                phenny.say("error: HTTP " + str(response.status_code) + " " + download_url(line))
                 return
     else:
         return
 download.commands = ["fetch", "get", "download"]
 download.priority = "high"
 download.rule = r'(.*)'
+
+def download_ieee(url):
+    """
+    Downloads an IEEE paper. The Zotero translator requires frames/windows to
+    be available. Eventually translation-server will be fixed, but until then
+    it might be nice to have an IEEE workaround.
+    """
+    # url = "http://ieeexplore.ieee.org:80/xpl/freeabs_all.jsp?reload=true&arnumber=901261"
+    # url = "http://ieeexplore.ieee.org/iel5/27/19498/00901261.pdf?arnumber=901261"
+    raise NotImplementedError
+
+def download_url(url):
+    response = requests.get(url, headers={"User-Agent": "origami-pdf"})
+    content = response.content
+    
+    title = "%0.2x" % random.getrandbits(128)
+
+    path = os.path.join("/home/bryan/public_html/papers2/paperbot/", title)
+
+    file_handler = open(path, "w")
+    file_handler.write(content)
+    file_handler.close()
+
+    url = "http://diyhpl.us/~bryan/papers2/paperbot/" + title
+
+    return url
 
