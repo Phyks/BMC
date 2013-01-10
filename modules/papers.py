@@ -45,7 +45,7 @@ def download(phenny, input, verbose=True):
     headers = {
         "Content-Type": "application/json",
     }
-    
+
     data = {
         "url": line,
         "sessionid": "what"
@@ -60,7 +60,7 @@ def download(phenny, input, verbose=True):
         content = json.loads(response.content)
         item = content[0]
         title = item["title"]
-        
+
         if item.has_key("attachments"):
             pdf_url = None
             for attachment in item["attachments"]:
@@ -102,7 +102,7 @@ def download(phenny, input, verbose=True):
 
                 filename = requests.utils.quote(title)
                 url = "http://diyhpl.us/~bryan/papers2/paperbot/" + filename + ".pdf"
-                
+
                 phenny.say(url)
                 return
             elif verbose and explicit:
@@ -141,7 +141,7 @@ def download_ieee(url):
 def download_url(url):
     response = requests.get(url, headers={"User-Agent": "origami-pdf"})
     content = response.content
-    
+
     title = "%0.2x" % random.getrandbits(128)
 
     path = os.path.join("/home/bryan/public_html/papers2/paperbot/", title)
