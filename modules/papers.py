@@ -23,7 +23,7 @@ def download(phenny, input, verbose=True):
 
     # get the input
     line = input.group()
-    phenny.say(line)
+    print line
     # was this an explicit command?
     explicit = False
     if line.startswith(phenny.nick):
