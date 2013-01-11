@@ -1,7 +1,7 @@
 """
 Fetches papers.
 """
-
+import re
 import os
 import json
 import random
@@ -39,91 +39,92 @@ def download(phenny, input, verbose=True):
     # don't bother if there's nothing there
     if len(line) < 5 or (not "http://" in line and not "https://" in line) or not line.startswith("http"):
         return
+	for line in re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', line):
+		translation_url = "http://localhost:1969/web"
 
-    translation_url = "http://localhost:1969/web"
+		headers = {
+			"Content-Type": "application/json",
+		}
 
-    headers = {
-        "Content-Type": "application/json",
-    }
+		data = {
+			"url": line,
+			"sessionid": "what"
+		}
 
-    data = {
-        "url": line,
-        "sessionid": "what"
-    }
+		data = json.dumps(data)
 
-    data = json.dumps(data)
+		response = requests.post(translation_url, data=data, headers=headers)
 
-    response = requests.post(translation_url, data=data, headers=headers)
+		if response.status_code == 200:
+			# see if there are any attachments
+			content = json.loads(response.content)
+			item = content[0]
+			title = item["title"]
 
-    if response.status_code == 200:
-        # see if there are any attachments
-        content = json.loads(response.content)
-        item = content[0]
-        title = item["title"]
+			if item.has_key("attachments"):
+				pdf_url = None
+				for attachment in item["attachments"]:
+					if attachment.has_key("mimeType") and "application/pdf" in attachment["mimeType"]:
+						pdf_url = attachment["url"]
+						break
 
-        if item.has_key("attachments"):
-            pdf_url = None
-            for attachment in item["attachments"]:
-                if attachment.has_key("mimeType") and "application/pdf" in attachment["mimeType"]:
-                    pdf_url = attachment["url"]
-                    break
+				if pdf_url:
+					user_agent = "Mozilla/5.0 (X11; Linux i686 (x86_64)) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11"
 
-            if pdf_url:
-                user_agent = "Mozilla/5.0 (X11; Linux i686 (x86_64)) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11"
+					headers = {
+						"User-Agent": user_agent,
+					}
 
-                headers = {
-                    "User-Agent": user_agent,
-                }
+					response = None
+					if pdf_url.startswith("https://"):
+						response = requests.get(pdf_url, headers=headers, verify=False)
+					else:
+						response = requests.get(pdf_url, headers=headers)
 
-                response = None
-                if pdf_url.startswith("https://"):
-                    response = requests.get(pdf_url, headers=headers, verify=False)
-                else:
-                    response = requests.get(pdf_url, headers=headers)
+					# detect failure
+					if response.status_code == 401:
+						phenny.say("HTTP 401 unauthorized " + str(pdf_url))
+						continue
+					elif response.status_code != 200:
+						phenny.say("HTTP " + str(response.status_code) + " " + str(pdf_url))
+						continue
 
-                # detect failure
-                if response.status_code == 401:
-                    phenny.say("HTTP 401 unauthorized " + str(pdf_url))
-                    return
-                elif response.status_code != 200:
-                    phenny.say("HTTP " + str(response.status_code) + " " + str(pdf_url))
-                    return
+					data = response.content
 
-                data = response.content
+					# grr..
+					title = title.encode("ascii", "ignore")
 
-                # grr..
-                title = title.encode("ascii", "ignore")
+					path = os.path.join("/home/bryan/public_html/papers2/paperbot/", title + ".pdf")
 
-                path = os.path.join("/home/bryan/public_html/papers2/paperbot/", title + ".pdf")
+					file_handler = open(path, "w")
+					file_handler.write(data)
+					file_handler.close()
 
-                file_handler = open(path, "w")
-                file_handler.write(data)
-                file_handler.close()
+					filename = requests.utils.quote(title)
+					url = "http://diyhpl.us/~bryan/papers2/paperbot/" + filename + ".pdf"
 
-                filename = requests.utils.quote(title)
-                url = "http://diyhpl.us/~bryan/papers2/paperbot/" + filename + ".pdf"
-
-                phenny.say(url)
-                return
-            elif verbose and explicit:
-                phenny.say("error: didn't find any pdfs on " + line)
-                phenny.say(download_url(line))
-                return
-        elif verbose and explicit:
-            phenny.say("error: dunno how to find the pdf on " + line)
-            phenny.say(download_url(line))
-            return
-    elif verbose and explicit:
-        if response.status_code == 501:
-            if verbose:
-                phenny.say("no translator available, raw dump: " + download_url(line))
-                return
-        else:
-            if verbose:
-                phenny.say("error: HTTP " + str(response.status_code) + " " + download_url(line))
-                return
-    else:
-        return
+					phenny.say(url)
+					continue
+				elif verbose and explicit:
+					phenny.say("error: didn't find any pdfs on " + line)
+					phenny.say(download_url(line))
+					continue
+			elif verbose and explicit:
+				phenny.say("error: dunno how to find the pdf on " + line)
+				phenny.say(download_url(line))
+				continue
+		elif verbose and explicit:
+			if response.status_code == 501:
+				if verbose:
+					phenny.say("no translator available, raw dump: " + download_url(line))
+					continue
+			else:
+				if verbose:
+					phenny.say("error: HTTP " + str(response.status_code) + " " + download_url(line))
+					continue
+		else:
+			continue
+	return
 download.commands = ["fetch", "get", "download"]
 download.priority = "high"
 download.rule = r'(.*)'
