@@ -111,7 +111,6 @@ def download(phenny, input, verbose=True):
                     phenny.say(download_url(line))
                     continue
             elif verbose and explicit:
-                phenny.say("error: dunno how to find the pdf on " + line)
                 phenny.say(download_url(line))
                 continue
         elif verbose and explicit:
@@ -195,7 +194,7 @@ def find_citation_pdf_url(tree, url):
     Returns the <meta name="citation_pdf_url"> content attribute.
     """
     citation_pdf_url = extract_meta_content(tree, "citation_pdf_url")
-    if not citation_pdf_url.startswith("http"):
+    if citation_pdf_url and  not citation_pdf_url.startswith("http"):
         if citation_pdf_url.startswith("/"):
             url_start = url[:url.find("/",8)]
             citation_pdf_url = url_start + citation_pdf_url
