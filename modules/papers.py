@@ -108,7 +108,6 @@ def download(phenny, input, verbose=True):
                     phenny.say(url)
                     continue
                 elif verbose and explicit:
-                    phenny.say("error: didn't find any pdfs on " + line)
                     phenny.say(download_url(line))
                     continue
             elif verbose and explicit:
@@ -161,14 +160,14 @@ def download_url(url):
         citation_pdf_url = find_citation_pdf_url(tree, url)
         citation_title = find_citation_title(tree)
 
-        if citation_pdf_url and content_title:
+        if citation_pdf_url and citation_title:
             response = requests.get(citation_pdf_url, headers={"User-Agent": "gundam-gdf"})
             content = response.content
             if "pdf" in response.headers["content-type"]:
                 extension = ".pdf"
                 title = citation_title
         else:
-            raise Exception("problem with citation_pdf_url or content_title")
+            raise Exception("problem with citation_pdf_url or citation_title")
 
     path = os.path.join("/home/bryan/public_html/papers2/paperbot/", title + extension)
 
