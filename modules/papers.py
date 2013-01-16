@@ -158,9 +158,9 @@ def download_url(url):
         # extract some metadata with xpaths
         citation_pdf_url = find_citation_pdf_url(tree, url)
         citation_title = find_citation_title(tree)
-        citation_title = citation_title.encode("ascii", "ignore")
 
         if citation_pdf_url and citation_title:
+            citation_title = citation_title.encode("ascii", "ignore")
             response = requests.get(citation_pdf_url, headers={"User-Agent": "pdf-defense-force"})
             content = response.content
             if "pdf" in response.headers["content-type"]:
