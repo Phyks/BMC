@@ -167,7 +167,24 @@ def download_url(url):
                 extension = ".pdf"
                 title = citation_title
         else:
-            raise Exception("problem with citation_pdf_url or citation_title")
+            if "h1 class=\"articleTitle" in content:
+                try:
+                    title = tree.xpath("//h1[class='articleTitle']")[0].text
+                    title = title.encode("ascii", "ignore")
+                    pdf_url = tree.xpath("//a[@title='View the Full Text PDF']/@href")[0]
+                except:
+                    pass
+                else:
+                    if pdf_url.startswith("/"):
+                        url_start = url[:url.find("/",8)]
+                        pdf_url = url_start + pdf_url
+                    response = requests.get(pdf_url, headers={"User-Agent": "pdf-teapot"})
+                    content = response.content
+                    if "pdf" in response.headers["content-type"]:
+                        extension = ".pdf"
+            # raise Exception("problem with citation_pdf_url or citation_title")
+            # well, at least save the contents from the original url
+            pass
 
     path = os.path.join("/home/bryan/public_html/papers2/paperbot/", title + extension)
 
