@@ -169,7 +169,7 @@ def download_url(url):
         else:
             if "h1 class=\"articleTitle" in content:
                 try:
-                    title = tree.xpath("//h1[class='articleTitle']")[0].text
+                    title = tree.xpath("//h1[@class='articleTitle']")[0].text
                     title = title.encode("ascii", "ignore")
                     pdf_url = tree.xpath("//a[@title='View the Full Text PDF']/@href")[0]
                 except:
