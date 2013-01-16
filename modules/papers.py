@@ -6,6 +6,8 @@ import os
 import json
 import random
 import requests
+import lxml.etree
+from StringIO import StringIO
 
 def download(phenny, input, verbose=True):
     """
@@ -143,15 +145,76 @@ def download_url(url):
     response = requests.get(url, headers={"User-Agent": "origami-pdf"})
     content = response.content
 
+    # just make up a default filename
     title = "%0.2x" % random.getrandbits(128)
 
-    path = os.path.join("/home/bryan/public_html/papers2/paperbot/", title)
+    # default extension
+    extension = ".txt"
+
+    if "pdf" in response.headers["content-type"]:
+        extension = ".pdf"
+    elif check_if_html(response):
+        # parse the html string with lxml.etree
+        tree = parse_html(content)
+
+        # extract some metadata with xpaths
+        citation_pdf_url = find_citation_pdf_url(tree, url)
+        citation_title = find_citation_title(tree)
+
+        if citation_pdf_url and content_title:
+            response = requests.get(citation_pdf_url, headers={"User-Agent": "gundam-gdf"})
+            content = response.content
+            if "pdf" in response.headers["content-type"]:
+                extension = ".pdf"
+                title = citation_title
+        else:
+            raise Exception("problem with citation_pdf_url or content_title")
+
+    path = os.path.join("/home/bryan/public_html/papers2/paperbot/", title + extension)
 
     file_handler = open(path, "w")
     file_handler.write(content)
     file_handler.close()
 
-    url = "http://diyhpl.us/~bryan/papers2/paperbot/" + title
+    url = "http://diyhpl.us/~bryan/papers2/paperbot/" + requests.utils.quote(title) + extension
 
     return url
+
+def parse_html(content):
+    if not isinstance(content, StringIO):
+        content = StringIO(content)
+    parser = lxml.etree.HTMLParser()
+    tree = lxml.etree.parse(content, parser)
+    return tree
+
+def check_if_html(response):
+    return "text/html" in response.headers["content-type"]
+
+def find_citation_pdf_url(tree, url):
+    """
+    Returns the <meta name="citation_pdf_url"> content attribute.
+    """
+    citation_pdf_url = extract_meta_content(tree, "citation_pdf_url")
+    if not citation_pdf_url.startswith("http"):
+        if citation_pdf_url.startswith("/"):
+            url_start = url[:url.find("/",8)]
+            citation_pdf_url = url_start + citation_pdf_url
+        else:
+            raise Exception("unhandled situation (citation_pdf_url)")
+    return citation_pdf_url
+
+def find_citation_title(tree):
+    """
+    Returns the <meta name="citation_title"> content attribute.
+    """
+    citation_title = extract_meta_content(tree, "citation_title")
+    return citation_title
+
+def extract_meta_content(tree, meta_name):
+    try:
+        content = tree.xpath("//meta[@name='" + meta_name + "']/@content")[0]
+    except:
+        return None
+    else:
+        return content
 
