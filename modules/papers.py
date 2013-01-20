@@ -42,6 +42,8 @@ def download(phenny, input, verbose=True):
     if len(line) < 5 or (not "http://" in line and not "https://" in line) or not line.startswith("http"):
         return
     for line in re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', line):
+        line = filter_fix(line)
+
         translation_url = "http://localhost:1969/web"
 
         headers = {
@@ -233,4 +235,12 @@ def extract_meta_content(tree, meta_name):
         return None
     else:
         return content
+
+def filter_fix(url):
+    """
+    Fixes some common problems in urls.
+    """
+    if ".proxy.lib.pdx.edu" in url:
+        url = url.replace(".proxy.lib.pdx.edu", "")
+    return url
 
