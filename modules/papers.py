@@ -172,6 +172,10 @@ def download_url(url):
             if "sciencedirect.com" in url:
                 title = tree.xpath("//h1[@class='svTitle']")[0].text
                 pdf_url = tree.xpath("//a[@id='pdfLink']/@href")[0]
+                response = requests.get(pdf_url, headers={"User-Agent": "sdf-macross"})
+                content = response.content
+                if "pdf" in response.headers["content-type"]:
+                    extension = ".pdf"
             elif "h1 class=\"articleTitle" in content:
                 try:
                     title = tree.xpath("//h1[@class='articleTitle']")[0].text
