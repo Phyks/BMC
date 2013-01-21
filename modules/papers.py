@@ -169,7 +169,10 @@ def download_url(url):
                 extension = ".pdf"
                 title = citation_title
         else:
-            if "h1 class=\"articleTitle" in content:
+            if "sciencedirect.com" in url:
+                title = tree.xpath("//h1[@class='svTitle']")[0].text
+                pdf_url = tree.xpath("//a[@id='pdfLink']/@href")[0]
+            elif "h1 class=\"articleTitle" in content:
                 try:
                     title = tree.xpath("//h1[@class='articleTitle']")[0].text
                     title = title.encode("ascii", "ignore")
