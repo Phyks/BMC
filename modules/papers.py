@@ -195,6 +195,9 @@ def download_url(url):
             # well, at least save the contents from the original url
             pass
 
+    # can't create directories
+    title = title.replace("/", "_")
+
     path = os.path.join("/home/bryan/public_html/papers2/paperbot/", title + extension)
 
     file_handler = open(path, "w")
