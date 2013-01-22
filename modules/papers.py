@@ -44,6 +44,9 @@ def download(phenny, input, verbose=True):
     for line in re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', line):
         line = filter_fix(line)
 
+        # fix for login.jsp links to ieee xplore
+        line = fix_ieee_login_urls(line)
+
         translation_url = "http://localhost:1969/web"
 
         headers = {
@@ -252,5 +255,30 @@ def filter_fix(url):
     """
     if ".proxy.lib.pdx.edu" in url:
         url = url.replace(".proxy.lib.pdx.edu", "")
+    return url
+
+def fix_ieee_login_urls(url):
+    """
+    Fixes urls point to login.jsp on IEEE Xplore. When someone browses to the
+    abstracts page on IEEE Xplore, they are sometimes sent to the login.jsp
+    page, and then this link is given to paperbot. The actual link is based on
+    the arnumber.
+
+    example:
+    http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=806324&url=http%3A%2F%2Fieeexplore.ieee.org%2Fxpls%2Fabs_all.jsp%3Farnumber%3D806324
+    """
+    if "ieeexplore.ieee.org/xpl/login.jsp" in url:
+        if "arnumber=" in url:
+            parts = url.split("arnumber=")
+
+            # i guess the url might not look like the example in the docstring
+            if "&" in parts[1]:
+                arnumber = parts[1].split("&")[0]
+            else:
+                arnumber = parts[1]
+
+            return "http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=" + arnumber
+
+    # default case when things go wrong
     return url
 
