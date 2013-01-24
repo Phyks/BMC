@@ -172,7 +172,7 @@ def download_url(url):
                 extension = ".pdf"
                 title = citation_title
         else:
-            if "sciencedirect.com" in url:
+            if "sciencedirect.com" in url and not "ShoppingCart" in url:
                 title = tree.xpath("//h1[@class='svTitle']")[0].text
                 pdf_url = tree.xpath("//a[@id='pdfLink']/@href")[0]
                 response = requests.get(pdf_url, headers={"User-Agent": "sdf-macross"})
