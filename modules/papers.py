@@ -173,12 +173,18 @@ def download_url(url):
                 title = citation_title
         else:
             if "sciencedirect.com" in url and not "ShoppingCart" in url:
-                title = tree.xpath("//h1[@class='svTitle']")[0].text
-                pdf_url = tree.xpath("//a[@id='pdfLink']/@href")[0]
-                response = requests.get(pdf_url, headers={"User-Agent": "sdf-macross"})
-                content = response.content
-                if "pdf" in response.headers["content-type"]:
-                    extension = ".pdf"
+                try:
+                    title = tree.xpath("//h1[@class='svTitle']")[0].text
+                    pdf_url = tree.xpath("//a[@id='pdfLink']/@href")[0]
+                    new_response = requests.get(pdf_url, headers={"User-Agent": "sdf-macross"})
+                    new_content = new_response.content
+                    if "pdf" in new_response.headers["content-type"]:
+                        extension = ".pdf"
+                except Exception:
+                    pass
+                else:
+                    content = new_content
+                    response = new_response
             elif "h1 class=\"articleTitle" in content:
                 try:
                     title = tree.xpath("//h1[@class='articleTitle']")[0].text
