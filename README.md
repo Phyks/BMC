@@ -6,7 +6,7 @@ Paperbot is an IRC bot that fetches academic papers. It monitors all conversatio
 <div id="deets" />
 ## deets
 
-All content is scraped using [zotero/translators](https://github.com/zotero/translators). These are javascript scrapers that work on a large number of academic publisher sites and are actively maintained. Paperbot offloads links to [zotero/translation-server](https://github.com/zotero/translation-server), which runs the zotero scrapers headlessly in a gecko and xulrunner environment. The scrapers return metadata and a link to the pdf. Then paperbot fetches that particular pdf. Also, sometimes in IRC someone drops a link straight to a pdf, which paperbot is also happy to compulsively archive.
+All content is scraped using [zotero/translators](https://github.com/zotero/translators). These are javascript scrapers that work on a large number of academic publisher sites and are actively maintained. Paperbot offloads links to [zotero/translation-server](https://github.com/zotero/translation-server), which runs the zotero scrapers headlessly in a gecko and xulrunner environment. The scrapers return metadata and a link to the pdf. Then paperbot fetches that particular pdf. Sometimes in IRC someone drops a link straight to a pdf, which paperbot is also happy to compulsively archive.
 
 * [zotero/translators](https://github.com/zotero/translators)
 * [zotero/translation-server](https://github.com/zotero/translation-server)
