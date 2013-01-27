@@ -11,6 +11,7 @@ All content is scraped using [zotero/translators](https://github.com/zotero/tran
 * [zotero/translators](https://github.com/zotero/translators)
 * [zotero/translation-server](https://github.com/zotero/translation-server)
 * [patched translation-server](https://github.com/kanzure/translation-server)
+* [phenny](https://github.com/sbp/phenny)
 
 <div id="todo" />
 ## TODO
