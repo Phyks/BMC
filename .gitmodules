@@ -1,0 +1,6 @@
+[submodule "phenny"]
+	path = phenny
+	url = git://github.com/sbp/phenny.git
+[submodule "translation-server"]
+	path = translation-server
+	url = git://github.com/zotero/translation-server.git
