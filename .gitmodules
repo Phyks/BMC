@@ -3,4 +3,4 @@
 	url = git://github.com/sbp/phenny.git
 [submodule "translation-server"]
 	path = translation-server
-	url = git://github.com/zotero/translation-server.git
+	url = git://github.com/kanzure/translation-server.git
