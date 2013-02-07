@@ -164,6 +164,7 @@ def download_url(url):
         citation_pdf_url = find_citation_pdf_url(tree, url)
         citation_title = find_citation_title(tree)
 
+        # wow, this seriously needs to be cleaned up
         if citation_pdf_url and citation_title:
             citation_title = citation_title.encode("ascii", "ignore")
             response = requests.get(citation_pdf_url, headers={"User-Agent": "pdf-defense-force"})
@@ -177,6 +178,19 @@ def download_url(url):
                     title = tree.xpath("//h1[@class='svTitle']")[0].text
                     pdf_url = tree.xpath("//a[@id='pdfLink']/@href")[0]
                     new_response = requests.get(pdf_url, headers={"User-Agent": "sdf-macross"})
+                    new_content = new_response.content
+                    if "pdf" in new_response.headers["content-type"]:
+                        extension = ".pdf"
+                except Exception:
+                    pass
+                else:
+                    content = new_content
+                    response = new_response
+            elif "apl.aip.org" in url:
+                try:
+                    title = tree.xpath("//title/text()")[0].split(" | ")[0]
+                    pdf_url = [link for link in tree.xpath("//a/@href") if "getpdf" in link][0]
+                    new_response = requests.get(pdf_url, headers={"User-Agent": "time-machine/1.0"})
                     new_content = new_response.content
                     if "pdf" in new_response.headers["content-type"]:
                         extension = ".pdf"
