@@ -164,6 +164,10 @@ def download_url(url):
         citation_pdf_url = find_citation_pdf_url(tree, url)
         citation_title = find_citation_title(tree)
 
+        # aip.org sucks, citation_pdf_url is wrong
+        if "link.aip.org/" in citation_pdf_url:
+            citation_pdf_url = None
+
         # wow, this seriously needs to be cleaned up
         if citation_pdf_url and citation_title:
             citation_title = citation_title.encode("ascii", "ignore")
