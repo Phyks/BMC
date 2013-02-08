@@ -168,9 +168,10 @@ def download_url(url):
         if citation_pdf_url and "link.aip.org/" in citation_pdf_url:
             citation_pdf_url = None
 
-        if "ieeexplore.ieee.org" in citation_pdf_url:
+        if citation_pdf_url and "ieeexplore.ieee.org" in citation_pdf_url:
             content = requests.get(citation_pdf_url).content
             tree = parse_html(content)
+            # citation_title = ...
 
         # wow, this seriously needs to be cleaned up
         if citation_pdf_url and citation_title and not "ieeexplore.ieee.org" in citation_pdf_url:
