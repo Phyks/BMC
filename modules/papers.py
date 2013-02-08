@@ -203,6 +203,18 @@ def download_url(url):
                 else:
                     content = new_content
                     response = new_response
+            elif "ieeexplore.ieee.org" in url:
+                try:
+                    pdf_url = [url for url in tree.xpath("//frame/@src") if "pdf" in url][0]
+                    new_response = requests.get(pdf_url, headers={"User-Agent": "time-machine/2.0"})
+                    new_content = new_response.content
+                    if "pdf" in new_response.headers["content-type"]:
+                        extension = ".pdf"
+                except Exception:
+                    pass
+                else:
+                    content = new_content
+                    response = new_response
             elif "h1 class=\"articleTitle" in content:
                 try:
                     title = tree.xpath("//h1[@class='articleTitle']")[0].text
