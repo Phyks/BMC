@@ -1,2 +1,3 @@
 phenny
 requests
+-e git://github.com/kanzure/pdfparanoia.git@master#egg=pdfparanoia
