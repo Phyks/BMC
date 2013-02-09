@@ -200,7 +200,7 @@ def download_url(url):
                 else:
                     content = new_content
                     response = new_response
-            elif "apl.aip.org" in url:
+            elif ".aip.org/" in url:
                 try:
                     title = tree.xpath("//title/text()")[0].split(" | ")[0]
                     pdf_url = [link for link in tree.xpath("//a/@href") if "getpdf" in link][0]
