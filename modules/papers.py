@@ -9,6 +9,8 @@ import requests
 import lxml.etree
 from StringIO import StringIO
 
+import pdfparanoia
+
 def download(phenny, input, verbose=True):
     """
     Downloads a paper.
@@ -202,6 +204,7 @@ def download_url(url):
                     new_response = requests.get(pdf_url, headers={"User-Agent": "time-machine/1.0"})
                     new_content = new_response.content
                     if "pdf" in new_response.headers["content-type"]:
+                        new_content = pdfparanoia.scrub(new_content)
                         extension = ".pdf"
                 except Exception:
                     pass
@@ -243,6 +246,9 @@ def download_url(url):
     title = title.replace("/", "_")
 
     path = os.path.join("/home/bryan/public_html/papers2/paperbot/", title + extension)
+
+    if extension in [".pdf", "pdf"]:
+        content = pdfparanoia.scrub(content)
 
     file_handler = open(path, "w")
     file_handler.write(content)
