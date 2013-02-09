@@ -101,7 +101,7 @@ def download(phenny, input, verbose=True):
                     data = response.content
 
                     if "pdf" in response.headers["content-type"]:
-                        data = pdfparanoia.scrub(data)
+                        data = pdfparanoia.scrub(StringIO(data))
 
                     # grr..
                     title = title.encode("ascii", "ignore")
@@ -207,7 +207,6 @@ def download_url(url):
                     new_response = requests.get(pdf_url, headers={"User-Agent": "time-machine/1.0"})
                     new_content = new_response.content
                     if "pdf" in new_response.headers["content-type"]:
-                        new_content = pdfparanoia.scrub(new_content)
                         extension = ".pdf"
                 except Exception:
                     pass
@@ -251,7 +250,7 @@ def download_url(url):
     path = os.path.join("/home/bryan/public_html/papers2/paperbot/", title + extension)
 
     if extension in [".pdf", "pdf"]:
-        content = pdfparanoia.scrub(content)
+        content = pdfparanoia.scrub(StringIO(content))
 
     file_handler = open(path, "w")
     file_handler.write(content)
