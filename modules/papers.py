@@ -100,6 +100,9 @@ def download(phenny, input, verbose=True):
 
                     data = response.content
 
+                    if "pdf" in response.headers["content-type"]:
+                        data = pdfparanoia.scrub(data)
+
                     # grr..
                     title = title.encode("ascii", "ignore")
 
