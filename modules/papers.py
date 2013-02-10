@@ -113,6 +113,12 @@ def download(phenny, input, verbose=True):
                     file_handler.close()
 
                     filename = requests.utils.quote(title)
+
+                    # Remove an ending period, which sometimes happens when the
+                    # title of the paper has a period at the end.
+                    if filename[-1] == ".":
+                        filename = filename[:-1]
+
                     url = "http://diyhpl.us/~bryan/papers2/paperbot/" + filename + ".pdf"
 
                     phenny.say(url)
