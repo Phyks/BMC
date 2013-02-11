@@ -101,7 +101,11 @@ def download(phenny, input, verbose=True):
                     data = response.content
 
                     if "pdf" in response.headers["content-type"]:
-                        data = pdfparanoia.scrub(StringIO(data))
+                        try:
+                            data = pdfparanoia.scrub(StringIO(data))
+                        except:
+                            # this is to avoid a PDFNotImplementedError
+                            pass
 
                     # grr..
                     title = title.encode("ascii", "ignore")
@@ -256,7 +260,11 @@ def download_url(url):
     path = os.path.join("/home/bryan/public_html/papers2/paperbot/", title + extension)
 
     if extension in [".pdf", "pdf"]:
-        content = pdfparanoia.scrub(StringIO(content))
+        try:
+            content = pdfparanoia.scrub(StringIO(content))
+        except:
+            # this is to avoid a PDFNotImplementedError
+            pass
 
     file_handler = open(path, "w")
     file_handler.write(content)
