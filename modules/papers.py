@@ -270,6 +270,7 @@ def download_url(url):
     file_handler.write(content)
     file_handler.close()
 
+    title = title.encode("ascii", "ignore")
     url = "http://diyhpl.us/~bryan/papers2/paperbot/" + requests.utils.quote(title) + extension
 
     return url
