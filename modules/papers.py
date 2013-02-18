@@ -64,7 +64,7 @@ def download(phenny, input, verbose=True):
 
         response = requests.post(translation_url, data=data, headers=headers)
 
-        if response.status_code == 200:
+        if response.status_code == 200 and response.content != "[]":
             # see if there are any attachments
             content = json.loads(response.content)
             item = content[0]
