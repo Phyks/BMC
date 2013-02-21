@@ -210,6 +210,38 @@ def download_url(url):
                 else:
                     content = new_content
                     response = new_response
+            elif "jstor.org/" in url:
+                # clean up the url
+                if "?" in url:
+                    url = url[0:url.find("?")]
+
+                # not all pages have the <input type="hidden" name="ppv-title"> element
+                try:
+                    title = tree.xpath("//input[@name='ppv-title']/@value")[0]
+                except Exception:
+                    pass
+
+                # get the document id
+                document_id = None
+                if url[-1] != "/":
+                    #if "stable/" in url:
+                    #elif "discover/" in url:
+                    #elif "action/showShelf?candidate=" in url:
+                    #elif "pss/" in url:
+                    document_id = url.split("/")[-1]
+
+                if document_id.isdigit():
+                    try:
+                        pdf_url = "http://www.jstor.org/stable/pdfplus/" + document_id + ".pdf?acceptTC=true"
+                        new_response = requests.get(pdf_url, header={"User-Agent": "time-machine/1.1"})
+                        new_content = new_response.content
+                        if "pdf" in new_response.headers["content-type"]:
+                            extension = ".pdf"
+                    except Exception:
+                        pass
+                    else:
+                        content = new_content
+                        response = new_response
             elif ".aip.org/" in url:
                 try:
                     title = tree.xpath("//title/text()")[0].split(" | ")[0]
