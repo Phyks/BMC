@@ -218,9 +218,12 @@ def download_url(url):
 
                 # not all pages have the <input type="hidden" name="ppv-title"> element
                 try:
-                    title = tree.xpath("//input[@name='ppv-title']/@value")[0]
+                    title = tree.xpath("//div[@class='hd title']")[0].text
                 except Exception:
-                    pass
+                    try:
+                        title = tree.xpath("//input[@name='ppv-title']/@value")[0]
+                    except Exception:
+                        pass
 
                 # get the document id
                 document_id = None
@@ -234,7 +237,7 @@ def download_url(url):
                 if document_id.isdigit():
                     try:
                         pdf_url = "http://www.jstor.org/stable/pdfplus/" + document_id + ".pdf?acceptTC=true"
-                        new_response = requests.get(pdf_url, header={"User-Agent": "time-machine/1.1"})
+                        new_response = requests.get(pdf_url, headers={"User-Agent": "time-machine/1.1"})
                         new_content = new_response.content
                         if "pdf" in new_response.headers["content-type"]:
                             extension = ".pdf"
