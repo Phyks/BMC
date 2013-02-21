@@ -48,6 +48,7 @@ def download(phenny, input, verbose=True):
 
         # fix for login.jsp links to ieee xplore
         line = fix_ieee_login_urls(line)
+        line = fix_jstor_pdf_urls(line)
 
         translation_url = "http://localhost:1969/web"
 
@@ -376,5 +377,14 @@ def fix_ieee_login_urls(url):
             return "http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=" + arnumber
 
     # default case when things go wrong
+    return url
+
+def fix_jstor_pdf_urls(url):
+    """
+    Fixes urls pointing to jstor pdfs.
+    """
+    if "jstor.org/" in url:
+        if ".pdf" in url and not "?acceptTC=true" in url:
+            url += "?acceptTC=true"
     return url
 
