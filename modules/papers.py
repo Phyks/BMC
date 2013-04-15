@@ -290,6 +290,10 @@ def download_url(url):
             # well, at least save the contents from the original url
             pass
 
+    # make the title again just in case
+    if not title:
+        title = "%0.2x" % random.getrandbits(128)
+
     # can't create directories
     title = title.replace("/", "_")
 
