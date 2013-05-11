@@ -1,44 +1,23 @@
+#!/usr/bin/python
 """
 Fetches papers.
 """
 import re
 import os
 import json
+import params
 import random
 import requests
 import lxml.etree
+import sys
 from StringIO import StringIO
 
 import pdfparanoia
 
-def download(phenny, input, verbose=True):
+def download(line, verbose=True):
     """
     Downloads a paper.
     """
-    # only accept requests in a channel
-    if not input.sender.startswith('#'):
-        # unless the user is an admin, of course
-        if not input.admin:
-            phenny.say("i only take requests in the ##hplusroadmap channel.")
-            return
-        else:
-            # just give a warning message to the admin.. not a big deal.
-            phenny.say("okay i'll try, but please send me requests in ##hplusroadmap in the future.")
-
-    # get the input
-    line = input.group()
-
-    # was this an explicit command?
-    explicit = False
-    if line.startswith(phenny.nick):
-        explicit = True
-        line = line[len(phenny.nick):]
-
-        if line.startswith(",") or line.startswith(":"):
-            line = line[1:]
-
-    if line.startswith(" "):
-        line = line.strip()
 
     # don't bother if there's nothing there
     if len(line) < 5 or (not "http://" in line and not "https://" in line) or not line.startswith("http"):
@@ -50,7 +29,7 @@ def download(phenny, input, verbose=True):
         line = fix_ieee_login_urls(line)
         line = fix_jstor_pdf_urls(line)
 
-        translation_url = "http://localhost:1969/web"
+        translation_url = params.server
 
         headers = {
             "Content-Type": "application/json",
@@ -93,10 +72,10 @@ def download(phenny, input, verbose=True):
 
                     # detect failure
                     if response.status_code == 401:
-                        phenny.say("HTTP 401 unauthorized " + str(pdf_url))
+                        print("HTTP 401 unauthorized " + str(pdf_url))
                         continue
                     elif response.status_code != 200:
-                        phenny.say("HTTP " + str(response.status_code) + " " + str(pdf_url))
+                        print("HTTP " + str(response.status_code) + " " + str(pdf_url))
                         continue
 
                     data = response.content
@@ -111,7 +90,7 @@ def download(phenny, input, verbose=True):
                     # grr..
                     title = title.encode("ascii", "ignore")
 
-                    path = os.path.join("/home/bryan/public_html/papers2/paperbot/", title + ".pdf")
+                    path = os.path.join(params.folder, title + ".pdf")
 
                     file_handler = open(path, "w")
                     file_handler.write(data)
@@ -124,27 +103,23 @@ def download(phenny, input, verbose=True):
                     if filename[-1] == ".":
                         filename = filename[:-1]
 
-                    url = "http://diyhpl.us/~bryan/papers2/paperbot/" + filename + ".pdf"
+                    url = params.url + filename + ".pdf"
 
-                    phenny.say(url)
+                    print(url)
                     continue
-                elif verbose and explicit:
-                    phenny.say(download_url(line))
-                    continue
-            elif verbose and explicit:
-                phenny.say(download_url(line))
-                continue
-        elif verbose and explicit:
-            if response.status_code == 501:
-                if verbose:
-                    phenny.say("no translator available, raw dump: " + download_url(line))
+                else:
+                    print(download_url(line))
                     continue
             else:
-                if verbose:
-                    phenny.say("error: HTTP " + str(response.status_code) + " " + download_url(line))
-                    continue
+                print(download_url(line))
+                continue
         else:
-            continue
+            if response.status_code == 501:
+                if verbose:
+                    print("no translator available, raw dump: " + download_url(line))
+            else:
+                if verbose:
+                    print("error: HTTP " + str(response.status_code) + " " + download_url(line))
     return
 download.commands = ["fetch", "get", "download"]
 download.priority = "high"
@@ -296,8 +271,10 @@ def download_url(url):
 
     # can't create directories
     title = title.replace("/", "_")
+    title = title.replace(" ", "_")
+    title = title[:20]
 
-    path = os.path.join("/home/bryan/public_html/papers2/paperbot/", title + extension)
+    path = os.path.join(params.folder, title + extension)
 
     if extension in [".pdf", "pdf"]:
         try:
@@ -311,7 +288,7 @@ def download_url(url):
     file_handler.close()
 
     title = title.encode("ascii", "ignore")
-    url = "http://diyhpl.us/~bryan/papers2/paperbot/" + requests.utils.quote(title) + extension
+    url = params.url + requests.utils.quote(title) + extension
 
     return url
 
@@ -394,4 +371,16 @@ def fix_jstor_pdf_urls(url):
         if ".pdf" in url and not "?acceptTC=true" in url:
             url += "?acceptTC=true"
     return url
+
+if __name__ == '__main__':
+  if len(sys.argv) > 1:
+    for a in sys.argv[1:]:
+      download(a)
+  else:
+    while True:
+      l = sys.stdin.readline()
+      if not l:
+        break
+      download(l)
+
 
