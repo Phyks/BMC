@@ -1,0 +1,26 @@
+# the folder in which the papers should be stored
+folder = "/home/user/www/papers/"
+
+# the URL at which the papers will be served by an existing HTTP server
+url = "http://example.com/papers/"
+
+# the length at which the file names should be truncated
+maxlen = 42
+
+# the maximum number of requests to allow before throttling
+thresh = 10
+
+# the time period after which throttling stops
+limit = 60
+
+# help message
+help = "a nice help message"
+
+# the various servers available to retrieve the content
+# the first tuple item is the URL for the translation-server instance
+# the second tuple item is the URL of the socks proxy to use
+servers = [
+  ("http://localhost:1969/web", 'socks4://127.0.0.1:9999'),
+  ]
+
+

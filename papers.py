@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/python -u
+# coding=utf8
 """
 Fetches papers.
 """
@@ -7,12 +8,123 @@ import os
 import json
 import params
 import random
-import requests
+import requesocks as requests
 import lxml.etree
 import sys
+from time import time
 from StringIO import StringIO
 
 import pdfparanoia
+
+def download_proxy(line, zotero, proxy, verbose=True):
+    sys.stderr.write("attempting download of %s through %s and %s\n" %
+        (line, zotero, proxy))
+
+    headers = {
+        "Content-Type": "application/json",
+    }
+
+    data = {
+        "url": line,
+        "sessionid": "what"
+    }
+
+    data = json.dumps(data)
+
+    response = requests.post(zotero, data=data, headers=headers)
+
+    if response.status_code != 200 or response.content == "[]":
+        sys.stderr.write("no valid reply from zotero\n")
+        sys.stderr.write("status %d\n" % response.status_code)
+        sys.stderr.write("content %s\n" % response.content)
+        return -1 # fatal
+
+    sys.stderr.write("content %s\n" % response.content)
+    # see if there are any attachments
+    content = json.loads(response.content)
+    item = content[0]
+    title = item["title"]
+
+    if not item.has_key("attachments"):
+        sys.stderr.write("no attachement with this proxy\n")
+        return 1 # try another proxy
+
+    pdf_url = None
+    for attachment in item["attachments"]:
+        if attachment.has_key("mimeType") and "application/pdf" in attachment["mimeType"]:
+            pdf_url = attachment["url"]
+            break
+
+    if not pdf_url:
+        sys.stderr.write("no PDF attachement with this proxy\n")
+        return 1 # try another proxy
+
+    user_agent = "Mozilla/5.0 (X11; Linux i686 (x86_64)) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11"
+
+    headers = {
+        "User-Agent": user_agent,
+    }
+
+    sys.stderr.write("try retrieving " +
+        str(pdf_url) + " through proxy " + proxy + "\n")
+    response = None
+    session = requests.Session()
+    session.proxies = {
+        'http': proxy,
+        'https': proxy}
+
+    try:
+        if pdf_url.startswith("https://"):
+            response = session.get(pdf_url, headers=headers, verify=False)
+        else:
+            response = session.get(pdf_url, headers=headers)
+    except requests.exceptions.ConnectionError:
+        sys.stderr.write("network failure on download " +
+            str(pdf_url) + "\n")
+        return 1
+
+    # detect failure
+    if response.status_code == 401:
+        sys.stderr.write("HTTP 401 unauthorized when trying to fetch " +
+            str(pdf_url) + "\n")
+        return 1
+    elif response.status_code != 200:
+        sys.stderr.write("HTTP " + str(response.status_code)
+        + " when trying to fetch " + str(pdf_url) + "\n")
+        return 1
+
+    data = response.content
+
+    if "pdf" in response.headers["content-type"]:
+        try:
+            data = pdfparanoia.scrub(StringIO(data))
+        except:
+            # this is to avoid a PDFNotImplementedError
+            pass
+
+    # grr..
+    title = title.encode("ascii", "ignore")
+    title = title.replace(" ", "_")
+    title = title[:params.maxlen]
+
+    path = os.path.join(params.folder, title + ".pdf")
+
+    file_handler = open(path, "w")
+    file_handler.write(data)
+    file_handler.close()
+
+    filename = requests.utils.quote(title)
+
+    # Remove an ending period, which sometimes happens when the
+    # title of the paper has a period at the end.
+    if filename[-1] == ".":
+        filename = filename[:-1]
+
+    url = params.url + filename + ".pdf"
+
+    print(url)
+    return 0
+
 
 def download(line, verbose=True):
     """
@@ -29,98 +141,29 @@ def download(line, verbose=True):
         line = fix_ieee_login_urls(line)
         line = fix_jstor_pdf_urls(line)
 
-        translation_url = params.server
+        ok = False
 
-        headers = {
-            "Content-Type": "application/json",
-        }
+        for (zotero, proxy) in params.servers:
+            s = download_proxy(line, zotero, proxy, verbose)
+            if s < 0:
+                break
+            if s == 0:
+                ok = True
+                break
+        if not ok:
+          for (zotero, proxy) in params.servers:
+            s = download_url(line, proxy)
+            sys.stderr.write("return code " + str(s) + "\n")
+            if s == 0:
+              ok = True
+              break
+        if not ok:
+            s = download_url(line, params.servers[0][1], last_resort=True)
+            if s != 0:
+              print "couldn't get it at all :("
 
-        data = {
-            "url": line,
-            "sessionid": "what"
-        }
-
-        data = json.dumps(data)
-
-        response = requests.post(translation_url, data=data, headers=headers)
-
-        if response.status_code == 200 and response.content != "[]":
-            # see if there are any attachments
-            content = json.loads(response.content)
-            item = content[0]
-            title = item["title"]
-
-            if item.has_key("attachments"):
-                pdf_url = None
-                for attachment in item["attachments"]:
-                    if attachment.has_key("mimeType") and "application/pdf" in attachment["mimeType"]:
-                        pdf_url = attachment["url"]
-                        break
-
-                if pdf_url:
-                    user_agent = "Mozilla/5.0 (X11; Linux i686 (x86_64)) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11"
-
-                    headers = {
-                        "User-Agent": user_agent,
-                    }
-
-                    response = None
-                    if pdf_url.startswith("https://"):
-                        response = requests.get(pdf_url, headers=headers, verify=False)
-                    else:
-                        response = requests.get(pdf_url, headers=headers)
-
-                    # detect failure
-                    if response.status_code == 401:
-                        print("HTTP 401 unauthorized " + str(pdf_url))
-                        continue
-                    elif response.status_code != 200:
-                        print("HTTP " + str(response.status_code) + " " + str(pdf_url))
-                        continue
-
-                    data = response.content
-
-                    if "pdf" in response.headers["content-type"]:
-                        try:
-                            data = pdfparanoia.scrub(StringIO(data))
-                        except:
-                            # this is to avoid a PDFNotImplementedError
-                            pass
-
-                    # grr..
-                    title = title.encode("ascii", "ignore")
-
-                    path = os.path.join(params.folder, title + ".pdf")
-
-                    file_handler = open(path, "w")
-                    file_handler.write(data)
-                    file_handler.close()
-
-                    filename = requests.utils.quote(title)
-
-                    # Remove an ending period, which sometimes happens when the
-                    # title of the paper has a period at the end.
-                    if filename[-1] == ".":
-                        filename = filename[:-1]
-
-                    url = params.url + filename + ".pdf"
-
-                    print(url)
-                    continue
-                else:
-                    print(download_url(line))
-                    continue
-            else:
-                print(download_url(line))
-                continue
-        else:
-            if response.status_code == 501:
-                if verbose:
-                    print("no translator available, raw dump: " + download_url(line))
-            else:
-                if verbose:
-                    print("error: HTTP " + str(response.status_code) + " " + download_url(line))
     return
+
 download.commands = ["fetch", "get", "download"]
 download.priority = "high"
 download.rule = r'(.*)'
@@ -135,8 +178,22 @@ def download_ieee(url):
     # url = "http://ieeexplore.ieee.org/iel5/27/19498/00901261.pdf?arnumber=901261"
     raise NotImplementedError
 
-def download_url(url):
-    response = requests.get(url, headers={"User-Agent": "origami-pdf"})
+def download_url(url, proxy, last_resort=False):
+    sys.stderr.write("attempting direct for %s through %s\n" % (url,
+      proxy))
+
+    session = requests.Session()
+    session.proxies = {
+        'http': proxy,
+        'https': proxy}
+
+    try:
+        response = session.get(url, headers={"User-Agent": "origami-pdf"})
+    except requests.exceptions.ConnectionError:
+        sys.stderr.write("network failure on download " +
+            str(url) + "\n")
+        return 1
+
     content = response.content
 
     # just make up a default filename
@@ -160,14 +217,14 @@ def download_url(url):
             citation_pdf_url = None
 
         if citation_pdf_url and "ieeexplore.ieee.org" in citation_pdf_url:
-            content = requests.get(citation_pdf_url).content
+            content = session.get(citation_pdf_url).content
             tree = parse_html(content)
             # citation_title = ...
 
         # wow, this seriously needs to be cleaned up
         if citation_pdf_url and citation_title and not "ieeexplore.ieee.org" in citation_pdf_url:
             citation_title = citation_title.encode("ascii", "ignore")
-            response = requests.get(citation_pdf_url, headers={"User-Agent": "pdf-defense-force"})
+            response = session.get(citation_pdf_url, headers={"User-Agent": "pdf-defense-force"})
             content = response.content
             if "pdf" in response.headers["content-type"]:
                 extension = ".pdf"
@@ -177,7 +234,7 @@ def download_url(url):
                 try:
                     title = tree.xpath("//h1[@class='svTitle']")[0].text
                     pdf_url = tree.xpath("//a[@id='pdfLink']/@href")[0]
-                    new_response = requests.get(pdf_url, headers={"User-Agent": "sdf-macross"})
+                    new_response = session.get(pdf_url, headers={"User-Agent": "sdf-macross"})
                     new_content = new_response.content
                     if "pdf" in new_response.headers["content-type"]:
                         extension = ".pdf"
@@ -212,7 +269,7 @@ def download_url(url):
                 if document_id.isdigit():
                     try:
                         pdf_url = "http://www.jstor.org/stable/pdfplus/" + document_id + ".pdf?acceptTC=true"
-                        new_response = requests.get(pdf_url, headers={"User-Agent": "time-machine/1.1"})
+                        new_response = session.get(pdf_url, headers={"User-Agent": "time-machine/1.1"})
                         new_content = new_response.content
                         if "pdf" in new_response.headers["content-type"]:
                             extension = ".pdf"
@@ -225,7 +282,7 @@ def download_url(url):
                 try:
                     title = tree.xpath("//title/text()")[0].split(" | ")[0]
                     pdf_url = [link for link in tree.xpath("//a/@href") if "getpdf" in link][0]
-                    new_response = requests.get(pdf_url, headers={"User-Agent": "time-machine/1.0"})
+                    new_response = session.get(pdf_url, headers={"User-Agent": "time-machine/1.0"})
                     new_content = new_response.content
                     if "pdf" in new_response.headers["content-type"]:
                         extension = ".pdf"
@@ -237,7 +294,7 @@ def download_url(url):
             elif "ieeexplore.ieee.org" in url:
                 try:
                     pdf_url = [url for url in tree.xpath("//frame/@src") if "pdf" in url][0]
-                    new_response = requests.get(pdf_url, headers={"User-Agent": "time-machine/2.0"})
+                    new_response = session.get(pdf_url, headers={"User-Agent": "time-machine/2.0"})
                     new_content = new_response.content
                     if "pdf" in new_response.headers["content-type"]:
                         extension = ".pdf"
@@ -257,7 +314,7 @@ def download_url(url):
                     if pdf_url.startswith("/"):
                         url_start = url[:url.find("/",8)]
                         pdf_url = url_start + pdf_url
-                    response = requests.get(pdf_url, headers={"User-Agent": "pdf-teapot"})
+                    response = session.get(pdf_url, headers={"User-Agent": "pdf-teapot"})
                     content = response.content
                     if "pdf" in response.headers["content-type"]:
                         extension = ".pdf"
@@ -272,12 +329,14 @@ def download_url(url):
     # can't create directories
     title = title.replace("/", "_")
     title = title.replace(" ", "_")
-    title = title[:20]
+    title = title[:params.maxlen]
 
     path = os.path.join(params.folder, title + extension)
 
     if extension in [".pdf", "pdf"]:
         try:
+            sys.stderr.write("got it! " +
+                str(url) + "\n")
             content = pdfparanoia.scrub(StringIO(content))
         except:
             # this is to avoid a PDFNotImplementedError
@@ -290,7 +349,17 @@ def download_url(url):
     title = title.encode("ascii", "ignore")
     url = params.url + requests.utils.quote(title) + extension
 
-    return url
+    if extension in [".pdf", "pdf"]:
+        print url
+        return 0
+    else:
+        sys.stderr.write("couldn't find it, dump: %s\n" % url)
+        if last_resort:
+            print "couldn't find it, dump: %s" % url
+        else:
+            return 1
+    return 0
+
 
 def parse_html(content):
     if not isinstance(content, StringIO):
@@ -377,10 +446,19 @@ if __name__ == '__main__':
     for a in sys.argv[1:]:
       download(a)
   else:
+    reqs = []
     while True:
       l = sys.stdin.readline()
       if not l:
         break
-      download(l)
+      if l.startswith("help") or l.startswith("HELP"):
+        print params.help
+      reqs.append(time())
+      if len(reqs) > params.thresh:
+        delay = time() - reqs[len(reqs) - params.thresh + 1]
+        if params.limit - delay > 0:
+            print "rate limit exceeded, try again in %d second(s)" % (params.limit - delay)
+      else:
+        download(l)
 
 
