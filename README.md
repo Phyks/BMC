@@ -1,3 +1,4 @@
+Forked from https://github.com/a3nm/paperbot
 # paperbot
 
 Paperbot is an command line utility that fetches academic papers. When given a URL on stdin or as a CLI argument, it fetches the content and returns a public link on stdout. This seems to help enhance the quality of discussion and make us less ignorant.
