@@ -1,3 +1,0 @@
-requesocks
--e git://github.com/kanzure/pdfparanoia.git@master#egg=pdfparanoia
-copy params.py.example as params.py and customize it
