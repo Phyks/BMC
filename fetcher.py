@@ -451,8 +451,6 @@ if __name__ == '__main__':
       l = sys.stdin.readline()
       if not l:
         break
-      if l.startswith("help") or l.startswith("HELP"):
-        print params.help
       reqs.append(time())
       if len(reqs) > params.thresh:
         delay = time() - reqs[len(reqs) - params.thresh + 1]

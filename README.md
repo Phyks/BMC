@@ -50,3 +50,7 @@ Paperbot can try multiple instances of translation-server (configured to use dif
 ## License
 
 TODO
+
+## Inspiration
+
+* [Bibsoup](http://openbiblio.net/2012/02/09/bibsoup-beta-released/)
