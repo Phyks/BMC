@@ -21,6 +21,11 @@ from bibtexparser.bparser import BibTexParser
 import params
 
 
+def rawInput(string):
+    sys.stdout.flush()
+    return raw_input(string)
+
+
 def warning(*objs):
     """
     Write to stderr
@@ -164,6 +169,30 @@ def getExtension(filename):
     return filename[filename.rfind('.'):]
 
 
+def checkBibtex(filename, bibtex):
+    print("The bibtex entry found for "+filename+" is :")
+    print(bibtex)
+    check = rawInput("Is it correct ? [Y/n] ")
+
+    bibtex = StringIO(bibtex)
+    bibtex = BibTexParser(bibtex).get_entry_dict()
+    bibtex_name = bibtex.keys()[0]
+    bibtex = bibtex[bibtex_name]
+     
+    if check.lower() == 'n':
+        fields = ['type', 'id'] + [i for i in sorted(bibtex)
+                                   if i not in ['id', 'type']]
+
+        for field in fields:
+            new_value = rawInput(field.capitalize()+" ? ["+bibtex[field]+"] ")
+            if new_value != '':
+                bibtex[field] = new_value
+
+        Exception("TODO : Add new fields")
+
+    return bibtex
+
+
 def addFile(src, filetype):
     """
     Add a file to the library
@@ -179,19 +208,19 @@ def addFile(src, filetype):
             warning("Could not determine the DOI or the ISBN for "+src+"." +
                     "Switching to manual entry.")
             while doi_isbn not in ['doi', 'isbn']:
-                doi_isbn = raw_input("DOI / ISBN ? ").lower()
+                doi_isbn = rawInput("DOI / ISBN ? ").lower()
             if doi_isbn == 'doi':
-                doi = raw_input('DOI ? ')
+                doi = rawInput('DOI ? ')
             else:
-                isbn = raw_input('ISBN ? ')
+                isbn = rawInput('ISBN ? ')
         elif filetype == 'article':
             warning("Could not determine the DOI for "+src+", switching to manual " +
                 "entry.")
-            doi = raw_input('DOI ? ')
+            doi = rawInput('DOI ? ')
         elif filetype == 'book':
             warning("Could not determine the ISBN for "+src+", switching to manual " +
                 "entry.")
-            isbn = raw_input('ISBN ? ')
+            isbn = rawInput('ISBN ? ')
     elif doi is not False:
         print("DOI for "+src+" is "+doi+".")
     elif isbn is not False:
@@ -201,10 +230,7 @@ def addFile(src, filetype):
         bibtex = doi2Bib(doi).strip().replace(',', ",\n")
     else:
         bibtex = isbn2Bib(isbn).strip()
-    bibtex = StringIO(bibtex)
-    bibtex = BibTexParser(bibtex).get_entry_dict()
-    bibtex_name = bibtex.keys()[0]
-    bibtex = bibtex[bibtex_name]
+    bibtex = checkBibtex(src, bibtex)
 
     authors = re.split(' and ', bibtex['author'])
 
@@ -228,7 +254,7 @@ def addFile(src, filetype):
         warning("Error, file "+new_name+" already exists.")
         default_rename = new_name.replace(getExtension(new_name),
                                           " (2)"+getExtension(new_name))
-        rename = raw_input("New name ["+default_rename+"] ? ")
+        rename = rawInput("New name ["+default_rename+"] ? ")
         if rename == '':
             new_name = default_rename
         else:
