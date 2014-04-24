@@ -98,7 +98,11 @@ def addFile(src):
     """
     Add a file to the library
     """
-    doi = PDF2Doi(src)
+    # TODO : Handle books + djvu
+    if src.endswith(".pdf"):
+        doi = PDF2Doi(src)
+    elif src.endswith(".djvu"):
+        raise Exception("TODO")
 
     if doi is False:
         print("Could not determine the DOI for "+src+", switching to manual " +
