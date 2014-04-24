@@ -11,6 +11,8 @@ import requests
 import subprocess
 import re
 import os
+from isbntools import meta
+from isbntools.dev.fmt import fmtbib, fmts
 try:
     from cStringIO import StringIO
 except:
@@ -42,6 +44,35 @@ def replaceAll(text, dic):
     for i, j in dic.iteritems():
         text = text.replace(i, j)
     return text
+
+
+def findISBN(src):
+    if src.endswith(".pdf"):
+        totext = subprocess.Popen(["pdftotext", src, "-"],
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE)
+    elif src.endswith(".djvu"):
+        totext = subprocess.Popen(["djvutxt", src],
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE)
+
+    extractfull = totext.communicate()
+    if extractfull[1] is not "":
+        return False
+
+    extractfull = extractfull[0]
+    extractISBN = re.search(r"isbn (([0-9]{3}[ -])?[0-9][ -][0-9]{2}[ -][0-9]{6}[ -][0-9])",
+                           extractfull.lower().replace('&#338;', '-'))
+
+    cleanISBN = False
+    if extractISBN:
+        cleanISBN = extractISBN.group(1).replace('-', '').replace(' ', '')
+
+    return cleanISBN
+
+
+def isbn2Bib(isbn):
+    return fmtbib('bibtex', meta(isbn, 'default'))
 
 
 def findDOI(src):
@@ -133,21 +164,43 @@ def getExtension(filename):
     return filename[filename.rfind('.'):]
 
 
-def addFile(src):
+def addFile(src, filetype):
     """
     Add a file to the library
     """
-    # TODO : Handle books (ISBN)
-    doi = findDOI(src)
+    if filetype == 'article' or filetype is None:
+        doi = findDOI(src)
 
-    if doi is False:
-        warning("Could not determine the DOI for "+src+", switching to manual " +
-              "entry.")
-        doi = raw_input('DOI ? ')
-    else:
+    if filetype == 'book' or (filetype is None and doi is False):
+        isbn = findISBN(src)
+
+    if doi is False and isbn is False:
+        if filetype is None:
+            warning("Could not determine the DOI or the ISBN for "+src+"." +
+                    "Switching to manual entry.")
+            while doi_isbn not in ['doi', 'isbn']:
+                doi_isbn = raw_input("DOI / ISBN ? ").lower()
+            if doi_isbn == 'doi':
+                doi = raw_input('DOI ? ')
+            else:
+                isbn = raw_input('ISBN ? ')
+        elif filetype == 'article':
+            warning("Could not determine the DOI for "+src+", switching to manual " +
+                "entry.")
+            doi = raw_input('DOI ? ')
+        elif filetype == 'book':
+            warning("Could not determine the ISBN for "+src+", switching to manual " +
+                "entry.")
+            isbn = raw_input('ISBN ? ')
+    elif doi is not False:
         print("DOI for "+src+" is "+doi+".")
+    elif isbn is not False:
+        print("ISBN for "+src+" is "+isbn+".")
 
-    bibtex = doi2Bib(doi).strip().replace(',', ",\n")
+    if doi is not False:
+        bibtex = doi2Bib(doi).strip().replace(',', ",\n")
+    else:
+        bibtex = isbn2Bib(isbn).strip()
     bibtex = StringIO(bibtex)
     bibtex = BibTexParser(bibtex).get_entry_dict()
     bibtex_name = bibtex.keys()[0]
@@ -155,14 +208,18 @@ def addFile(src):
 
     authors = re.split(' and ', bibtex['author'])
 
-    new_name = params.format
+    if doi is not False:
+        new_name = params.format_articles
+        new_name = new_name.replace("%j", bibtex['journal'])
+    else:
+        new_name = params.format_books
+
+    new_name = new_name.replace("%t", bibtex['title'])
+    new_name = new_name.replace("%Y", bibtex['year'])
     new_name = new_name.replace("%f", authors[0].split(',')[0].strip())
     new_name = new_name.replace("%l", authors[-1].split(',')[0].strip())
-    new_name = new_name.replace("%j", bibtex['journal'])
-    new_name = new_name.replace("%Y", bibtex['year'])
-    new_name = new_name.replace("%t", bibtex['title'])
     new_name = new_name.replace("%a", ', '.join([i.split(',')[0].strip()
-                                                 for i in authors]))
+                                                for i in authors]))
 
     new_name = params.folder+_slugify(new_name)+getExtension(src)
     bibtex['file'] = new_name
@@ -198,9 +255,13 @@ if __name__ == '__main__':
 
         if sys.argv[1] == 'import':
             if len(sys.argv) < 3:
-                sys.exit("Usage : " + sys.argv[0] + " import FILE")
+                sys.exit("Usage : " + sys.argv[0] + " import FILE [article|book]")
 
-            addFile(sys.argv[2])
+            filetype = None
+            if len(sys.argv) > 3 and sys.argv[3] in ["article", "book"]:
+                filetype = sys.argv[3].lower()
+
+            addFile(sys.argv[2], filetype)
             sys.exit()
 
         elif sys.argv[1] == 'list':
