@@ -35,11 +35,17 @@ def replaceAll(text, dic):
     return text
 
 
-def PDF2Doi(pdf):
-    pdftotext = subprocess.Popen(["pdftotext", pdf, "-"],
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE)
-    extractfull = pdftotext.communicate()
+def findDOI(src):
+    if src.endswith(".pdf"):
+        totext = subprocess.Popen(["pdftotext", src, "-"],
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE)
+    elif src.endswith(".djvu"):
+        totext = subprocess.Popen(["djvutxt", src],
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE)
+
+    extractfull = totext.communicate()
     if extractfull[1] is not "":
         return False
 
@@ -98,11 +104,9 @@ def addFile(src):
     """
     Add a file to the library
     """
-    # TODO : Handle books + djvu
-    if src.endswith(".pdf"):
-        doi = PDF2Doi(src)
-    elif src.endswith(".djvu"):
-        raise Exception("TODO")
+    # TODO : Handle books (ISBN)
+    # Check file already exist
+    doi = findDOI(src)
 
     if doi is False:
         print("Could not determine the DOI for "+src+", switching to manual " +
@@ -114,17 +118,30 @@ def addFile(src):
     bibtex = doi2Bib(doi).strip().replace(',', ",\n")
     bibtex = StringIO(bibtex)
     bibtex = BibTexParser(bibtex).get_entry_dict()
+    bibtex_name = bibtex.keys()[0]
+    bibtex = bibtex[bibtex_name]
 
-    # TODO : Rename
-    new_name = params.folder+"/"+doi
+    authors = re.split(' and ', bibtex['author'])
 
-    bibtex[bibtex.keys()[0]]['file'] = new_name
+    new_name = params.format
+    new_name = new_name.replace("%f", authors[0].split(',')[0].strip())
+    new_name = new_name.replace("%l", authors[-1].split(',')[0].strip())
+    new_name = new_name.replace("%j", bibtex['journal'].replace('.', '')
+                                                       .replace(' ', '_'))
+    new_name = new_name.replace("%Y", bibtex['year'])
+    new_name = new_name.replace("%t", bibtex['title'])
+    new_name = new_name.replace("%a", ', '.join([i.split(',')[0].strip()
+                                                 for i in authors]))
+
+    new_name = params.folder+new_name+src[src.rfind('.'):]
+    bibtex['file'] = new_name
 
     try:
         shutil.copy2(src, new_name)
     except IOError:
         sys.exit("Unable to move file to library dir " + params.folder+".")
 
+    # TODO
     bibtexAppend(bibtex)
     print("File " + src + " successfully imported.")
 
