@@ -188,7 +188,14 @@ def checkBibtex(filename, bibtex):
             if new_value != '':
                 bibtex[field] = new_value
 
-        Exception("TODO : Add new fields")
+        while True:
+            new_field = rawInput("Add a new field (leave empty to skip) ? ")
+            if new_field == '':
+                break
+            new_value = rawInput("Value for field "+new_field+" ? ")
+            bibtex[new_field] = new_value
+
+    # TODO : Reprint bibtex and check
 
     return bibtex
 
