@@ -3,18 +3,27 @@
 """
 Main app
 """
+from __future__ import print_function
 
 import sys
 import shutil
 import requests
 import subprocess
 import re
+import os
 try:
     from cStringIO import StringIO
 except:
     from StringIO import StringIO
 from bibtexparser.bparser import BibTexParser
 import params
+
+
+def warning(*objs):
+    """
+    Write to stderr
+    """
+    print("WARNING: ", *objs, file=sys.stderr)
 
 
 def bibtexAppend(data):
@@ -100,16 +109,39 @@ def doi2Bib(doi):
     return r.text
 
 
+_slugify_strip_re = re.compile(r'[^\w\s-]')
+_slugify_hyphenate_re = re.compile(r'[\s]+')
+def _slugify(value):
+    """
+    Normalizes string, converts to lowercase, removes non-alpha characters,
+    and converts spaces to hyphens.
+    
+    From Django's "django/template/defaultfilters.py".
+    """
+    import unicodedata
+    if not isinstance(value, unicode):
+        value = unicode(value)
+    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
+    value = unicode(_slugify_strip_re.sub('', value).strip())
+    return _slugify_hyphenate_re.sub('_', value)
+
+
+def getExtension(filename):
+    """
+    Get the extension of the filename
+    """
+    return filename[filename.rfind('.'):]
+
+
 def addFile(src):
     """
     Add a file to the library
     """
     # TODO : Handle books (ISBN)
-    # Check file already exist
     doi = findDOI(src)
 
     if doi is False:
-        print("Could not determine the DOI for "+src+", switching to manual " +
+        warning("Could not determine the DOI for "+src+", switching to manual " +
               "entry.")
         doi = raw_input('DOI ? ')
     else:
@@ -126,15 +158,25 @@ def addFile(src):
     new_name = params.format
     new_name = new_name.replace("%f", authors[0].split(',')[0].strip())
     new_name = new_name.replace("%l", authors[-1].split(',')[0].strip())
-    new_name = new_name.replace("%j", bibtex['journal'].replace('.', '')
-                                                       .replace(' ', '_'))
+    new_name = new_name.replace("%j", bibtex['journal'])
     new_name = new_name.replace("%Y", bibtex['year'])
     new_name = new_name.replace("%t", bibtex['title'])
     new_name = new_name.replace("%a", ', '.join([i.split(',')[0].strip()
                                                  for i in authors]))
 
-    new_name = params.folder+new_name+src[src.rfind('.'):]
+    new_name = params.folder+_slugify(new_name)+getExtension(src)
     bibtex['file'] = new_name
+
+    while os.path.exists(new_name):
+        warning("Error, file "+new_name+" already exists.")
+        default_rename = new_name.replace(getExtension(new_name),
+                                          " (2)"+getExtension(new_name))
+        rename = raw_input("New name ["+default_rename+"] ? ")
+        if rename == '':
+            new_name = default_rename
+        else:
+            new_name = rename
+
 
     try:
         shutil.copy2(src, new_name)
@@ -147,21 +189,24 @@ def addFile(src):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        sys.exit("Usage : TODO")
+    try:
+        if len(sys.argv) < 2:
+            sys.exit("Usage : TODO")
 
-    if sys.argv[1] == 'download':
-        raise Exception('TODO')
+        if sys.argv[1] == 'download':
+            raise Exception('TODO')
 
-    if sys.argv[1] == 'import':
-        if len(sys.argv) < 3:
-            sys.exit("Usage : " + sys.argv[0] + " import FILE")
+        if sys.argv[1] == 'import':
+            if len(sys.argv) < 3:
+                sys.exit("Usage : " + sys.argv[0] + " import FILE")
 
-        addFile(sys.argv[2])
+            addFile(sys.argv[2])
+            sys.exit()
+
+        elif sys.argv[1] == 'list':
+            raise Exception('TODO')
+
+        elif sys.argv[1] == 'search':
+            raise Exception('TODO')
+    except KeyboardInterrupt:
         sys.exit()
-
-    elif sys.argv[1] == 'list':
-        raise Exception('TODO')
-
-    elif sys.argv[1] == 'search':
-        raise Exception('TODO')
