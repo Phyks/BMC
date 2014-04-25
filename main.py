@@ -1,8 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf8 -*-
-"""
-Main app
-"""
+
 from __future__ import print_function
 
 import sys
@@ -12,7 +10,7 @@ import subprocess
 import re
 import os
 from isbntools import meta
-from isbntools.dev.fmt import fmtbib, fmts
+from isbntools.dev.fmt import fmtbib
 try:
     from cStringIO import StringIO
 except:
@@ -39,8 +37,8 @@ def parsed2Bibtex(parsed):
     """
     Convert a single bibtex entry dict to bibtex string
     """
-    bibtex = '@'+parsed['type']+'{'+parsed['id']+"\n"
-    
+    bibtex = '@'+parsed['type']+'{'+parsed['id']+",\n"
+
     for field in [i for i in sorted(parsed) if i not in ['type', 'id']]:
         bibtex += "\t"+field+"={"+parsed[field]+"},\n"
     bibtex += "}\n"
@@ -54,6 +52,7 @@ def bibtexAppend(data):
     """
     with open(params.folder+'index.bib', 'a') as fh:
         fh.write(parsed2Bibtex(data)+"\n")
+
 
 def bibtexRewrite(data):
     """
@@ -89,7 +88,7 @@ def findISBN(src):
 
     extractfull = extractfull[0]
     extractISBN = re.search(r"isbn (([0-9]{3}[ -])?[0-9][ -][0-9]{2}[ -][0-9]{6}[ -][0-9])",
-                           extractfull.lower().replace('&#338;', '-'))
+                            extractfull.lower().replace('&#338;', '-'))
 
     cleanISBN = False
     if extractISBN:
@@ -169,11 +168,13 @@ def doi2Bib(doi):
 
 _slugify_strip_re = re.compile(r'[^\w\s-]')
 _slugify_hyphenate_re = re.compile(r'[\s]+')
+
+
 def _slugify(value):
     """
     Normalizes string, converts to lowercase, removes non-alpha characters,
     and converts spaces to hyphens.
-    
+
     From Django's "django/template/defaultfilters.py".
     """
     import unicodedata
@@ -201,10 +202,10 @@ def checkBibtex(filename, bibtex):
     bibtex = bibtex.get_entry_dict()
     bibtex_name = bibtex.keys()[0]
     bibtex = bibtex[bibtex_name]
-     
+
     while check.lower() == 'n':
         fields = [u'type', u'id'] + [i for i in sorted(bibtex)
-                                   if i not in ['id', 'type']]
+                                     if i not in ['id', 'type']]
 
         for field in fields:
             new_value = rawInput(field.capitalize()+" ? ["+bibtex[field]+"] ")
@@ -217,7 +218,6 @@ def checkBibtex(filename, bibtex):
                 break
             new_value = rawInput("Value for field "+new_field+" ? ")
             bibtex[new_field] = new_value
-
 
         print("\nThe bibtex entry for "+filename+" is :")
         print(parsed2Bibtex(bibtex))
@@ -239,6 +239,7 @@ def addFile(src, filetype):
         if filetype is None:
             warning("Could not determine the DOI or the ISBN for "+src+"." +
                     "Switching to manual entry.")
+            doi_isbn = ''
             while doi_isbn not in ['doi', 'isbn']:
                 doi_isbn = rawInput("DOI / ISBN ? ").lower()
             if doi_isbn == 'doi':
@@ -246,12 +247,12 @@ def addFile(src, filetype):
             else:
                 isbn = rawInput('ISBN ? ')
         elif filetype == 'article':
-            warning("Could not determine the DOI for "+src+", switching to manual " +
-                "entry.")
+            warning("Could not determine the DOI for "+src +
+                    ", switching to manual entry.")
             doi = rawInput('DOI ? ')
         elif filetype == 'book':
-            warning("Could not determine the ISBN for "+src+", switching to manual " +
-                "entry.")
+            warning("Could not determine the ISBN for "+src +
+                    ", switching to manual entry.")
             isbn = rawInput('ISBN ? ')
     elif doi is not False:
         print("DOI for "+src+" is "+doi+".")
@@ -308,7 +309,8 @@ def delete_id(ident):
     Delete a file based on its id in the bibtex file
     """
     with open(params.folder+'index.bib', 'r') as fh:
-        bibtex = BibTexParser(fh).get_entry_dict()
+        bibtex = BibTexParser(fh, customization=homogeneize_latex_encoding)
+    bibtex = bibtex.get_entry_dict()
 
     if ident not in bibtex.keys():
         return False
@@ -328,7 +330,8 @@ def delete_file(filename):
     Delete a file based on its filename
     """
     with open(params.folder+'index.bib', 'r') as fh:
-        bibtex = BibTexParser(fh).get_entry_dict()
+        bibtex = BibTexParser(fh, customization=homogeneize_latex_encoding)
+    bibtex = bibtex.get_entry_dict()
 
     found = False
     for key in bibtex.keys():
@@ -355,7 +358,8 @@ if __name__ == '__main__':
 
         if sys.argv[1] == 'import':
             if len(sys.argv) < 3:
-                sys.exit("Usage : " + sys.argv[0] + " import FILE [article|book]")
+                sys.exit("Usage : " + sys.argv[0] +
+                         " import FILE [article|book]")
 
             filetype = None
             if len(sys.argv) > 3 and sys.argv[3] in ["article", "book"]:

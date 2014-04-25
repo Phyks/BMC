@@ -71,6 +71,7 @@ TODO
 
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
+* Webserver interface
 * Various re.compile ?
 * check output of subprocesses before it ends
 * Split main.py
