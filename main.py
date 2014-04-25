@@ -19,11 +19,12 @@ except:
     from StringIO import StringIO
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import homogeneize_latex_encoding
+from termios import tcflush, TCIOFLUSH
 import params
 
 
 def rawInput(string):
-    sys.stdout.flush()
+    tcflush(sys.stdin, TCIOFLUSH)
     return raw_input(string)
 
 
@@ -35,6 +36,9 @@ def warning(*objs):
 
 
 def parsed2Bibtex(parsed):
+    """
+    Convert a single bibtex entry dict to bibtex string
+    """
     bibtex = '@'+parsed['type']+'{'+parsed['id']+"\n"
     
     for field in [i for i in sorted(parsed) if i not in ['type', 'id']]:
@@ -46,10 +50,21 @@ def parsed2Bibtex(parsed):
 def bibtexAppend(data):
     """
     Append data to the main bibtex file
-    data is a dict as the one from bibtexparser output
+    data is a dict for one entry in bibtex, as the one from bibtexparser output
     """
     with open(params.folder+'index.bib', 'a') as fh:
         fh.write(parsed2Bibtex(data)+"\n")
+
+def bibtexRewrite(data):
+    """
+    Rewrite the bibtex index file.
+    data is a dict of bibtex entry dict.
+    """
+    bibtex = ''
+    for entry in data.keys():
+        bibtex += parsed2Bibtex(data[entry])+"\n"
+    with open(params.folder+'index.bib', 'w') as fh:
+        fh.write(bibtex)
 
 
 def replaceAll(text, dic):
@@ -267,7 +282,6 @@ def addFile(src, filetype):
                                                 for i in authors]))
 
     new_name = params.folder+_slugify(new_name)+getExtension(src)
-    bibtex['file'] = new_name
 
     while os.path.exists(new_name):
         warning("file "+new_name+" already exists.")
@@ -278,16 +292,57 @@ def addFile(src, filetype):
             new_name = default_rename
         else:
             new_name = rename
-
+    bibtex['file'] = new_name
 
     try:
         shutil.copy2(src, new_name)
     except IOError:
         sys.exit("Unable to move file to library dir " + params.folder+".")
 
-    # TODO
     bibtexAppend(bibtex)
     print("File " + src + " successfully imported.")
+
+
+def delete_id(ident):
+    """
+    Delete a file based on its id in the bibtex file
+    """
+    with open(params.folder+'index.bib', 'r') as fh:
+        bibtex = BibTexParser(fh).get_entry_dict()
+
+    if ident not in bibtex.keys():
+        return False
+
+    try:
+        os.remove(bibtex[ident]['file'])
+    except:
+        warning("Unable to delete file associated to id "+ident+" : " +
+                bibtex[ident]['file'])
+    del(bibtex[ident])
+    bibtexRewrite(bibtex)
+    return True
+
+
+def delete_file(filename):
+    """
+    Delete a file based on its filename
+    """
+    with open(params.folder+'index.bib', 'r') as fh:
+        bibtex = BibTexParser(fh).get_entry_dict()
+
+    found = False
+    for key in bibtex.keys():
+        if bibtex[key]['file'] == filename:
+            found = True
+            try:
+                os.remove(bibtex[key]['file'])
+            except:
+                warning("Unable to delete file associated to id "+key+" : " +
+                        bibtex[key]['file'])
+            del(bibtex[key])
+    if found:
+        bibtexRewrite(bibtex)
+    return found
 
 
 if __name__ == '__main__':
@@ -310,12 +365,24 @@ if __name__ == '__main__':
             sys.exit()
 
         elif sys.argv[1] == 'delete':
-            raise Exception('TODO')
+            if len(sys.argv) < 3:
+                sys.exit("Usage : " + sys.argv[0] + " delete FILE|ID")
+
+            if not delete_id(sys.argv[2]):
+                if not delete_file(sys.argv[2]):
+                    warning("Unable to delete "+sys.argv[2])
+                    sys.exit(1)
+
+            print(sys.argv[2]+" successfully deleted.")
+            sys.exit()
 
         elif sys.argv[1] == 'list':
             raise Exception('TODO')
 
         elif sys.argv[1] == 'search':
+            raise Exception('TODO')
+
+        elif sys.argv[1] == 'rebuild':
             raise Exception('TODO')
     except KeyboardInterrupt:
         sys.exit()

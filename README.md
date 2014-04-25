@@ -81,3 +81,13 @@ A list of ideas and TODO. Don't hesitate to give feedback on the ones you really
 * Options to ignore auto check, manual check etc.
 * anti-duplicates
 * Split main.py
+
+## Roadmap
+
+* Working with local files
+    [x] Import
+    [x] Deletion
+    [ ] Update ?
+* Get distant files
+    * cf paperbot
+* Search engine / list
