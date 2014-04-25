@@ -10,7 +10,7 @@ BiblioManager is a simple script to download and store your articles. This is mo
 I used to have a folder with poorly named papers and books and wanted something to help me handle it. I don't like Mendeley and Zotero and so on, which are heavy and overkill for my needs. I just want to feed a script with PDF files of papers and books, and I want it to automatically maintain a BibTeX index of these files, to help me cite them and find them back.
 
 This is the goal of BiblioManager. It will :
-* Download or import PDF files (but also epub, djvu etc.)
+* Download or import PDF/Djvu files
 * Try to get automatically the metadata of the files (keywords, author, review, …)
 * Store all the metadata in a BibTex file
 * Rename your files to store them in a logical and homogeneous way
@@ -22,10 +22,7 @@ BiblioManager will always use standard formats such as BibTeX, so that you can e
 
 ## Current status
 
-* Able to import a PDF file, automagically find the DOI, get the bibtex entry back and add it to the library. If DOI search fails, it will prompt you for the DOI.
-* Same thing for DJVU files.
-* Same thing for books (PDF or DJVU) using ISBN.
-* TODO (in one of the next commits) : Add bibtex to the global bibtex index.
+* Able to import a PDF / djvu file, automagically find the DOI / ISBN, get the bibtex entry back and add it to the library. If DOI / ISBN search fails, it will prompt you for it.
 
 **Important note :** I use it for personnal use, but I don't read articles from many journals. If you find any file which is not working, please fill an issue or send me an e-mail with the relevant information. There are alternative ways to get the metadata for example, and I didn't know really which one was the best one as writing this code.
 
@@ -66,21 +63,18 @@ TODO
 
 ## Inspiration
 
-* [Bibsoup](http://openbiblio.net/2012/02/09/bibsoup-beta-released/)
-* http://en.dogeno.us/2010/02/release-a-python-script-for-organizing-scientific-papers-pyrenamepdf-py/
 * MPC
+* http://en.dogeno.us/2010/02/release-a-python-script-for-organizing-scientific-papers-pyrenamepdf-py/
+* [Bibsoup](http://openbiblio.net/2012/02/09/bibsoup-beta-released/)
 
 ## Ideas, TODO
 
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
-* Categories
-* Client / server
 * Various re.compile ?
 * check output of subprocesses before it ends
-* Options to ignore auto check, manual check etc.
-* anti-duplicates
 * Split main.py
+* Categories
 
 ## Roadmap
 
