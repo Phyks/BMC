@@ -39,7 +39,7 @@ def parsed2Bibtex(parsed):
     
     for field in [i for i in sorted(parsed) if i not in ['type', 'id']]:
         bibtex += "\t"+field+"={"+parsed[field]+"},\n"
-    bibtex += "}"
+    bibtex += "}\n"
     return bibtex
 
 
@@ -48,11 +48,8 @@ def bibtexAppend(data):
     Append data to the main bibtex file
     data is a dict as the one from bibtexparser output
     """
-    bibtex = ''
-    for field, value in data:
-        bibtex += "\n" + field + ": " + value + ","
-
-    # TODO : Write
+    with open(params.folder+'index.bib', 'a') as fh:
+        fh.write(parsed2Bibtex(data)+"\n")
 
 
 def replaceAll(text, dic):
@@ -273,7 +270,7 @@ def addFile(src, filetype):
     bibtex['file'] = new_name
 
     while os.path.exists(new_name):
-        warning("Error, file "+new_name+" already exists.")
+        warning("file "+new_name+" already exists.")
         default_rename = new_name.replace(getExtension(new_name),
                                           " (2)"+getExtension(new_name))
         rename = rawInput("New name ["+default_rename+"] ? ")
@@ -311,6 +308,9 @@ if __name__ == '__main__':
 
             addFile(sys.argv[2], filetype)
             sys.exit()
+
+        elif sys.argv[1] == 'delete':
+            raise Exception('TODO')
 
         elif sys.argv[1] == 'list':
             raise Exception('TODO')

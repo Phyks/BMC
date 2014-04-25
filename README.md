@@ -20,6 +20,16 @@ This is the goal of BiblioManager. It will :
 BiblioManager will always use standard formats such as BibTeX, so that you can easily edit your library, export it and manage it by hand, even if you quit this software for any reason.
 
 
+## Current status
+
+* Able to import a PDF file, automagically find the DOI, get the bibtex entry back and add it to the library. If DOI search fails, it will prompt you for the DOI.
+* Same thing for DJVU files.
+* Same thing for books (PDF or DJVU) using ISBN.
+* TODO (in one of the next commits) : Add bibtex to the global bibtex index.
+
+**Important note :** I use it for personnal use, but I don't read articles from many journals. If you find any file which is not working, please fill an issue or send me an e-mail with the relevant information. There are alternative ways to get the metadata for example, and I didn't know really which one was the best one as writing this code.
+
+
 ## Installation
 TODO -- To be updated
 
@@ -27,6 +37,9 @@ TODO -- To be updated
 Install pdfminer, pdfparanoia (via pip) and requesocks.
 Init the submodules and install Zotero translation server.
 Copy params.py.example as params.py and customize it.
+Install pdftotext.
+Install djvulibre to use djvu files.
+Install isbntools with pip.
 
 
 ## Paperbot
@@ -54,3 +67,17 @@ TODO
 ## Inspiration
 
 * [Bibsoup](http://openbiblio.net/2012/02/09/bibsoup-beta-released/)
+* http://en.dogeno.us/2010/02/release-a-python-script-for-organizing-scientific-papers-pyrenamepdf-py/
+* MPC
+
+## Ideas, TODO
+
+A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
+
+* Categories
+* Client / server
+* Various re.compile ?
+* check output of subprocesses before it ends
+* Options to ignore auto check, manual check etc.
+* anti-duplicates
+* Split main.py
