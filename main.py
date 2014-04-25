@@ -1,5 +1,5 @@
-#!/usr/bin/python2 -u
-# coding=utf8
+#!/usr/bin/env python2
+# -*- coding: utf8 -*-
 """
 Main app
 """
@@ -18,6 +18,7 @@ try:
 except:
     from StringIO import StringIO
 from bibtexparser.bparser import BibTexParser
+from bibtexparser.customization import homogeneize_latex_encoding
 import params
 
 
@@ -31,6 +32,15 @@ def warning(*objs):
     Write to stderr
     """
     print("WARNING: ", *objs, file=sys.stderr)
+
+
+def parsed2Bibtex(parsed):
+    bibtex = '@'+parsed['type']+'{'+parsed['id']+"\n"
+    
+    for field in [i for i in sorted(parsed) if i not in ['type', 'id']]:
+        bibtex += "\t"+field+"={"+parsed[field]+"},\n"
+    bibtex += "}"
+    return bibtex
 
 
 def bibtexAppend(data):
@@ -175,12 +185,13 @@ def checkBibtex(filename, bibtex):
     check = rawInput("Is it correct ? [Y/n] ")
 
     bibtex = StringIO(bibtex)
-    bibtex = BibTexParser(bibtex).get_entry_dict()
+    bibtex = BibTexParser(bibtex, customization=homogeneize_latex_encoding)
+    bibtex = bibtex.get_entry_dict()
     bibtex_name = bibtex.keys()[0]
     bibtex = bibtex[bibtex_name]
      
-    if check.lower() == 'n':
-        fields = ['type', 'id'] + [i for i in sorted(bibtex)
+    while check.lower() == 'n':
+        fields = [u'type', u'id'] + [i for i in sorted(bibtex)
                                    if i not in ['id', 'type']]
 
         for field in fields:
@@ -195,8 +206,10 @@ def checkBibtex(filename, bibtex):
             new_value = rawInput("Value for field "+new_field+" ? ")
             bibtex[new_field] = new_value
 
-    # TODO : Reprint bibtex and check
 
+        print("\nThe bibtex entry for "+filename+" is :")
+        print(parsed2Bibtex(bibtex))
+        check = rawInput("Is it correct ? [Y/n] ")
     return bibtex
 
 
@@ -234,9 +247,11 @@ def addFile(src, filetype):
         print("ISBN for "+src+" is "+isbn+".")
 
     if doi is not False:
-        bibtex = doi2Bib(doi).strip().replace(',', ",\n")
+        # Add extra \n for bibtexparser
+        bibtex = doi2Bib(doi).strip().replace(',', ",\n")+"\n"
     else:
-        bibtex = isbn2Bib(isbn).strip()
+        # Idem
+        bibtex = isbn2Bib(isbn).strip()+"\n"
     bibtex = checkBibtex(src, bibtex)
 
     authors = re.split(' and ', bibtex['author'])
