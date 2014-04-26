@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 
+import fetcher
 import sys
 import shutil
 import requests
@@ -298,13 +299,14 @@ def addFile(src, filetype):
     try:
         shutil.copy2(src, new_name)
     except IOError:
+        new_name = False
         sys.exit("Unable to move file to library dir " + params.folder+".")
 
     bibtexAppend(bibtex)
-    print("File " + src + " successfully imported.")
+    return new_name
 
 
-def delete_id(ident):
+def deleteId(ident):
     """
     Delete a file based on its id in the bibtex file
     """
@@ -325,7 +327,7 @@ def delete_id(ident):
     return True
 
 
-def delete_file(filename):
+def deleteFile(filename):
     """
     Delete a file based on its filename
     """
@@ -348,13 +350,41 @@ def delete_file(filename):
     return found
 
 
+def downloadFile(url, filetype):
+    pdf = fetcher.download_url(url)
+
+    if pdf is not False:
+        with open(params.folder+'tmp.pdf', 'w+') as fh:
+            fh.write(pdf)
+        new_name = addFile(params.folder+'tmp.pdf', filetype)
+        try:
+            os.remove(params.folder+'tmp.pdf')
+        except:
+            warning('Unable to delete temp file '+params.folder+'tmp.pdf')
+        return new_name
+    else:
+        warning("Could not fetch "+url)
+        return False
+
+
 if __name__ == '__main__':
     try:
         if len(sys.argv) < 2:
             sys.exit("Usage : TODO")
 
         if sys.argv[1] == 'download':
-            raise Exception('TODO')
+            if len(sys.argv) < 3:
+                sys.exit("Usage : " + sys.argv[0] +
+                         " download FILE [article|book]")
+
+            filetype = None
+            if len(sys.argv) > 3 and sys.argv[3] in ["article", "book"]:
+                filetype = sys.argv[3].lower()
+
+            new_name = downloadFile(sys.argv[2], filetype)
+            if new_name is not False:
+                print(sys.argv[2]+" successfully imported as "+new_name)
+            sys.exit()
 
         if sys.argv[1] == 'import':
             if len(sys.argv) < 3:
@@ -365,15 +395,17 @@ if __name__ == '__main__':
             if len(sys.argv) > 3 and sys.argv[3] in ["article", "book"]:
                 filetype = sys.argv[3].lower()
 
-            addFile(sys.argv[2], filetype)
+            new_name = addFile(sys.argv[2], filetype)
+            if new_name is not False:
+                print("File " + src + " successfully imported as "+new_name+".")
             sys.exit()
 
         elif sys.argv[1] == 'delete':
             if len(sys.argv) < 3:
                 sys.exit("Usage : " + sys.argv[0] + " delete FILE|ID")
 
-            if not delete_id(sys.argv[2]):
-                if not delete_file(sys.argv[2]):
+            if not deleteId(sys.argv[2]):
+                if not deleteFile(sys.argv[2]):
                     warning("Unable to delete "+sys.argv[2])
                     sys.exit(1)
 

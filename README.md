@@ -23,6 +23,9 @@ BiblioManager will always use standard formats such as BibTeX, so that you can e
 ## Current status
 
 * Able to import a PDF / djvu file, automagically find the DOI / ISBN, get the bibtex entry back and add it to the library. If DOI / ISBN search fails, it will prompt you for it.
+* Able to download a URL, using any specified proxy (you can list many and it will try all of them) and store the pdf file with its metadata.
+
+Should be almost working and usable now, although still to be considered as **experimental**.
 
 **Important note :** I use it for personnal use, but I don't read articles from many journals. If you find any file which is not working, please fill an issue or send me an e-mail with the relevant information. There are alternative ways to get the metadata for example, and I didn't know really which one was the best one as writing this code.
 
@@ -32,29 +35,16 @@ TODO -- To be updated
 
 
 Install pdfminer, pdfparanoia (via pip) and requesocks.
-Init the submodules and install Zotero translation server.
 Copy params.py.example as params.py and customize it.
 Install pdftotext.
 Install djvulibre to use djvu files.
 Install isbntools with pip.
 
 
-## Paperbot
-
-Paperbot is a command line utility that fetches academic papers. When given a URL on stdin or as a CLI argument, it fetches the content and returns a public link on stdout. This seems to help enhance the quality of discussion and make us less ignorant.
-
-All content is scraped using [zotero/translators](https://github.com/zotero/translators). These are javascript scrapers that work on a large number of academic publisher sites and are actively maintained. Paperbot offloads links to [zotero/translation-server](https://github.com/zotero/translation-server), which runs the zotero scrapers headlessly in a gecko and xulrunner environment. The scrapers return metadata and a link to the pdf. Then paperbot fetches that particular pdf. When given a link straight to a pdf, which paperbot is also happy to compulsively archive it.
-
-I kept part of the code to handle pdf downloading, and added a backend behind it.
-
-Paperbot can try multiple instances of translation-server (configured to use different ways to access content) and different SOCKS proxies to retrieve the content.
-
-
 ## Used source codes
 
-* [zotero/translators](https://github.com/zotero/translators) : Links finder
-* [zotero/translation-server](https://github.com/zotero/translation-server) : Links finder
 * [pdfparanoia](https://github.com/kanzure/pdfparanoia) : Watermark removal
+* [paperbot](https://github.com/kanzure/paperbot) although my fetching of papers is way more basic
 
 
 ## License
@@ -71,6 +61,7 @@ TODO
 
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
+* pdfparanoia to remove the watermarks on pdf files
 * Webserver interface
 * Various re.compile ?
 * check output of subprocesses before it ends
