@@ -34,7 +34,7 @@ Should be almost working and usable now, although still to be considered as **ex
 ## Installation
 
 * Clone this git repository where you want : `git clone https://github.com/Phyks/BMC`
-* Install `requesocks` and `isbntools` _via_ Pypi
+* Install `requesocks`, `PyPDF2` and `isbntools` _via_ Pypi
 * Install `pdftotext` (provided by Xpdf) and `djvulibre` _via_ your package manager the way you want
 * Copy `params.py.example` to `params.py` and customize it to fit your needs
 
@@ -63,6 +63,11 @@ Run `./main.py delete PARAM` where `PARAM` should be either a path to a paper fi
 TODO
 
 ### List all entries
+
+TODO
+
+
+### Edit entries
 
 TODO
 
@@ -100,16 +105,18 @@ Here are some sources of inspirations for this project :
 
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
-* if doi does not exist ?
-* download djvu
-* test file field for bibtex
 * Open
-* Confirmation for deletion
 * Rebuild
-* Remove the watermarks on pdf files : First page of IOP publishing articles => tearpages
 * Webserver interface
 * Various re.compile ?
 * check output of subprocesses before it ends
 * Split main.py
 * Categories
 * Edit an entry instead of deleting it and adding it again
+
+## Issues ?
+
+See upstream
+
+* homogeneize\_latex\_encoding => to implement again, bug with metadata upstream
+* Remove the watermarks on pdf files => done, some warning in okular on generated pdf, but seems ok. Seems to be a bug in PyPDF2.

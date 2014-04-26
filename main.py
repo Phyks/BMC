@@ -4,6 +4,7 @@
 from __future__ import print_function
 
 import fetcher
+import tearpages
 import sys
 import shutil
 import tempfile
@@ -18,7 +19,6 @@ try:
 except:
     from StringIO import StringIO
 from bibtexparser.bparser import BibTexParser
-from bibtexparser.customization import homogeneize_latex_encoding
 from termios import tcflush, TCIOFLUSH
 import params
 
@@ -100,7 +100,10 @@ def findISBN(src):
 
 
 def isbn2Bib(isbn):
-    return fmtbib('bibtex', meta(isbn, 'default'))
+    try:
+        return fmtbib('bibtex', meta(isbn, 'default'))
+    except:
+        return ''
 
 
 def findDOI(src):
@@ -165,7 +168,11 @@ def doi2Bib(doi):
     url = "http://dx.doi.org/" + doi
     headers = {"accept": "application/x-bibtex"}
     r = requests.get(url, headers=headers)
-    return r.text
+
+    if r.headers['content-type'] == 'application/x-bibtex':
+        return r.text
+    else
+        return ''
 
 
 _slugify_strip_re = re.compile(r'[^\w\s-]')
@@ -198,7 +205,7 @@ def checkBibtex(filename, bibtex):
     print("The bibtex entry found for "+filename+" is :")
 
     bibtex = StringIO(bibtex)
-    bibtex = BibTexParser(bibtex, customization=homogeneize_latex_encoding)
+    bibtex = BibTexParser(bibtex)
     bibtex = bibtex.get_entry_dict()
     bibtex_name = bibtex.keys()[0]
     bibtex = bibtex[bibtex_name]
@@ -261,25 +268,33 @@ def addFile(src, filetype):
     elif isbn is not False:
         print("ISBN for "+src+" is "+isbn+".")
 
-    if doi is not False:
+    if doi is not False and doi != '':
         # Add extra \n for bibtexparser
         bibtex = doi2Bib(doi).strip().replace(',', ",\n")+"\n"
-    else:
+    elif isbn is not False and isbn != '':
         # Idem
         bibtex = isbn2Bib(isbn).strip()+"\n"
+    else:
+        bibtex = ''
     
     bibtex = checkBibtex(src, bibtex)
 
     authors = re.split(' and ', bibtex['author'])
 
-    if doi is not False:
+    if bibtex['type'] == 'article':
         new_name = params.format_articles
-        new_name = new_name.replace("%j", bibtex['journal'])
-    else:
+        try:
+            new_name = new_name.replace("%j", bibtex['journal'])
+        except:
+            pass
+    elif bibtex['type'] == 'book':
         new_name = params.format_books
 
     new_name = new_name.replace("%t", bibtex['title'])
-    new_name = new_name.replace("%Y", bibtex['year'])
+    try:
+        new_name = new_name.replace("%Y", bibtex['year'])
+    except:
+        pass
     new_name = new_name.replace("%f", authors[0].split(',')[0].strip())
     new_name = new_name.replace("%l", authors[-1].split(',')[0].strip())
     new_name = new_name.replace("%a", ', '.join([i.split(',')[0].strip()
@@ -304,6 +319,10 @@ def addFile(src, filetype):
         new_name = False
         sys.exit("Unable to move file to library dir " + params.folder+".")
 
+    # Remove first page of IOP papers
+    if 'IOP' in bibtex['publisher'] and bibtex['type'] == 'article':
+        tearpages.tearpage(new_name)
+
     bibtexAppend(bibtex)
     return new_name
 
@@ -313,7 +332,7 @@ def deleteId(ident):
     Delete a file based on its id in the bibtex file
     """
     with open(params.folder+'index.bib', 'r') as fh:
-        bibtex = BibTexParser(fh, customization=homogeneize_latex_encoding)
+        bibtex = BibTexParser(fh)
     bibtex = bibtex.get_entry_dict()
 
     if ident not in bibtex.keys():
@@ -334,7 +353,7 @@ def deleteFile(filename):
     Delete a file based on its filename
     """
     with open(params.folder+'index.bib', 'r') as fh:
-        bibtex = BibTexParser(fh, customization=homogeneize_latex_encoding)
+        bibtex = BibTexParser(fh)
     bibtex = bibtex.get_entry_dict()
 
     found = False
@@ -353,10 +372,10 @@ def deleteFile(filename):
 
 
 def downloadFile(url, filetype):
-    dl = fetcher.download_url(url)
+    dl, contenttype = fetcher.download_url(url)
 
     if dl is not False:
-        tmp = tempfile.NamedTemporaryFile(suffix='.pdf')
+        tmp = tempfile.NamedTemporaryFile(suffix='.'+contenttype)
 
         with open(tmp.name, 'w+') as fh:
             fh.write(dl)
@@ -398,19 +417,23 @@ if __name__ == '__main__':
 
             new_name = addFile(sys.argv[2], filetype)
             if new_name is not False:
-                print("File " + src + " successfully imported as "+new_name+".")
+                print(sys.argv[2]+ " successfully imported as "+new_name+".")
             sys.exit()
 
         elif sys.argv[1] == 'delete':
             if len(sys.argv) < 3:
                 sys.exit("Usage : " + sys.argv[0] + " delete FILE|ID")
 
-            if not deleteId(sys.argv[2]):
-                if not deleteFile(sys.argv[2]):
-                    warning("Unable to delete "+sys.argv[2])
-                    sys.exit(1)
+            confirm = rawInput("Are you sure you want to delete "+sys.argv[2] +
+                               " ? [y/N] ")
 
-            print(sys.argv[2]+" successfully deleted.")
+            if confirm.lower() == 'y':
+                if not deleteId(sys.argv[2]):
+                    if not deleteFile(sys.argv[2]):
+                        warning("Unable to delete "+sys.argv[2])
+                        sys.exit(1)
+
+                print(sys.argv[2]+" successfully deleted.")
             sys.exit()
 
         elif sys.argv[1] == 'list':

@@ -27,11 +27,16 @@ def download_url(url):
 
         try:
             r = requests.get(url, proxies=r_proxy)
+            contenttype = False
+            if 'pdf' in r.headers['content-type']:
+                contenttype = 'pdf'
+            elif 'djvu' in r.headers['content-type']:
+                contenttype = 'djvu'
 
-            if r.status_code != 200 or 'pdf' not in r.headers['content-type']:
+            if r.status_code != 200 or contenttype is False:
                 continue
 
-            return r.content
+            return r.content, contenttype
         except:
             warning("Proxy "+proxy+" not available.")
             continue
