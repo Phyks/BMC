@@ -1,26 +1,19 @@
-# the folder in which the papers should be stored
-folder = "/home/user/www/papers/"
+# The folder in which the papers should be stored
+# /!\ Keep the trailing slash /!\
+folder = "/home/phyks/Papers/"
 
-# the URL at which the papers will be served by an existing HTTP server
-url = "http://example.com/papers/"
+# The various proxies available to retrieve the content
+proxies = [
+    '',
+    'socks5://localhost:4711'
+]
 
-# the length at which the file names should be truncated
-maxlen = 42
-
-# the maximum number of requests to allow before throttling
-thresh = 10
-
-# the time period after which throttling stops
-limit = 60
-
-# help message
-help = "a nice help message"
-
-# the various servers available to retrieve the content
-# the first tuple item is the URL for the translation-server instance
-# the second tuple item is the URL of the socks proxy to use
-servers = [
-  ("http://localhost:1969/web", 'socks4://127.0.0.1:9999'),
-  ]
-
-
+# The mask to rename files
+# %f = last name of first author
+# %l = last name of last author
+# %j = name of the journal
+# %Y = published year
+# %t = title
+# %a = authors
+format_articles = "%f_%l-%j-%Y"
+format_books = "%a-%t"
