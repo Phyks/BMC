@@ -103,7 +103,6 @@ A list of ideas and TODO. Don't hesitate to give feedback on the ones you really
 * if doi does not exist ?
 * download djvu
 * test file field for bibtex
-* No fail if proxy not accessible
 * Open
 * Confirmation for deletion
 * Rebuild
