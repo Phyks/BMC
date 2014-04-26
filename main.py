@@ -6,6 +6,7 @@ from __future__ import print_function
 import fetcher
 import sys
 import shutil
+import tempfile
 import requests
 import subprocess
 import re
@@ -354,13 +355,12 @@ def downloadFile(url, filetype):
     pdf = fetcher.download_url(url)
 
     if pdf is not False:
-        with open(params.folder+'tmp.pdf', 'w+') as fh:
+        tmp = tempfile.NamedTemporaryFile()
+
+        with open(tmp.name, 'w+') as fh:
             fh.write(pdf)
-        new_name = addFile(params.folder+'tmp.pdf', filetype)
-        try:
-            os.remove(params.folder+'tmp.pdf')
-        except:
-            warning('Unable to delete temp file '+params.folder+'tmp.pdf')
+        new_name = addFile(tmp.name, filetype)
+        tmp.close()
         return new_name
     else:
         warning("Could not fetch "+url)

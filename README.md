@@ -72,6 +72,7 @@ All your documents will be stored in the papers dir specified in `params.py`. Al
 
 ## License
 
+All the source code I wrote is under a `no-alcoohol beer-ware license`. All functions that I didn't write myself are under the original license and their origin is specified in the function itself.
 ```
 * --------------------------------------------------------------------------------
 * "THE NO-ALCOHOL BEER-WARE LICENSE" (Revision 42):
@@ -83,6 +84,8 @@ All your documents will be stored in the papers dir specified in `params.py`. Al
 *																		Phyks
 * ---------------------------------------------------------------------------------
 ```
+
+I used the `tearpages.py` script from sciunto, which can be found [here](https://github.com/sciunto/tear-pages) and is released under a GNU GPLv3 license.
 
 ## Inspiration
 
@@ -97,10 +100,13 @@ Here are some sources of inspirations for this project :
 
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
+* if doi not found ? if no doi ?
+* store url of articles
+* test file field for bibtex
 * Open
 * Confirmation for deletion
 * Rebuild
-* Remove the watermarks on pdf files : First page of IOP publishing articles
+* Remove the watermarks on pdf files : First page of IOP publishing articles => tearpages
 * Webserver interface
 * Various re.compile ?
 * check output of subprocesses before it ends
