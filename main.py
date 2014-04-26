@@ -195,14 +195,14 @@ def getExtension(filename):
 
 def checkBibtex(filename, bibtex):
     print("The bibtex entry found for "+filename+" is :")
-    print(bibtex)
-    check = rawInput("Is it correct ? [Y/n] ")
 
     bibtex = StringIO(bibtex)
     bibtex = BibTexParser(bibtex, customization=homogeneize_latex_encoding)
     bibtex = bibtex.get_entry_dict()
     bibtex_name = bibtex.keys()[0]
     bibtex = bibtex[bibtex_name]
+    print(parsed2Bibtex(bibtex))
+    check = rawInput("Is it correct ? [Y/n] ")
 
     while check.lower() == 'n':
         fields = [u'type', u'id'] + [i for i in sorted(bibtex)
