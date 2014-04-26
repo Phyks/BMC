@@ -100,9 +100,10 @@ Here are some sources of inspirations for this project :
 
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
-* if doi not found ? if no doi ?
-* store url of articles
+* if doi does not exist ?
+* download djvu
 * test file field for bibtex
+* No fail if proxy not accessible
 * Open
 * Confirmation for deletion
 * Rebuild

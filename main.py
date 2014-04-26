@@ -267,6 +267,7 @@ def addFile(src, filetype):
     else:
         # Idem
         bibtex = isbn2Bib(isbn).strip()+"\n"
+    
     bibtex = checkBibtex(src, bibtex)
 
     authors = re.split(' and ', bibtex['author'])
@@ -296,7 +297,7 @@ def addFile(src, filetype):
         else:
             new_name = rename
     bibtex['file'] = new_name
-
+    
     try:
         shutil.copy2(src, new_name)
     except IOError:
@@ -352,13 +353,13 @@ def deleteFile(filename):
 
 
 def downloadFile(url, filetype):
-    pdf = fetcher.download_url(url)
+    dl = fetcher.download_url(url)
 
-    if pdf is not False:
-        tmp = tempfile.NamedTemporaryFile()
+    if dl is not False:
+        tmp = tempfile.NamedTemporaryFile(suffix='.pdf')
 
         with open(tmp.name, 'w+') as fh:
-            fh.write(pdf)
+            fh.write(dl)
         new_name = addFile(tmp.name, filetype)
         tmp.close()
         return new_name
