@@ -22,6 +22,8 @@ from bibtexparser.bparser import BibTexParser
 from termios import tcflush, TCIOFLUSH
 import params
 
+EDITOR = os.environ.get('EDITOR') if os.environ.get('EDITOR') else 'vim'
+
 
 def rawInput(string):
     tcflush(sys.stdin, TCIOFLUSH)
@@ -167,11 +169,16 @@ def doi2Bib(doi):
     """
     url = "http://dx.doi.org/" + doi
     headers = {"accept": "application/x-bibtex"}
-    r = requests.get(url, headers=headers)
+    try:
+        r = requests.get(url, headers=headers)
 
-    if r.headers['content-type'] == 'application/x-bibtex':
-        return r.text
-    else
+        if r.headers['content-type'] == 'application/x-bibtex':
+            return r.text
+        else:
+            return ''
+    except requests.exceptions.ConnectionError:
+        warning('Unable to contact remote server to get the bibtex entry ' +
+                'for doi '+doi)
         return ''
 
 
@@ -207,29 +214,31 @@ def checkBibtex(filename, bibtex):
     bibtex = StringIO(bibtex)
     bibtex = BibTexParser(bibtex)
     bibtex = bibtex.get_entry_dict()
-    bibtex_name = bibtex.keys()[0]
-    bibtex = bibtex[bibtex_name]
-    print(parsed2Bibtex(bibtex))
+    if len(bibtex) > 0:
+        bibtex_name = bibtex.keys()[0]
+        bibtex = bibtex[bibtex_name]
+        bibtex_string = parsed2Bibtex(bibtex)
+    else:
+        bibtex_string = ''
+    print(bibtex_string)
     check = rawInput("Is it correct ? [Y/n] ")
 
     while check.lower() == 'n':
-        fields = [u'type', u'id'] + [i for i in sorted(bibtex)
-                                     if i not in ['id', 'type']]
+        with tempfile.NamedTemporaryFile(suffix=".tmp") as tmpfile:
+            tmpfile.write(bibtex_string)
+            tmpfile.flush()
+            subprocess.call([EDITOR, tmpfile.name])
+            bibtex = BibTexParser(StringIO(tmpfile.read()+"\n"))
 
-        for field in fields:
-            new_value = rawInput(field.capitalize()+" ? ["+bibtex[field]+"] ")
-            if new_value != '':
-                bibtex[field] = new_value
-
-        while True:
-            new_field = rawInput("Add a new field (leave empty to skip) ? ")
-            if new_field == '':
-                break
-            new_value = rawInput("Value for field "+new_field+" ? ")
-            bibtex[new_field] = new_value
-
+        bibtex = bibtex.get_entry_dict()
+        if len(bibtex) > 0:
+            bibtex_name = bibtex.keys()[0]
+            bibtex = bibtex[bibtex_name]
+            bibtex_string = parsed2Bibtex(bibtex)
+        else:
+            bibtex_string = ''
         print("\nThe bibtex entry for "+filename+" is :")
-        print(parsed2Bibtex(bibtex))
+        print(bibtex_string)
         check = rawInput("Is it correct ? [Y/n] ")
     return bibtex
 
@@ -276,7 +285,7 @@ def addFile(src, filetype):
         bibtex = isbn2Bib(isbn).strip()+"\n"
     else:
         bibtex = ''
-    
+
     bibtex = checkBibtex(src, bibtex)
 
     authors = re.split(' and ', bibtex['author'])
@@ -312,7 +321,7 @@ def addFile(src, filetype):
         else:
             new_name = rename
     bibtex['file'] = new_name
-    
+
     try:
         shutil.copy2(src, new_name)
     except IOError:
@@ -417,7 +426,7 @@ if __name__ == '__main__':
 
             new_name = addFile(sys.argv[2], filetype)
             if new_name is not False:
-                print(sys.argv[2]+ " successfully imported as "+new_name+".")
+                print(sys.argv[2]+" successfully imported as "+new_name+".")
             sys.exit()
 
         elif sys.argv[1] == 'delete':
