@@ -106,6 +106,7 @@ Here are some sources of inspirations for this project :
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
 * Open
+* Use bibtex-parser lib to write bibtex, instead of parsed2BibTex
 * Parameter to disable remote search
 * Rebuild
 * Webserver interface
@@ -119,5 +120,4 @@ A list of ideas and TODO. Don't hesitate to give feedback on the ones you really
 
 See upstream
 
-* homogeneize\_latex\_encoding => to implement again, bug with metadata upstream
 * Remove the watermarks on pdf files => done, some warning in okular on generated pdf, but seems ok. Seems to be a bug in PyPDF2.

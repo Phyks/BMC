@@ -19,6 +19,8 @@ try:
 except:
     from StringIO import StringIO
 from bibtexparser.bparser import BibTexParser
+from bibtexparser.customization import homogeneize_latex_encoding
+from bibtexparser.bwriter import bibtex as bibTexWriter
 from termios import tcflush, TCIOFLUSH
 import params
 
@@ -211,8 +213,7 @@ def getExtension(filename):
 def checkBibtex(filename, bibtex):
     print("The bibtex entry found for "+filename+" is :")
 
-    bibtex = StringIO(bibtex)
-    bibtex = BibTexParser(bibtex)
+    bibtex = BibTexParser(bibtex, customization=homogeneize_latex_encoding)
     bibtex = bibtex.get_entry_dict()
     if len(bibtex) > 0:
         bibtex_name = bibtex.keys()[0]
@@ -228,7 +229,7 @@ def checkBibtex(filename, bibtex):
             tmpfile.write(bibtex_string)
             tmpfile.flush()
             subprocess.call([EDITOR, tmpfile.name])
-            bibtex = BibTexParser(StringIO(tmpfile.read()+"\n"))
+            bibtex = BibTexParser(tmpfile.read()+"\n", customization=homogeneize_latex_encoding)
 
         bibtex = bibtex.get_entry_dict()
         if len(bibtex) > 0:
@@ -341,7 +342,7 @@ def deleteId(ident):
     Delete a file based on its id in the bibtex file
     """
     with open(params.folder+'index.bib', 'r') as fh:
-        bibtex = BibTexParser(fh)
+        bibtex = BibTexParser(fh.read(), customization=homogeneize_latex_encoding)
     bibtex = bibtex.get_entry_dict()
 
     if ident not in bibtex.keys():
@@ -362,7 +363,7 @@ def deleteFile(filename):
     Delete a file based on its filename
     """
     with open(params.folder+'index.bib', 'r') as fh:
-        bibtex = BibTexParser(fh)
+        bibtex = BibTexParser(fh.read(), customization=homogeneize_latex_encoding)
     bibtex = bibtex.get_entry_dict()
 
     found = False
