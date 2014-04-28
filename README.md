@@ -105,21 +105,21 @@ Here are some sources of inspirations for this project :
 
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
-* Open
-* Use bibtex-parser lib to write bibtex, instead of parsed2BibTex
-* Parameter to disable remote search
-* Rebuild
-* Webserver interface
-* Various re.compile ?
-* check output of subprocesses before it ends
-* Split main.py
-* Categories
-* Edit an entry instead of deleting it and adding it again
-* Doc / Man
-* No DOI for arXiv / HAL
+10. Refactor
+    11. Use bibtex-parser lib to write bibtex, instead of parsed2BibTex
+    12. Rebuild function
+    13. Split main.py
+    14. Various re.compile ?
+    15. Check output of subprocesses before it ends
+    16. TODO in files
+20. No DOI for arXiv / HAL
+30. Parameter to disable remote search
+40. Open file
+45. Doc / Man
+50. Webserver interface
+60. Categories
+70. Edit an entry instead of deleting it and adding it again
 
 ## Issues ?
-
-See upstream
 
 * Remove the watermarks on pdf files => done, some warning in okular on generated pdf, but seems ok. Seems to be a bug in PyPDF2.
