@@ -115,6 +115,8 @@ A list of ideas and TODO. Don't hesitate to give feedback on the ones you really
 * Split main.py
 * Categories
 * Edit an entry instead of deleting it and adding it again
+* Doc / Man
+* No DOI for arXiv / HAL
 
 ## Issues ?
 

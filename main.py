@@ -1,42 +1,20 @@
 #!/usr/bin/env python2
 # -*- coding: utf8 -*-
 
-from __future__ import print_function
-
+import tools
 import fetcher
+import backend
 import tearpages
 import sys
 import shutil
 import tempfile
-import requests
 import subprocess
-import re
 import os
-from isbntools import meta
-from isbntools.dev.fmt import fmtbib
-try:
-    from cStringIO import StringIO
-except:
-    from StringIO import StringIO
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import homogeneize_latex_encoding
-from bibtexparser.bwriter import bibtex as bibTexWriter
-from termios import tcflush, TCIOFLUSH
 import params
 
 EDITOR = os.environ.get('EDITOR') if os.environ.get('EDITOR') else 'vim'
-
-
-def rawInput(string):
-    tcflush(sys.stdin, TCIOFLUSH)
-    return raw_input(string)
-
-
-def warning(*objs):
-    """
-    Write to stderr
-    """
-    print("WARNING: ", *objs, file=sys.stderr)
 
 
 def parsed2Bibtex(parsed):
@@ -51,165 +29,6 @@ def parsed2Bibtex(parsed):
     return bibtex
 
 
-def bibtexAppend(data):
-    """
-    Append data to the main bibtex file
-    data is a dict for one entry in bibtex, as the one from bibtexparser output
-    """
-    with open(params.folder+'index.bib', 'a') as fh:
-        fh.write(parsed2Bibtex(data)+"\n")
-
-
-def bibtexRewrite(data):
-    """
-    Rewrite the bibtex index file.
-    data is a dict of bibtex entry dict.
-    """
-    bibtex = ''
-    for entry in data.keys():
-        bibtex += parsed2Bibtex(data[entry])+"\n"
-    with open(params.folder+'index.bib', 'w') as fh:
-        fh.write(bibtex)
-
-
-def replaceAll(text, dic):
-    for i, j in dic.iteritems():
-        text = text.replace(i, j)
-    return text
-
-
-def findISBN(src):
-    if src.endswith(".pdf"):
-        totext = subprocess.Popen(["pdftotext", src, "-"],
-                                  stdout=subprocess.PIPE,
-                                  stderr=subprocess.PIPE)
-    elif src.endswith(".djvu"):
-        totext = subprocess.Popen(["djvutxt", src],
-                                  stdout=subprocess.PIPE,
-                                  stderr=subprocess.PIPE)
-
-    extractfull = totext.communicate()
-    if extractfull[1] is not "":
-        return False
-
-    extractfull = extractfull[0]
-    extractISBN = re.search(r"isbn (([0-9]{3}[ -])?[0-9][ -][0-9]{2}[ -][0-9]{6}[ -][0-9])",
-                            extractfull.lower().replace('&#338;', '-'))
-
-    cleanISBN = False
-    if extractISBN:
-        cleanISBN = extractISBN.group(1).replace('-', '').replace(' ', '')
-
-    return cleanISBN
-
-
-def isbn2Bib(isbn):
-    try:
-        return fmtbib('bibtex', meta(isbn, 'default'))
-    except:
-        return ''
-
-
-def findDOI(src):
-    if src.endswith(".pdf"):
-        totext = subprocess.Popen(["pdftotext", src, "-"],
-                                  stdout=subprocess.PIPE,
-                                  stderr=subprocess.PIPE)
-    elif src.endswith(".djvu"):
-        totext = subprocess.Popen(["djvutxt", src],
-                                  stdout=subprocess.PIPE,
-                                  stderr=subprocess.PIPE)
-
-    extractfull = totext.communicate()
-    if extractfull[1] is not "":
-        return False
-
-    extractfull = extractfull[0]
-    extractDOI = re.search('(?<=doi)/?:?\s?[0-9\.]{7}/\S*[0-9]',
-                           extractfull.lower().replace('&#338;', '-'))
-    if not extractDOI:
-        # PNAS fix
-        extractDOI = re.search('(?<=doi).?10.1073/pnas\.\d+',
-                               extractfull.lower().replace('pnas', '/pnas'))
-        if not extractDOI:
-            # JSB fix
-            extractDOI = re.search('10\.1083/jcb\.\d{9}', extractfull.lower())
-
-    cleanDOI = False
-    if extractDOI:
-        cleanDOI = extractDOI.group(0).replace(':', '').replace(' ', '')
-        if re.search('^/', cleanDOI):
-            cleanDOI = cleanDOI[1:]
-
-        # FABSE J fix
-        if re.search('^10.1096', cleanDOI):
-            cleanDOI = cleanDOI[:20]
-
-        # Second JCB fix
-        if re.search('^10.1083', cleanDOI):
-            cleanDOI = cleanDOI[:21]
-
-        if len(cleanDOI) > 40:
-            cleanDOItemp = re.sub(r'\d\.\d', '000', cleanDOI)
-            reps = {'.': 'A', '-': '0'}
-            cleanDOItemp = replaceAll(cleanDOItemp[8:], reps)
-            digitStart = 0
-            for i in range(len(cleanDOItemp)):
-                if cleanDOItemp[i].isdigit():
-                    digitStart = 1
-                    if cleanDOItemp[i].isalpha() and digitStart:
-                        break
-            cleanDOI = cleanDOI[0:(8+i)]
-
-    return cleanDOI
-
-
-def doi2Bib(doi):
-    """
-    Return a bibTeX string of metadata for a given DOI.
-    From : https://gist.github.com/jrsmith3/5513926
-    """
-    url = "http://dx.doi.org/" + doi
-    headers = {"accept": "application/x-bibtex"}
-    try:
-        r = requests.get(url, headers=headers)
-
-        if r.headers['content-type'] == 'application/x-bibtex':
-            return r.text
-        else:
-            return ''
-    except requests.exceptions.ConnectionError:
-        warning('Unable to contact remote server to get the bibtex entry ' +
-                'for doi '+doi)
-        return ''
-
-
-_slugify_strip_re = re.compile(r'[^\w\s-]')
-_slugify_hyphenate_re = re.compile(r'[\s]+')
-
-
-def _slugify(value):
-    """
-    Normalizes string, converts to lowercase, removes non-alpha characters,
-    and converts spaces to hyphens.
-
-    From Django's "django/template/defaultfilters.py".
-    """
-    import unicodedata
-    if not isinstance(value, unicode):
-        value = unicode(value)
-    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
-    value = unicode(_slugify_strip_re.sub('', value).strip())
-    return _slugify_hyphenate_re.sub('_', value)
-
-
-def getExtension(filename):
-    """
-    Get the extension of the filename
-    """
-    return filename[filename.rfind('.'):]
-
-
 def checkBibtex(filename, bibtex):
     print("The bibtex entry found for "+filename+" is :")
 
@@ -222,7 +41,7 @@ def checkBibtex(filename, bibtex):
     else:
         bibtex_string = ''
     print(bibtex_string)
-    check = rawInput("Is it correct ? [Y/n] ")
+    check = tools.rawInput("Is it correct ? [Y/n] ")
 
     while check.lower() == 'n':
         with tempfile.NamedTemporaryFile(suffix=".tmp") as tmpfile:
@@ -240,7 +59,7 @@ def checkBibtex(filename, bibtex):
             bibtex_string = ''
         print("\nThe bibtex entry for "+filename+" is :")
         print(bibtex_string)
-        check = rawInput("Is it correct ? [Y/n] ")
+        check = tools.rawInput("Is it correct ? [Y/n] ")
     return bibtex
 
 
@@ -256,23 +75,23 @@ def addFile(src, filetype):
 
     if doi is False and isbn is False:
         if filetype is None:
-            warning("Could not determine the DOI or the ISBN for "+src+"." +
+            tools.warning("Could not determine the DOI or the ISBN for "+src+"." +
                     "Switching to manual entry.")
             doi_isbn = ''
             while doi_isbn not in ['doi', 'isbn']:
-                doi_isbn = rawInput("DOI / ISBN ? ").lower()
+                doi_isbn = tools.rawInput("DOI / ISBN ? ").lower()
             if doi_isbn == 'doi':
-                doi = rawInput('DOI ? ')
+                doi = tools.rawInput('DOI ? ')
             else:
-                isbn = rawInput('ISBN ? ')
+                isbn = tools.rawInput('ISBN ? ')
         elif filetype == 'article':
-            warning("Could not determine the DOI for "+src +
+            tools.warning("Could not determine the DOI for "+src +
                     ", switching to manual entry.")
-            doi = rawInput('DOI ? ')
+            doi = tools.rawInput('DOI ? ')
         elif filetype == 'book':
-            warning("Could not determine the ISBN for "+src +
+            tools.warning("Could not determine the ISBN for "+src +
                     ", switching to manual entry.")
-            isbn = rawInput('ISBN ? ')
+            isbn = tools.rawInput('ISBN ? ')
     elif doi is not False:
         print("DOI for "+src+" is "+doi+".")
     elif isbn is not False:
@@ -310,13 +129,13 @@ def addFile(src, filetype):
     new_name = new_name.replace("%a", ', '.join([i.split(',')[0].strip()
                                                 for i in authors]))
 
-    new_name = params.folder+_slugify(new_name)+getExtension(src)
+    new_name = params.folder+tools.slugify(new_name)+tools.getExtension(src)
 
     while os.path.exists(new_name):
-        warning("file "+new_name+" already exists.")
-        default_rename = new_name.replace(getExtension(new_name),
-                                          " (2)"+getExtension(new_name))
-        rename = rawInput("New name ["+default_rename+"] ? ")
+        tools.warning("file "+new_name+" already exists.")
+        default_rename = new_name.replace(tools.getExtension(new_name),
+                                          " (2)"+tools.getExtension(new_name))
+        rename = tools.rawInput("New name ["+default_rename+"] ? ")
         if rename == '':
             new_name = default_rename
         else:
@@ -351,7 +170,7 @@ def deleteId(ident):
     try:
         os.remove(bibtex[ident]['file'])
     except:
-        warning("Unable to delete file associated to id "+ident+" : " +
+        tools.warning("Unable to delete file associated to id "+ident+" : " +
                 bibtex[ident]['file'])
     del(bibtex[ident])
     bibtexRewrite(bibtex)
@@ -373,7 +192,7 @@ def deleteFile(filename):
             try:
                 os.remove(bibtex[key]['file'])
             except:
-                warning("Unable to delete file associated to id "+key+" : " +
+                tools.warning("Unable to delete file associated to id "+key+" : " +
                         bibtex[key]['file'])
             del(bibtex[key])
     if found:
@@ -382,7 +201,7 @@ def deleteFile(filename):
 
 
 def downloadFile(url, filetype):
-    dl, contenttype = fetcher.download_url(url)
+    dl, contenttype = fetcher.download(url)
 
     if dl is not False:
         tmp = tempfile.NamedTemporaryFile(suffix='.'+contenttype)
@@ -393,7 +212,7 @@ def downloadFile(url, filetype):
         tmp.close()
         return new_name
     else:
-        warning("Could not fetch "+url)
+        tools.warning("Could not fetch "+url)
         return False
 
 
@@ -434,13 +253,13 @@ if __name__ == '__main__':
             if len(sys.argv) < 3:
                 sys.exit("Usage : " + sys.argv[0] + " delete FILE|ID")
 
-            confirm = rawInput("Are you sure you want to delete "+sys.argv[2] +
+            confirm = tools.rawInput("Are you sure you want to delete "+sys.argv[2] +
                                " ? [y/N] ")
 
             if confirm.lower() == 'y':
                 if not deleteId(sys.argv[2]):
                     if not deleteFile(sys.argv[2]):
-                        warning("Unable to delete "+sys.argv[2])
+                        tools.warning("Unable to delete "+sys.argv[2])
                         sys.exit(1)
 
                 print(sys.argv[2]+" successfully deleted.")

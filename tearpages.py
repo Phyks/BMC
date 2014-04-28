@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 # Author: Francois Boulogne
 # License: GPLv3
@@ -30,6 +30,7 @@ def fixPdf(pdfFile, destination):
     output.close()
     shutil.copy(tmp.name, destination)
 
+
 def tearpage(filename):
     """
     Copy filename to a tempfile, write pages 1..N to filename.
@@ -60,8 +61,8 @@ def tearpage(filename):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Remove the first page of a PDF',
-                             epilog='')
+    parser = argparse.ArgumentParser(description='Remove the first page ' +
+                                     'of a PDF', epilog='')
     parser.add_argument('--version', action='version', version=__version__)
     parser.add_argument('pdf', metavar='PDF', help='PDF filepath')
     args = parser.parse_args()
