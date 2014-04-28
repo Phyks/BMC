@@ -33,9 +33,9 @@ def download(url):
                 continue
 
             return r.content, contenttype
-        # TODO : except trop large
-        except:
-            tools.warning("Proxy "+proxy+" not available.")
+        except requests.exceptions.RequestException:
+            tools.warning("Unable to get "+url+" using roxy "+proxy+". It " +
+                          "may not be available.")
             continue
     return False
 

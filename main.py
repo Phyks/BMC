@@ -1,32 +1,21 @@
 #!/usr/bin/env python2
 # -*- coding: utf8 -*-
 
-import tools
-import fetcher
-import backend
-import tearpages
-import sys
-import shutil
-import tempfile
-import subprocess
 import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import backend
+import fetcher
+import tearpages
+import tools
+import params
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import homogeneize_latex_encoding
-import params
 
 EDITOR = os.environ.get('EDITOR') if os.environ.get('EDITOR') else 'vim'
-
-
-def parsed2Bibtex(parsed):
-    """
-    Convert a single bibtex entry dict to bibtex string
-    """
-    bibtex = '@'+parsed['type']+'{'+parsed['id']+",\n"
-
-    for field in [i for i in sorted(parsed) if i not in ['type', 'id']]:
-        bibtex += "\t"+field+"={"+parsed[field]+"},\n"
-    bibtex += "}\n"
-    return bibtex
 
 
 def checkBibtex(filename, bibtex):
@@ -37,7 +26,7 @@ def checkBibtex(filename, bibtex):
     if len(bibtex) > 0:
         bibtex_name = bibtex.keys()[0]
         bibtex = bibtex[bibtex_name]
-        bibtex_string = parsed2Bibtex(bibtex)
+        bibtex_string = backend.parsed2Bibtex(bibtex)
     else:
         bibtex_string = ''
     print(bibtex_string)
@@ -48,13 +37,14 @@ def checkBibtex(filename, bibtex):
             tmpfile.write(bibtex_string)
             tmpfile.flush()
             subprocess.call([EDITOR, tmpfile.name])
-            bibtex = BibTexParser(tmpfile.read()+"\n", customization=homogeneize_latex_encoding)
+            bibtex = BibTexParser(tmpfile.read()+"\n",
+                                  customization=homogeneize_latex_encoding)
 
         bibtex = bibtex.get_entry_dict()
         if len(bibtex) > 0:
             bibtex_name = bibtex.keys()[0]
             bibtex = bibtex[bibtex_name]
-            bibtex_string = parsed2Bibtex(bibtex)
+            bibtex_string = backend.parsed2Bibtex(bibtex)
         else:
             bibtex_string = ''
         print("\nThe bibtex entry for "+filename+" is :")
@@ -68,15 +58,15 @@ def addFile(src, filetype):
     Add a file to the library
     """
     if filetype == 'article' or filetype is None:
-        doi = findDOI(src)
+        doi = fetcher.findDOI(src)
 
     if filetype == 'book' or (filetype is None and doi is False):
-        isbn = findISBN(src)
+        isbn = fetcher.findISBN(src)
 
     if doi is False and isbn is False:
         if filetype is None:
-            tools.warning("Could not determine the DOI or the ISBN for "+src+"." +
-                    "Switching to manual entry.")
+            tools.warning("Could not determine the DOI or the ISBN for " +
+                          src+"."+"Switching to manual entry.")
             doi_isbn = ''
             while doi_isbn not in ['doi', 'isbn']:
                 doi_isbn = tools.rawInput("DOI / ISBN ? ").lower()
@@ -86,11 +76,11 @@ def addFile(src, filetype):
                 isbn = tools.rawInput('ISBN ? ')
         elif filetype == 'article':
             tools.warning("Could not determine the DOI for "+src +
-                    ", switching to manual entry.")
+                          ", switching to manual entry.")
             doi = tools.rawInput('DOI ? ')
         elif filetype == 'book':
             tools.warning("Could not determine the ISBN for "+src +
-                    ", switching to manual entry.")
+                          ", switching to manual entry.")
             isbn = tools.rawInput('ISBN ? ')
     elif doi is not False:
         print("DOI for "+src+" is "+doi+".")
@@ -99,10 +89,10 @@ def addFile(src, filetype):
 
     if doi is not False and doi != '':
         # Add extra \n for bibtexparser
-        bibtex = doi2Bib(doi).strip().replace(',', ",\n")+"\n"
+        bibtex = fetcher.doi2Bib(doi).strip().replace(',', ",\n")+"\n"
     elif isbn is not False and isbn != '':
         # Idem
-        bibtex = isbn2Bib(isbn).strip()+"\n"
+        bibtex = fetcher.isbn2Bib(isbn).strip()+"\n"
     else:
         bibtex = ''
 
@@ -152,52 +142,8 @@ def addFile(src, filetype):
     if 'IOP' in bibtex['publisher'] and bibtex['type'] == 'article':
         tearpages.tearpage(new_name)
 
-    bibtexAppend(bibtex)
+    backend.bibtexAppend(bibtex)
     return new_name
-
-
-def deleteId(ident):
-    """
-    Delete a file based on its id in the bibtex file
-    """
-    with open(params.folder+'index.bib', 'r') as fh:
-        bibtex = BibTexParser(fh.read(), customization=homogeneize_latex_encoding)
-    bibtex = bibtex.get_entry_dict()
-
-    if ident not in bibtex.keys():
-        return False
-
-    try:
-        os.remove(bibtex[ident]['file'])
-    except:
-        tools.warning("Unable to delete file associated to id "+ident+" : " +
-                bibtex[ident]['file'])
-    del(bibtex[ident])
-    bibtexRewrite(bibtex)
-    return True
-
-
-def deleteFile(filename):
-    """
-    Delete a file based on its filename
-    """
-    with open(params.folder+'index.bib', 'r') as fh:
-        bibtex = BibTexParser(fh.read(), customization=homogeneize_latex_encoding)
-    bibtex = bibtex.get_entry_dict()
-
-    found = False
-    for key in bibtex.keys():
-        if bibtex[key]['file'] == filename:
-            found = True
-            try:
-                os.remove(bibtex[key]['file'])
-            except:
-                tools.warning("Unable to delete file associated to id "+key+" : " +
-                        bibtex[key]['file'])
-            del(bibtex[key])
-    if found:
-        bibtexRewrite(bibtex)
-    return found
 
 
 def downloadFile(url, filetype):
@@ -253,12 +199,12 @@ if __name__ == '__main__':
             if len(sys.argv) < 3:
                 sys.exit("Usage : " + sys.argv[0] + " delete FILE|ID")
 
-            confirm = tools.rawInput("Are you sure you want to delete "+sys.argv[2] +
-                               " ? [y/N] ")
+            confirm = tools.rawInput("Are you sure you want to delete " +
+                                     sys.argv[2]+" ? [y/N] ")
 
             if confirm.lower() == 'y':
-                if not deleteId(sys.argv[2]):
-                    if not deleteFile(sys.argv[2]):
+                if not backend.deleteId(sys.argv[2]):
+                    if not backend.deleteFile(sys.argv[2]):
                         tools.warning("Unable to delete "+sys.argv[2])
                         sys.exit(1)
 
