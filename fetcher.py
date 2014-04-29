@@ -50,19 +50,26 @@ def findISBN(src):
     if src.endswith(".pdf"):
         totext = subprocess.Popen(["pdftotext", src, "-"],
                                   stdout=subprocess.PIPE,
-                                  stderr=subprocess.PIPE)
+                                  stderr=subprocess.PIPE,
+                                  bufsize=1)
     elif src.endswith(".djvu"):
         totext = subprocess.Popen(["djvutxt", src],
                                   stdout=subprocess.PIPE,
-                                  stderr=subprocess.PIPE)
-    extractfull = totext.communicate()
-    # TODO : ^ Return result before processing the whole book ?
-    if extractfull[1] is not "":
+                                  stderr=subprocess.PIPE,
+                                  bufsize=1)
+    while totext.poll() == None:
+        extractfull = totext.stdin.readline()
+        extractISBN = isbn_re.search(extractfull.lower().replace('&#338;', '-'))
+        if extractISBN:
+            totext.terminate()
+            break
+
+    err = totext.communicate()[1]
+    if totext.returncode > 0:
         # Error happened
-        tools.warning(extractfull[1])
+        tools.warning(err)
         return False
-    extractfull = extractfull[0]
-    extractISBN = isbn_re.search(extractfull.lower().replace('&#338;', '-'))
+
     cleanISBN = False
     # Clean ISBN is the ISBN number without separators
     if extractISBN:
@@ -103,21 +110,26 @@ def findDOI(src):
         totext = subprocess.Popen(["djvutxt", src],
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE)
-    extractfull = totext.communicate()
-    # TODO : ^ Return result before full conversion ?
-    if extractfull[1] is not "":
-        # Error happened
-        tools.warning(extractfull[1])
-        return False
-    extractfull = extractfull[0]
-    extractDOI = doi_re.search(extractfull.lower().replace('&#338;', '-'))
-    if not extractDOI:
-        # PNAS fix
-        extractDOI = doi_pnas_re.search(extractfull.lower().replace('pnas',
-                                                                    '/pnas'))
+
+    while totext.poll() == None:
+        extractfull = totext.stdin.readline()
+        extractDOI = doi_re.search(extractfull.lower().replace('&#338;', '-'))
         if not extractDOI:
-            # JSB fix
-            extractDOI = doi_jsb_re.search(extractfull.lower())
+            # PNAS fix
+            extractDOI = doi_pnas_re.search(extractfull.lower().replace('pnas',
+                                                                        '/pnas'))
+            if not extractDOI:
+                # JSB fix
+                extractDOI = doi_jsb_re.search(extractfull.lower())
+        if extractDOI:
+            totext.terminate()
+            break
+
+    err = totext.communicate()[1]
+    if totext.returncode > 0:
+        # Error happened
+        tools.warning(err)
+        return False
 
     cleanDOI = False
     if extractDOI:

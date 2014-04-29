@@ -108,8 +108,6 @@ A list of ideas and TODO. Don't hesitate to give feedback on the ones you really
 10. Refactor
     11. Use bibtex-parser lib to write bibtex, instead of parsed2BibTex
     12. Rebuild function
-    15. Check output of subprocesses before it ends
-    16. TODO in files
 20. No DOI for arXiv / HAL
 30. Parameter to disable remote search
 40. Open file

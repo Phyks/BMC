@@ -52,7 +52,7 @@ def tearpage(filename):
 
     # Write pages excepted the first one
     output_file = PdfFileWriter()
-    for i in range(0, num_pages):
+    for i in range(1, num_pages):
         output_file.addPage(input_file.getPage(i))
 
     tmp.close()
