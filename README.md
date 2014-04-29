@@ -118,4 +118,4 @@ A list of ideas and TODO. Don't hesitate to give feedback on the ones you really
 
 ## Issues ?
 
-* Remove the watermarks on pdf files => done, some warning in okular on generated pdf, but seems ok. Seems to be a bug in PyPDF2.
+* Remove the watermarks on pdf files => done, some warning in okular on generated pdf, but seems ok. Seems to be a bug in Okular.

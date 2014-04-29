@@ -57,9 +57,10 @@ def findISBN(src):
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
                                   bufsize=1)
-    while totext.poll() == None:
+    while totext.poll() is None:
         extractfull = totext.stdin.readline()
-        extractISBN = isbn_re.search(extractfull.lower().replace('&#338;', '-'))
+        extractISBN = isbn_re.search(extractfull.lower().replace('&#338;',
+                                                                 '-'))
         if extractISBN:
             totext.terminate()
             break
@@ -111,7 +112,7 @@ def findDOI(src):
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE)
 
-    while totext.poll() == None:
+    while totext.poll() is None:
         extractfull = totext.stdin.readline()
         extractDOI = doi_re.search(extractfull.lower().replace('&#338;', '-'))
         if not extractDOI:
