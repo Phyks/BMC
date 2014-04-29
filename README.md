@@ -28,7 +28,7 @@ BiblioManager will always use standard formats such as BibTeX, so that you can e
 
 Should be almost working and usable now, although still to be considered as **experimental**.
 
-**Important note :** I use it for personnal use, but I don't read articles from many journals. If you find any file which is not working, please fill an issue or send me an e-mail with the relevant information. There are alternative ways to get the metadata for example, and I didn't know really which one was the best one as writing this code.
+**Important note :** I use it for personal use, but I don't read articles from many journals. If you find any file which is not working, please fill an issue or send me an e-mail with the relevant information. There are alternative ways to get the metadata for example, and I didn't know really which one was the best one as writing this code.
 
 
 ## Installation
