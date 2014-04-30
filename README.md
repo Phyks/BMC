@@ -26,7 +26,7 @@ BiblioManager will always use standard formats such as BibTeX, so that you can e
 * Able to import a PDF / djvu file, automagically find the DOI / ISBN, get the bibtex entry back and add it to the library. If DOI / ISBN search fails, it will prompt you for it.
 * Able to download a URL, using any specified proxy (you can list many and it will try all of them) and store the pdf file with its metadata.
 
-Should be almost working and usable now, although still to be considered as **experimental**.
+Should be almost working and usable now, although still to be considered as **experimental**. It can be **broken** at **any commit** and not repaired for a few days. I will update this when I will have a version that I can consider to be “stable”.
 
 **Important note :** I use it for personal use, but I don't read articles from many journals. If you find any file which is not working, please fill an issue or send me an e-mail with the relevant information. There are alternative ways to get the metadata for example, and I didn't know really which one was the best one as writing this code.
 
