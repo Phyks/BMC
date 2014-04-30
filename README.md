@@ -73,7 +73,9 @@ TODO
 
 ### Data storage
 
-All your documents will be stored in the papers dir specified in `params.py`. All the bibtex entries will be added to the `index.bib` file. You should **not** add entries to this file (but you can edit existing entries without any problem), as this will break synchronization between documents in papers dir and the index. If you do so, you can rebuild the index fie with `./main.py rebuild`.
+All your documents will be stored in the papers dir specified in `params.py`. All the bibtex entries will be added to the `index.bib` file. You should **not** add entries to this file (but you can edit existing entries without any problem), as this will break synchronization between documents in papers dir and the index. If you do so, you can resync the index file with `./main.py resync`.
+
+The resync option will check that all bibtex entries have a corresponding file and all file have a corresponding bibtex entry. It will prompt you what to do for unmatched entries.
 
 ## License
 
@@ -107,7 +109,6 @@ A list of ideas and TODO. Don't hesitate to give feedback on the ones you really
 
 10. Refactor
     11. Use bibtex-parser lib to write bibtex, instead of parsed2BibTex
-    12. Rebuild function
 20. No DOI for arXiv / HAL
 30. Parameter to disable remote search
 40. Open file

@@ -2,7 +2,6 @@
 # -*- coding: utf8 -*-
 
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -98,28 +97,7 @@ def addFile(src, filetype):
 
     bibtex = checkBibtex(src, bibtex)
 
-    authors = re.split(' and ', bibtex['author'])
-
-    if bibtex['type'] == 'article':
-        new_name = params.format_articles
-        try:
-            new_name = new_name.replace("%j", bibtex['journal'])
-        except:
-            pass
-    elif bibtex['type'] == 'book':
-        new_name = params.format_books
-
-    new_name = new_name.replace("%t", bibtex['title'])
-    try:
-        new_name = new_name.replace("%Y", bibtex['year'])
-    except:
-        pass
-    new_name = new_name.replace("%f", authors[0].split(',')[0].strip())
-    new_name = new_name.replace("%l", authors[-1].split(',')[0].strip())
-    new_name = new_name.replace("%a", ', '.join([i.split(',')[0].strip()
-                                                for i in authors]))
-
-    new_name = params.folder+tools.slugify(new_name)+tools.getExtension(src)
+    new_name = backend.getNewName(src, bibtex)
 
     while os.path.exists(new_name):
         tools.warning("file "+new_name+" already exists.")
@@ -160,6 +138,72 @@ def downloadFile(url, filetype):
     else:
         tools.warning("Could not fetch "+url)
         return False
+
+
+def resync():
+    diff = backend.diffFilesIndex()
+
+    for entry in diff:
+        if entry['file'] == '':
+            print("Found entry in index without associated file.")
+            confirm = False
+            while not confirm:
+                filename = tools.rawInput("File to import for this entry " +
+                                          "(leave empty to delete the " +
+                                          "entry) ? ")
+                if filename == '':
+                    break
+                else:
+                    confirm = True
+                    if 'doi' in entry.keys():
+                        doi = fetcher.findDOI(filename)
+                        if doi is not False and doi != entry['doi']:
+                            confirm = tools.rawInput("Found DOI does not " +
+                                                     "match bibtex entry " +
+                                                     "DOI, continue anyway " +
+                                                     "? [y/N]")
+                            confirm = (confirm.lower() == 'y')
+                    elif 'isbn' in entry.keys():
+                        isbn = fetcher.findISBN(filename)
+                        if isbn is not False and isbn != entry['isbn']:
+                            confirm = tools.rawInput("Found ISBN does not " +
+                                                     "match bibtex entry " +
+                                                     "ISBN, continue anyway " +
+                                                     "? [y/N]")
+                            confirm = (confirm.lower() == 'y')
+                    continue
+            if filename == '':
+                backend.deleteId(entry['id'])
+            else:
+                new_name = backend.getNewName(filename, entry)
+                try:
+                    shutil.copy2(filename, new_name)
+                except IOError:
+                    new_name = False
+                    sys.exit("Unable to move file to library dir " +
+                             params.folder+".")
+                backend.bibtexEdit(entry['id'], {'file': filename})
+        else:
+            print("Found file without any associated entry in index.")
+            action = ''
+            while action.lower() not in ['import', 'delete']:
+                action = tools.rawInput("What to do ? [import / delete] ")
+                action = action.lower()
+            if action == 'import':
+                tmp = tempfile.NamedTemporaryFile()
+                shutil.copy(entry['file'], tmp.name)
+                filetype = tools.getExtension(entry['file'])
+                try:
+                    os.remove(entry['file'])
+                except:
+                    tools.warning("Unable to delete file "+entry['file'])
+                if not addFile(tmp.name, filetype):
+                    tools.warning("Unable to reimport file "+entry['file'])
+                tmp.close()
+            else:
+                backend.deleteFile(entry['file'])
+                print(entry['file'] + " removed from disk and " +
+                      "index.")
 
 
 if __name__ == '__main__':
@@ -217,7 +261,12 @@ if __name__ == '__main__':
         elif sys.argv[1] == 'search':
             raise Exception('TODO')
 
-        elif sys.argv[1] == 'rebuild':
-            raise Exception('TODO')
+        elif sys.argv[1] == 'resync':
+            if len(sys.argv) > 2 and sys.argv[2] == 'help':
+                sys.exit("Usage : " + sys.argv[0] + " resync")
+            confirm = tools.rawInput("Resync files and bibtex index ? [y/N] ")
+            if confirm.lower() == 'y':
+                resync()
+
     except KeyboardInterrupt:
         sys.exit()
