@@ -107,8 +107,6 @@ Here are some sources of inspirations for this project :
 
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
-10. Refactor
-    11. Use bibtex-parser lib to write bibtex, instead of parsed2BibTex
 20. No DOI for arXiv / HAL
 30. Parameter to disable remote search
 40. Open file

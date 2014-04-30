@@ -7,7 +7,6 @@ import tools
 import params
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import homogeneize_latex_encoding
-from bibtexparser.bwriter import bibtex as bibTexWriter
 
 
 def getNewName(src, bibtex):
@@ -45,7 +44,7 @@ def parsed2Bibtex(parsed):
 
     for field in [i for i in sorted(parsed) if i not in ['type', 'id']]:
         bibtex += "\t"+field+"={"+parsed[field]+"},\n"
-    bibtex += "}\n"
+    bibtex += "}\n\n"
     return bibtex
 
 
