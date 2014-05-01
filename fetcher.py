@@ -58,8 +58,11 @@ def findISBN(src):
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
                                   bufsize=1)
+    else:
+        return False
+
     while totext.poll() is None:
-        extractfull = totext.stdin.readline()
+        extractfull = totext.stdout.readline()
         extractISBN = isbn_re.search(extractfull.lower().replace('&#338;',
                                                                  '-'))
         if extractISBN:
@@ -112,9 +115,11 @@ def findDOI(src):
         totext = subprocess.Popen(["djvutxt", src],
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE)
+    else:
+        return False
 
     while totext.poll() is None:
-        extractfull = totext.stdin.readline()
+        extractfull = totext.stdout.readline()
         extractDOI = doi_re.search(extractfull.lower().replace('&#338;', '-'))
         if not extractDOI:
             # PNAS fix
@@ -182,7 +187,7 @@ arXiv_re = re.compile(r'arXiv:\s*([\w\.\/\-]+)')
 
 
 def findArXivId(src):
-    """Search for a valid arXiv id in src.
+    """Searches for a valid arXiv id in src.
 
     Returns the arXiv id or False if not found or an error occurred.
     From : https://github.com/minad/bibsync/blob/3fdf121016f6187a2fffc66a73cd33b45a20e55d/lib/bibsync/utils.rb
@@ -195,9 +200,11 @@ def findArXivId(src):
         totext = subprocess.Popen(["djvutxt", src],
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE)
+    else:
+        return False
 
     while totext.poll() is None:
-        extractfull = totext.stdin.readline()
+        extractfull = totext.stdout.readline()
         extractID = arXiv_re.search(extractfull)
         if extractID:
             totext.terminate()
@@ -209,7 +216,7 @@ def findArXivId(src):
         tools.warning(err)
         return False
     else:
-        return extractID
+        return extractID.group(1)
 
 
 def arXiv2Bib(arxiv):
@@ -224,3 +231,39 @@ def arXiv2Bib(arxiv):
         else:
             return bib.bibtex()
     return False
+
+
+HAL_re = re.compile(r'(hal-\d{8}), version (\d+)')
+
+
+def findHALId(src):
+    """Searches for a valid HAL id in src
+
+    Returns a tuple of the HAL id and the version
+    or False if not found or an error occurred.
+    """
+    if src.endswith(".pdf"):
+        totext = subprocess.Popen(["pdftotext", src, "-"],
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE)
+    elif src.endswith(".djvu"):
+        totext = subprocess.Popen(["djvutxt", src],
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE)
+    else:
+        return False
+
+    while totext.poll() is None:
+        extractfull = totext.stdout.readline()
+        extractID = HAL_re.search(extractfull)
+        if extractID:
+            totext.terminate()
+            break
+
+    err = totext.communicate()[1]
+    if totext.returncode > 0:
+        # Error happened
+        tools.warning(err)
+        return False
+    else:
+        return extractID.group(1), extractID.group(2)
