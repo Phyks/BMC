@@ -107,7 +107,7 @@ Here are some sources of inspirations for this project :
 
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
-20. No DOI for arXiv / HAL
+20. No DOI for HAL
 30. Parameter to disable remote search
 40. Open file
 45. Doc / Man
@@ -119,3 +119,9 @@ A list of ideas and TODO. Don't hesitate to give feedback on the ones you really
 ## Issues ?
 
 * Remove the watermarks on pdf files => done, some warning in okular on generated pdf, but seems ok. Seems to be a bug in Okular.
+
+
+## Thanks
+
+* Nathan Grigg for his [arxiv2bib](https://pypi.python.org/pypi/arxiv2bib/1.0.5#downloads) python module
+* François Boulogne for his [python-bibtexparser](https://github.com/sciunto/python-bibtexparser) python module and his integration of new requested features

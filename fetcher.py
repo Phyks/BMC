@@ -5,6 +5,7 @@ import isbntools
 import re
 import requesocks as requests  # Requesocks is requests with SOCKS support
 import subprocess
+import arxiv2bib as arxiv_metadata
 import tools
 import params
 
@@ -178,7 +179,6 @@ def doi2Bib(doi):
 
 
 arXiv_re = re.compile(r'arXiv:\s*([\w\.\/\-]+)')
-arXiv_wo_v_re = re.compile(r'v\d+\Z')
 
 
 def findArXivId(src):
@@ -208,21 +208,19 @@ def findArXivId(src):
         # Error happened
         tools.warning(err)
         return False
-
-    cleanID = False
-    if extractID:
-        cleanID = arXiv_wo_v_re.sub('', extractID.group(1))
-    return cleanID
-
+    else:
+        return extractID
 
 
 def arXiv2Bib(arxiv):
     """Returns bibTeX string of metadata for a given arXiv id
 
     arxiv is an arxiv id
-    From : https://github.com/minad/bibsync/blob/master/lib/bibsync/actions/synchronize_metadata.rb
     """
-    arxiv = "oai:arXiv.org:"+arxiv
-    bibtex = ''
-
-    return bibtex
+    bibtex = arxiv_metadata.arxiv2bib([arxiv])
+    for bib in bibtex:
+        if isinstance(bib, arxiv_metadata.ReferenceErrorInfo):
+            continue
+        else:
+            return bib.bibtex()
+    return False

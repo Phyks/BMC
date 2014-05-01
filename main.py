@@ -18,7 +18,7 @@ EDITOR = os.environ.get('EDITOR') if os.environ.get('EDITOR') else 'vim'
 
 
 def checkBibtex(filename, bibtex):
-    print("The bibtex entry found for "+filename+" is :")
+    print("The bibtex entry found for "+filename+" is:")
 
     bibtex = BibTexParser(bibtex, customization=homogeneize_latex_encoding)
     bibtex = bibtex.get_entry_dict()
@@ -29,7 +29,7 @@ def checkBibtex(filename, bibtex):
     else:
         bibtex_string = ''
     print(bibtex_string)
-    check = tools.rawInput("Is it correct ? [Y/n] ")
+    check = tools.rawInput("Is it correct? [Y/n] ")
 
     while check.lower() == 'n':
         with tempfile.NamedTemporaryFile(suffix=".tmp") as tmpfile:
@@ -46,9 +46,9 @@ def checkBibtex(filename, bibtex):
             bibtex_string = backend.parsed2Bibtex(bibtex)
         else:
             bibtex_string = ''
-        print("\nThe bibtex entry for "+filename+" is :")
+        print("\nThe bibtex entry for "+filename+" is:")
         print(bibtex_string)
-        check = tools.rawInput("Is it correct ? [Y/n] ")
+        check = tools.rawInput("Is it correct? [Y/n] ")
     return bibtex
 
 
@@ -58,37 +58,52 @@ def addFile(src, filetype):
     """
     if filetype == 'article' or filetype is None:
         doi = fetcher.findDOI(src)
+    if (filetype == 'article' or filetype is None) and doi is False:
+        arxiv = fetcher.findArXivId(src)
 
-    if filetype == 'book' or (filetype is None and doi is False):
+    if filetype == 'book' or (filetype is None and doi is False and arxiv is
+                              False):
         isbn = fetcher.findISBN(src)
 
-    if doi is False and isbn is False:
+    if doi is False and isbn is False and arxiv is False:
         if filetype is None:
-            tools.warning("Could not determine the DOI or the ISBN for " +
-                          src+"."+"Switching to manual entry.")
-            doi_isbn = ''
-            while doi_isbn not in ['doi', 'isbn']:
-                doi_isbn = tools.rawInput("DOI / ISBN ? ").lower()
-            if doi_isbn == 'doi':
-                doi = tools.rawInput('DOI ? ')
+            tools.warning("Could not determine the DOI nor the arXiv id nor " +
+                          "the ISBN for "+src+"."+"Switching to manual entry.")
+            doi_arxiv_isbn = ''
+            while doi_arxiv_isbn not in ['doi', 'arxiv', 'isbn']:
+                doi_arxiv_isbn = tools.rawInput("DOI / arXiv / ISBN? ").lower()
+            if doi_arxiv_isbn == 'doi':
+                doi = tools.rawInput('DOI? ')
+            elif doi_arxiv_isbn == 'arxiv':
+                arxiv = tools.rawInput('arXiv id? ')
             else:
-                isbn = tools.rawInput('ISBN ? ')
+                isbn = tools.rawInput('ISBN? ')
         elif filetype == 'article':
-            tools.warning("Could not determine the DOI for "+src +
-                          ", switching to manual entry.")
-            doi = tools.rawInput('DOI ? ')
+            tools.warning("Could not determine the DOI nor the arXiv id for " +
+                          src+", switching to manual entry.")
+            doi_arxiv = ''
+            while doi_arxiv not in ['doi', 'arxiv']:
+                doi_arxiv = tools.rawInput("DOI / arXiv? ").lower()
+            if doi_arxiv == 'doi':
+                doi = tools.rawInput('DOI? ')
+            else:
+                arxiv = tools.rawInput('arXiv id? ')
         elif filetype == 'book':
             tools.warning("Could not determine the ISBN for "+src +
                           ", switching to manual entry.")
-            isbn = tools.rawInput('ISBN ? ')
+            isbn = tools.rawInput('ISBN? ')
     elif doi is not False:
         print("DOI for "+src+" is "+doi+".")
+    elif arxiv is not False:
+        print("ArXiv id for "+src+" is "+arxiv+".")
     elif isbn is not False:
         print("ISBN for "+src+" is "+isbn+".")
 
     if doi is not False and doi != '':
         # Add extra \n for bibtexparser
         bibtex = fetcher.doi2Bib(doi).strip().replace(',', ",\n")+"\n"
+    elif arxiv is not False and arxiv != '':
+        bibtex = fetcher.arXiv2Bib(arxiv).strip().replace(',', ",\n")+"\n"
     elif isbn is not False and isbn != '':
         # Idem
         bibtex = fetcher.isbn2Bib(isbn).strip()+"\n"
@@ -103,7 +118,7 @@ def addFile(src, filetype):
         tools.warning("file "+new_name+" already exists.")
         default_rename = new_name.replace(tools.getExtension(new_name),
                                           " (2)"+tools.getExtension(new_name))
-        rename = tools.rawInput("New name ["+default_rename+"] ? ")
+        rename = tools.rawInput("New name ["+default_rename+"]? ")
         if rename == '':
             new_name = default_rename
         else:
@@ -150,7 +165,7 @@ def resync():
             while not confirm:
                 filename = tools.rawInput("File to import for this entry " +
                                           "(leave empty to delete the " +
-                                          "entry) ? ")
+                                          "entry)? ")
                 if filename == '':
                     break
                 else:
@@ -162,6 +177,14 @@ def resync():
                                                      "match bibtex entry " +
                                                      "DOI, continue anyway " +
                                                      "? [y/N]")
+                            confirm = (confirm.lower() == 'y')
+                    if 'Eprint' in entry.keys():
+                        arxiv = fetcher.findArXivId(filename)
+                        if arxiv is not False and arxiv != entry['Eprint']:
+                            confirm = tools.rawInput("Found arXiv id does " +
+                                                     "not match bibtex " +
+                                                     "entry arxiv id, " +
+                                                     "continue anyway ? [y/N]")
                             confirm = (confirm.lower() == 'y')
                     elif 'isbn' in entry.keys():
                         isbn = fetcher.findISBN(filename)
@@ -187,7 +210,7 @@ def resync():
             print("Found file without any associated entry in index.")
             action = ''
             while action.lower() not in ['import', 'delete']:
-                action = tools.rawInput("What to do ? [import / delete] ")
+                action = tools.rawInput("What to do? [import / delete] ")
                 action = action.lower()
             if action == 'import':
                 tmp = tempfile.NamedTemporaryFile()
@@ -209,11 +232,11 @@ def resync():
 if __name__ == '__main__':
     try:
         if len(sys.argv) < 2:
-            sys.exit("Usage : TODO")
+            sys.exit("Usage: TODO")
 
         if sys.argv[1] == 'download':
             if len(sys.argv) < 3:
-                sys.exit("Usage : " + sys.argv[0] +
+                sys.exit("Usage: " + sys.argv[0] +
                          " download FILE [article|book]")
 
             filetype = None
@@ -227,7 +250,7 @@ if __name__ == '__main__':
 
         if sys.argv[1] == 'import':
             if len(sys.argv) < 3:
-                sys.exit("Usage : " + sys.argv[0] +
+                sys.exit("Usage: " + sys.argv[0] +
                          " import FILE [article|book]")
 
             filetype = None
@@ -241,10 +264,10 @@ if __name__ == '__main__':
 
         elif sys.argv[1] == 'delete':
             if len(sys.argv) < 3:
-                sys.exit("Usage : " + sys.argv[0] + " delete FILE|ID")
+                sys.exit("Usage: " + sys.argv[0] + " delete FILE|ID")
 
             confirm = tools.rawInput("Are you sure you want to delete " +
-                                     sys.argv[2]+" ? [y/N] ")
+                                     sys.argv[2]+"? [y/N] ")
 
             if confirm.lower() == 'y':
                 if not backend.deleteId(sys.argv[2]):
@@ -263,8 +286,8 @@ if __name__ == '__main__':
 
         elif sys.argv[1] == 'resync':
             if len(sys.argv) > 2 and sys.argv[2] == 'help':
-                sys.exit("Usage : " + sys.argv[0] + " resync")
-            confirm = tools.rawInput("Resync files and bibtex index ? [y/N] ")
+                sys.exit("Usage: " + sys.argv[0] + " resync")
+            confirm = tools.rawInput("Resync files and bibtex index? [y/N] ")
             if confirm.lower() == 'y':
                 resync()
 
