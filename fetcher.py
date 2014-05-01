@@ -79,7 +79,7 @@ def findISBN(src):
 
 
 def isbn2Bib(isbn):
-    """Try to get bibtex entry from an ISBN number"""
+    """Tries to get bibtex entry from an ISBN number"""
     try:
         # Default merges results from worldcat.org and google books
         return isbntools.dev.fmt.fmtbib('bibtex',
@@ -158,7 +158,7 @@ def findDOI(src):
 
 
 def doi2Bib(doi):
-    """Return a bibTeX string of metadata for a given DOI.
+    """Returns a bibTeX string of metadata for a given DOI.
 
     From : https://gist.github.com/jrsmith3/5513926
     """
@@ -175,3 +175,54 @@ def doi2Bib(doi):
         tools.warning('Unable to contact remote server to get the bibtex ' +
                       'entry for doi '+doi)
         return ''
+
+
+arXiv_re = re.compile(r'arXiv:\s*([\w\.\/\-]+)')
+arXiv_wo_v_re = re.compile(r'v\d+\Z')
+
+
+def findArXivId(src):
+    """Search for a valid arXiv id in src.
+
+    Returns the arXiv id or False if not found or an error occurred.
+    From : https://github.com/minad/bibsync/blob/3fdf121016f6187a2fffc66a73cd33b45a20e55d/lib/bibsync/utils.rb
+    """
+    if src.endswith(".pdf"):
+        totext = subprocess.Popen(["pdftotext", src, "-"],
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE)
+    elif src.endswith(".djvu"):
+        totext = subprocess.Popen(["djvutxt", src],
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE)
+
+    while totext.poll() is None:
+        extractfull = totext.stdin.readline()
+        extractID = arXiv_re.search(extractfull)
+        if extractID:
+            totext.terminate()
+            break
+
+    err = totext.communicate()[1]
+    if totext.returncode > 0:
+        # Error happened
+        tools.warning(err)
+        return False
+
+    cleanID = False
+    if extractID:
+        cleanID = arXiv_wo_v_re.sub('', extractID.group(1))
+    return cleanID
+
+
+
+def arXiv2Bib(arxiv):
+    """Returns bibTeX string of metadata for a given arXiv id
+
+    arxiv is an arxiv id
+    From : https://github.com/minad/bibsync/blob/master/lib/bibsync/actions/synchronize_metadata.rb
+    """
+    arxiv = "oai:arXiv.org:"+arxiv
+    bibtex = ''
+
+    return bibtex

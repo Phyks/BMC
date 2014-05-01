@@ -114,6 +114,7 @@ A list of ideas and TODO. Don't hesitate to give feedback on the ones you really
 50. Webserver interface
 60. Categories
 70. Edit an entry instead of deleting it and adding it again
+80. Automatic download of new arXiv version
 
 ## Issues ?
 
