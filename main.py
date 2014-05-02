@@ -304,10 +304,11 @@ if __name__ == '__main__':
         elif sys.argv[1] == 'open':
             if len(sys.argv) < 3:
                 sys.exit("Usage: " + sys.argv[0] +
-                         " open ID")
-            if not openFile(sys.argv[2]):
-                sys.exit("Unable to open file associated " +
-                         "to ident "+sys.argv[2])
+                         " open ID1 ID2 …")
+            for filename in sys.argv[2:]:
+                if not openFile(filename):
+                    sys.exit("Unable to open file associated " +
+                            "to ident "+filename)
 
         elif sys.argv[1] == 'resync':
             if len(sys.argv) > 2 and sys.argv[2] == 'help':
