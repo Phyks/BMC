@@ -107,14 +107,13 @@ Here are some sources of inspirations for this project :
 
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
-20. No DOI for HAL
 30. Parameter to disable remote search
-40. Open file
 45. Doc / Man
 50. Webserver interface
 60. Categories
 70. Edit an entry instead of deleting it and adding it again
 80. Automatic download of new arXiv version
+90. No DOI for HAL => thanks all for metadata with SOAP API… don't want to handle it for now :/
 
 ## Issues ?
 

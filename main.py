@@ -155,6 +155,23 @@ def downloadFile(url, filetype):
         return False
 
 
+def openFile(ident):
+    try:
+        with open(params.folder+'index.bib', 'r') as fh:
+            bibtex = BibTexParser(fh.read(),
+                                  customization=homogeneize_latex_encoding)
+        bibtex = bibtex.get_entry_dict()
+    except:
+        tools.warning("Unable to open index file.")
+        return False
+
+    if ident not in bibtex.keys():
+        return False
+    else:
+        subprocess.Popen(['xdg-open', bibtex[ident]['file']])
+        return True
+
+
 def resync():
     diff = backend.diffFilesIndex()
 
@@ -283,6 +300,14 @@ if __name__ == '__main__':
 
         elif sys.argv[1] == 'search':
             raise Exception('TODO')
+
+        elif sys.argv[1] == 'open':
+            if len(sys.argv) < 3:
+                sys.exit("Usage: " + sys.argv[0] +
+                         " open ID")
+            if not openFile(sys.argv[2]):
+                sys.exit("Unable to open file associated " +
+                         "to ident "+sys.argv[2])
 
         elif sys.argv[1] == 'resync':
             if len(sys.argv) > 2 and sys.argv[2] == 'help':

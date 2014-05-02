@@ -53,17 +53,25 @@ def bibtexAppend(data):
 
     data is a dict for one entry in bibtex, as the one from bibtexparser output
     """
-    with open(params.folder+'index.bib', 'a') as fh:
-        fh.write(parsed2Bibtex(data)+"\n")
+    try:
+        with open(params.folder+'index.bib', 'a') as fh:
+            fh.write(parsed2Bibtex(data)+"\n")
+    except:
+        tools.warning("Unable to open index file.")
+        return False
 
 
 def bibtexEdit(ident, modifs):
     """Update ident key in bibtex file, modifications are in modifs dict"""
 
-    with open(params.folder+'index.bib', 'r') as fh:
-        bibtex = BibTexParser(fh.read(),
-                              customization=homogeneize_latex_encoding)
-    bibtex = bibtex.get_entry_dict()
+    try:
+        with open(params.folder+'index.bib', 'r') as fh:
+            bibtex = BibTexParser(fh.read(),
+                                  customization=homogeneize_latex_encoding)
+        bibtex = bibtex.get_entry_dict()
+    except:
+        tools.warning("Unable to open index file.")
+        return False
 
     for key in modifs.keys():
         bibtex[ident][key] = modifs[key]
@@ -78,16 +86,24 @@ def bibtexRewrite(data):
     bibtex = ''
     for entry in data.keys():
         bibtex += parsed2Bibtex(data[entry])+"\n"
-    with open(params.folder+'index.bib', 'w') as fh:
-        fh.write(bibtex)
+    try:
+        with open(params.folder+'index.bib', 'w') as fh:
+            fh.write(bibtex)
+    except:
+        tools.warning("Unable to open index file.")
+        return False
 
 
 def deleteId(ident):
     """Delete a file based on its id in the bibtex file"""
-    with open(params.folder+'index.bib', 'r') as fh:
-        bibtex = BibTexParser(fh.read(),
-                              customization=homogeneize_latex_encoding)
-    bibtex = bibtex.get_entry_dict()
+    try:
+        with open(params.folder+'index.bib', 'r') as fh:
+            bibtex = BibTexParser(fh.read(),
+                                  customization=homogeneize_latex_encoding)
+        bibtex = bibtex.get_entry_dict()
+    except:
+        tools.warning("Unable to open index file.")
+        return False
 
     if ident not in bibtex.keys():
         return False
@@ -108,10 +124,14 @@ def deleteId(ident):
 
 def deleteFile(filename):
     """Delete a file based on its filename"""
-    with open(params.folder+'index.bib', 'r') as fh:
-        bibtex = BibTexParser(fh.read(),
-                              customization=homogeneize_latex_encoding)
-    bibtex = bibtex.get_entry_dict()
+    try:
+        with open(params.folder+'index.bib', 'r') as fh:
+            bibtex = BibTexParser(fh.read(),
+                                  customization=homogeneize_latex_encoding)
+        bibtex = bibtex.get_entry_dict()
+    except:
+        tools.warning("Unable to open index file.")
+        return False
 
     found = False
     for key in bibtex.keys():
@@ -141,11 +161,14 @@ def diffFilesIndex():
     """
 
     files = tools.listDir(params.folder)
-    with open(params.folder+'index.bib', 'r') as fh:
-        index = BibTexParser(fh.read(),
-                             customization=homogeneize_latex_encoding)
-
-    index_diff = index.get_entry_dict()
+    try:
+        with open(params.folder+'index.bib', 'r') as fh:
+            index = BibTexParser(fh.read(),
+                                 customization=homogeneize_latex_encoding)
+        index_diff = index.get_entry_dict()
+    except:
+        tools.warning("Unable to open index file.")
+        return False
 
     for key in index_diff.keys():
         if index_diff[key]['file'] not in files:
