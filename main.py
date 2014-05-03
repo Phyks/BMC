@@ -145,6 +145,31 @@ def addFile(src, filetype, manual):
     return new_name
 
 
+def editEntry(entry, file_id = 'both'):
+    bibtex = backend.getBibtex(entry, file_id)
+    if bibtex is False:
+        tools.warning("Entry "+entry+" does not exist.")
+
+    if file_id == 'file':
+        filename = entry
+    else:
+        filename = bibtex['file']
+    bibtex = checkBibtex(filename, bibtex)
+    
+    try:
+        with open(params.folder+'index.bib', 'r') as fh:
+            index = BibTexParser(fh.read(),
+                                 customization=homogeneize_latex_encoding)
+        index = index.get_entry_dict()
+    except:
+        tools.warning("Unable to open index file.")
+        return False
+    
+    index[bibtex['id']] = bibtex
+    backend.bibtexRewrite(index)
+    return True
+
+
 def downloadFile(url, filetype, manual):
     dl, contenttype = fetcher.download(url)
 
@@ -280,12 +305,27 @@ if __name__ == '__main__':
     parser_import.set_defaults(func='import')
 
     parser_delete = subparsers.add_parser('delete', help="delete help")
-    parser_delete.add_argument('files', metavar='entry', nargs='+',
+    parser_delete.add_argument('entries', metavar='entry', nargs='+',
                                help="a filename or an identifier")
+    group = parser_delete.add_mutually_exclusive_group()
+    group.add_argument('--id', action="store_true", default=False,
+                               help="id based deletion")
+    group.add_argument('--file', action="store_true", default=False,
+                               help="file based deletion")
     parser_delete.add_argument('-f', '--force', default=False,
                                action='store_true',
                                help="delete without confirmation")
     parser_delete.set_defaults(func='delete')
+    
+    parser_edit = subparsers.add_parser('edit', help="edit help")
+    parser_edit.add_argument('entries', metavar='entry', nargs='+',
+                               help="a filename or an identifier")
+    group = parser_edit.add_mutually_exclusive_group()
+    group.add_argument('--id', action="store_true", default=False,
+                               help="id based deletion")
+    group.add_argument('--file', action="store_true", default=False,
+                               help="file based deletion")
+    parser_edit.set_defaults(func='edit')
 
     parser_list = subparsers.add_parser('list', help="list help")
     parser_list.set_defaults(func='list')
@@ -324,7 +364,7 @@ if __name__ == '__main__':
             sys.exit()
 
         elif args.func == 'delete':
-            for filename in args.file:
+            for filename in args.entries:
                 if not args.force:
                     confirm = tools.rawInput("Are you sure you want to " +
                                              "delete "+filename+" ? [y/N] ")
@@ -332,12 +372,23 @@ if __name__ == '__main__':
                     confirm = 'y'
 
                 if confirm.lower() == 'y':
-                    if not backend.deleteId(filename):
-                        if not backend.deleteFile(filename):
+                    if args.file or not backend.deleteId(filename):
+                        if args.id or not backend.deleteFile(filename):
                             tools.warning("Unable to delete "+filename)
                             sys.exit(1)
 
                     print(filename+" successfully deleted.")
+            sys.exit()
+
+        elif args.fund == 'edit':
+            for filename in args.entries:
+                if args.file:
+                    file_id = 'file'
+                elif args.id:
+                    file_id = 'id'
+                else:
+                    file_id = 'both'
+                editEntry(filename, file_id)
             sys.exit()
 
         elif args.func == 'list':
@@ -351,11 +402,13 @@ if __name__ == '__main__':
                 if not openFile(filename):
                     sys.exit("Unable to open file associated " +
                              "to ident "+filename)
+            sys.exit()
 
         elif args.func == 'resync':
             confirm = tools.rawInput("Resync files and bibtex index? [y/N] ")
             if confirm.lower() == 'y':
                 resync()
+            sys.exit()
 
     except KeyboardInterrupt:
         sys.exit()

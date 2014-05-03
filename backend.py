@@ -159,7 +159,6 @@ def diffFilesIndex():
         * full bibtex entry with file='' if file is not found
         * only file entry if file with missing bibtex entry
     """
-
     files = tools.listDir(params.folder)
     try:
         with open(params.folder+'index.bib', 'r') as fh:
@@ -180,3 +179,32 @@ def diffFilesIndex():
         index_diff[filename] = {'file': filename}
 
     return index
+
+
+def getBibtex(entry, file_id = 'both'):
+    """Returns the bibtex entry corresponding to entry, as a dict
+
+    entry is either a filename or a bibtex ident
+    file_id is file or id or both to search for a file / id / both
+    """
+    try:
+        with open(params.folder+'index.bib', 'r') as fh:
+           bibtex = BibTexParser(fh.read(),
+                                 customization=homogeneize_latex_encoding)
+        bibtex = bibtex.get_entry_dict()
+    except:
+        tools.warning("Unable to open index file.")
+        return False
+    
+    bibtex_entry = False
+    if file_id == 'both' or file_id == 'id':
+        try:
+            bibtex_entry = bibtex[entry]
+        except KeyError:
+            pass
+    elif file_id == 'both' or file_id == 'file':
+        for key in bibtex.keys():
+            if bibtex[key]['file'] == filename:
+                bibtex_entry = bibtex[key]
+                break
+    return bibtex_entry
