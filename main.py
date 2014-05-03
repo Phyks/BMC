@@ -53,18 +53,23 @@ def checkBibtex(filename, bibtex):
     return bibtex
 
 
-def addFile(src, filetype):
+def addFile(src, filetype, manual):
     """
     Add a file to the library
     """
-    if filetype == 'article' or filetype is None:
-        doi = fetcher.findDOI(src)
-    if (filetype == 'article' or filetype is None) and doi is False:
-        arxiv = fetcher.findArXivId(src)
+    doi = False
+    arxiv = False
+    isbn = False
 
-    if filetype == 'book' or (filetype is None and doi is False and arxiv is
-                              False):
-        isbn = fetcher.findISBN(src)
+    if not manual:
+        if filetype == 'article' or filetype is None:
+            doi = fetcher.findDOI(src)
+        if (filetype == 'article' or filetype is None) and doi is False:
+            arxiv = fetcher.findArXivId(src)
+
+        if filetype == 'book' or (filetype is None and doi is False and
+                                  arxiv is False):
+            isbn = fetcher.findISBN(src)
 
     if doi is False and isbn is False and arxiv is False:
         if filetype is None:
@@ -140,7 +145,7 @@ def addFile(src, filetype):
     return new_name
 
 
-def downloadFile(url, filetype):
+def downloadFile(url, filetype, manual):
     dl, contenttype = fetcher.download(url)
 
     if dl is not False:
@@ -148,7 +153,7 @@ def downloadFile(url, filetype):
 
         with open(tmp.name, 'w+') as fh:
             fh.write(dl)
-        new_name = addFile(tmp.name, filetype)
+        new_name = addFile(tmp.name, filetype, manual)
         tmp.close()
         return new_name
     else:
@@ -255,7 +260,10 @@ if __name__ == '__main__':
     parser_download = subparsers.add_parser('download', help="download help")
     parser_download.add_argument('-t', '--type', default=None,
                                  choices=['article', 'book'],
-                                 help="Type of the file to download")
+                                 help="type of the file to download")
+    parser_download.add_argument('-m', '--manual', default=False,
+                                 action='store_true',
+                                 help="disable auto-download of bibtex")
     parser_download.add_argument('url',  nargs='+',
                                  help="url of the file to import")
     parser_download.set_defaults(func='download')
@@ -263,7 +271,10 @@ if __name__ == '__main__':
     parser_import = subparsers.add_parser('import', help="import help")
     parser_import.add_argument('-t', '--type', default=None,
                                choices=['article', 'book'],
-                               help="Type of the file to import")
+                               help="type of the file to import")
+    parser_import.add_argument('-m', '--manual', default=False,
+                               action='store_true',
+                               help="disable auto-download of bibtex")
     parser_import.add_argument('file',  nargs='+',
                                help="path to the file to import")
     parser_import.set_defaults(func='import')
@@ -271,15 +282,16 @@ if __name__ == '__main__':
     parser_delete = subparsers.add_parser('delete', help="delete help")
     parser_delete.add_argument('files', metavar='entry', nargs='+',
                                help="a filename or an identifier")
+    parser_delete.add_argument('-f', '--force', default=False,
+                               action='store_true',
+                               help="delete without confirmation")
     parser_delete.set_defaults(func='delete')
 
     parser_list = subparsers.add_parser('list', help="list help")
     parser_list.set_defaults(func='list')
-    # TODO
 
     parser_search = subparsers.add_parser('search', help="search help")
     parser_search.set_defaults(func='search')
-    # TODO
 
     parser_open = subparsers.add_parser('open', help="open help")
     parser_open.add_argument('ids', metavar='id',  nargs='+',
@@ -293,7 +305,7 @@ if __name__ == '__main__':
     try:
         if args.func == 'download':
             for url in args.url:
-                new_name = downloadFile(url, args.t)
+                new_name = downloadFile(url, args.type, args.manual)
                 if new_name is not False:
                     print(url+" successfully imported as "+new_name)
                 else:
@@ -302,7 +314,7 @@ if __name__ == '__main__':
 
         if args.func == 'import':
             for filename in args.file:
-                new_name = addFile(filename, args.t)
+                new_name = addFile(filename, args.type, args.manual)
                 if new_name is not False:
                     print(sys.argv[2]+" successfully imported as " +
                           new_name+".")
@@ -313,8 +325,11 @@ if __name__ == '__main__':
 
         elif args.func == 'delete':
             for filename in args.file:
-                confirm = tools.rawInput("Are you sure you want to delete " +
-                                         filename+"? [y/N] ")
+                if not args.force:
+                    confirm = tools.rawInput("Are you sure you want to " +
+                                             "delete "+filename+" ? [y/N] ")
+                else:
+                    confirm = 'y'
 
                 if confirm.lower() == 'y':
                     if not backend.deleteId(filename):
