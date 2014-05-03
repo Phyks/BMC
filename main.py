@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf8 -*-
 
+import argparse
 import os
 import shutil
 import subprocess
@@ -247,72 +248,96 @@ def resync():
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="A bibliography " +
+                                     "management tool.")
+    subparsers = parser.add_subparsers(help="sub-command help")
+
+    parser_download = subparsers.add_parser('download', help="download help")
+    parser_download.add_argument('-t', '--type', default=None,
+                                 choices=['article', 'book'],
+                                 help="Type of the file to download")
+    parser_download.add_argument('url',  nargs='+',
+                                 help="url of the file to import")
+    parser_download.set_defaults(func='download')
+
+    parser_import = subparsers.add_parser('import', help="import help")
+    parser_import.add_argument('-t', '--type', default=None,
+                               choices=['article', 'book'],
+                               help="Type of the file to import")
+    parser_import.add_argument('file',  nargs='+',
+                               help="path to the file to import")
+    parser_import.set_defaults(func='import')
+
+    parser_delete = subparsers.add_parser('delete', help="delete help")
+    parser_delete.add_argument('files', metavar='entry', nargs='+',
+                               help="a filename or an identifier")
+    parser_delete.set_defaults(func='delete')
+
+    parser_list = subparsers.add_parser('list', help="list help")
+    parser_list.set_defaults(func='list')
+    # TODO
+
+    parser_search = subparsers.add_parser('search', help="search help")
+    parser_search.set_defaults(func='search')
+    # TODO
+
+    parser_open = subparsers.add_parser('open', help="open help")
+    parser_open.add_argument('ids', metavar='id',  nargs='+',
+                             help="an identifier")
+    parser_open.set_defaults(func='open')
+
+    parser_resync = subparsers.add_parser('resync', help="resync help")
+    parser_resync.set_defaults(func='resync')
+
+    args = parser.parse_args()
     try:
-        if len(sys.argv) < 2:
-            sys.exit("Usage: TODO")
-
-        if sys.argv[1] == 'download':
-            if len(sys.argv) < 3:
-                sys.exit("Usage: " + sys.argv[0] +
-                         " download FILE [article|book]")
-
-            filetype = None
-            if len(sys.argv) > 3 and sys.argv[3] in ["article", "book"]:
-                filetype = sys.argv[3].lower()
-
-            new_name = downloadFile(sys.argv[2], filetype)
-            if new_name is not False:
-                print(sys.argv[2]+" successfully imported as "+new_name)
+        if args.func == 'download':
+            for url in args.url:
+                new_name = downloadFile(url, args.t)
+                if new_name is not False:
+                    print(url+" successfully imported as "+new_name)
+                else:
+                    tools.warning("An error occurred while downloading "+url)
             sys.exit()
 
-        if sys.argv[1] == 'import':
-            if len(sys.argv) < 3:
-                sys.exit("Usage: " + sys.argv[0] +
-                         " import FILE [article|book]")
-
-            filetype = None
-            if len(sys.argv) > 3 and sys.argv[3] in ["article", "book"]:
-                filetype = sys.argv[3].lower()
-
-            new_name = addFile(sys.argv[2], filetype)
-            if new_name is not False:
-                print(sys.argv[2]+" successfully imported as "+new_name+".")
+        if args.func == 'import':
+            for filename in args.file:
+                new_name = addFile(filename, args.t)
+                if new_name is not False:
+                    print(sys.argv[2]+" successfully imported as " +
+                          new_name+".")
+                else:
+                    tools.warning("An error occurred while importing " +
+                                  filename)
             sys.exit()
 
-        elif sys.argv[1] == 'delete':
-            if len(sys.argv) < 3:
-                sys.exit("Usage: " + sys.argv[0] + " delete FILE|ID")
+        elif args.func == 'delete':
+            for filename in args.file:
+                confirm = tools.rawInput("Are you sure you want to delete " +
+                                         filename+"? [y/N] ")
 
-            confirm = tools.rawInput("Are you sure you want to delete " +
-                                     sys.argv[2]+"? [y/N] ")
+                if confirm.lower() == 'y':
+                    if not backend.deleteId(filename):
+                        if not backend.deleteFile(filename):
+                            tools.warning("Unable to delete "+filename)
+                            sys.exit(1)
 
-            if confirm.lower() == 'y':
-                if not backend.deleteId(sys.argv[2]):
-                    if not backend.deleteFile(sys.argv[2]):
-                        tools.warning("Unable to delete "+sys.argv[2])
-                        sys.exit(1)
-
-                print(sys.argv[2]+" successfully deleted.")
+                    print(filename+" successfully deleted.")
             sys.exit()
 
-        elif sys.argv[1] == 'list':
+        elif args.func == 'list':
             raise Exception('TODO')
 
-        elif sys.argv[1] == 'search':
+        elif args.func == 'search':
             raise Exception('TODO')
 
-        elif sys.argv[1] == 'open':
-            if len(sys.argv) < 3:
-                sys.exit("Usage: " + sys.argv[0] +
-                         " open ID1 ID2 …")
-            for filename in sys.argv[2:]:
+        elif args.func == 'open':
+            for filename in args.ids:
                 if not openFile(filename):
                     sys.exit("Unable to open file associated " +
-                            "to ident "+filename)
+                             "to ident "+filename)
 
-        elif sys.argv[1] == 'resync':
-            if len(sys.argv) > 2 and sys.argv[2] == 'help':
-                sys.exit("Usage: " + sys.argv[0] + " resync")
+        elif args.func == 'resync':
             confirm = tools.rawInput("Resync files and bibtex index? [y/N] ")
             if confirm.lower() == 'y':
                 resync()
