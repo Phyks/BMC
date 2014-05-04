@@ -135,7 +135,7 @@ def deleteFile(filename):
 
     found = False
     for key in bibtex.keys():
-        if bibtex[key]['file'] == filename:
+        if os.path.samepath(bibtex[key]['file'], filename):
             found = True
             try:
                 os.remove(bibtex[key]['file'])
@@ -204,7 +204,7 @@ def getBibtex(entry, file_id = 'both'):
             pass
     elif file_id == 'both' or file_id == 'file':
         for key in bibtex.keys():
-            if bibtex[key]['file'] == filename:
+            if os.path.samepath(bibtex[key]['file'], filename):
                 bibtex_entry = bibtex[key]
                 break
     return bibtex_entry

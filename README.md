@@ -69,7 +69,7 @@ TODO
 
 ### Edit entries
 
-TODO
+Run `./main.py edit PARAM` where `PARAM` should be either a path to a paper file or an ident in the bibtex index. This will open a text editor to edit the corresponding bibtex entry.
 
 ### Data storage
 
