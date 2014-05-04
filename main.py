@@ -118,7 +118,10 @@ def addFile(src, filetype, manual):
 
     bibtex = checkBibtex(src, bibtex)
 
-    new_name = backend.getNewName(src, bibtex)
+    tag = tools.rawInput("Tag for this paper (leave empty for default) ? ")
+    bibtex['tag'] = tag
+
+    new_name = backend.getNewName(src, bibtex, tag)
 
     while os.path.exists(new_name):
         tools.warning("file "+new_name+" already exists.")
@@ -145,7 +148,7 @@ def addFile(src, filetype, manual):
     return new_name
 
 
-def editEntry(entry, file_id = 'both'):
+def editEntry(entry, file_id='both'):
     bibtex = backend.getBibtex(entry, file_id)
     if bibtex is False:
         tools.warning("Entry "+entry+" does not exist.")
@@ -154,8 +157,40 @@ def editEntry(entry, file_id = 'both'):
         filename = entry
     else:
         filename = bibtex['file']
-    bibtex = checkBibtex(filename, bibtex)
-    
+    new_bibtex = checkBibtex(filename, bibtex)
+
+    # Tag update
+    if new_bibtex['tag'] != bibtex['tag']:
+        print("Editing tag, moving file.")
+        new_name = backend.getNewName(new_bibtex['file'],
+                                      new_bibtex,
+                                      new_bibtex['tag'])
+
+        while os.path.exists(new_name):
+            tools.warning("file "+new_name+" already exists.")
+            default_rename = new_name.replace(tools.getExtension(new_name),
+                                              " (2)" +
+                                              tools.getExtension(new_name))
+            rename = tools.rawInput("New name ["+default_rename+"]? ")
+            if rename == '':
+                new_name = default_rename
+            else:
+                new_name = rename
+        new_bibtex['file'] = new_name
+
+        try:
+            shutil.move(bibtex['file'], new_bibtex['file'])
+        except:
+            raise Exception('Unable to move file '+bibtex['file']+' to ' +
+                            new_bibtex['file'] + ' according to tag edit.')
+
+        try:
+            if not os.listdir(os.path.dirname(bibtex['file'])):
+                os.rmdir(os.path.dirname(bibtex['file']))
+        except:
+            tools.warning("Unable to delete empty tag dir " +
+                          os.path.dirname(bibtex['file']))
+
     try:
         with open(params.folder+'index.bib', 'r') as fh:
             index = BibTexParser(fh.read(),
@@ -164,8 +199,8 @@ def editEntry(entry, file_id = 'both'):
     except:
         tools.warning("Unable to open index file.")
         return False
-    
-    index[bibtex['id']] = bibtex
+
+    index[new_bibtex['id']] = new_bibtex
     backend.bibtexRewrite(index)
     return True
 
@@ -275,6 +310,14 @@ def resync():
                 backend.deleteFile(entry['file'])
                 print(entry['file'] + " removed from disk and " +
                       "index.")
+    # Check for empty tag dirs
+    for i in os.listdir(params.folder):
+        if os.path.isdir(i) and not os.listdir(params.folder + i):
+            try:
+                os.rmdir(params.folder + i)
+            except:
+                tools.warning("Found empty tag dir "+params.folder + i +
+                              " but could not delete it.")
 
 
 if __name__ == '__main__':
@@ -309,22 +352,22 @@ if __name__ == '__main__':
                                help="a filename or an identifier")
     group = parser_delete.add_mutually_exclusive_group()
     group.add_argument('--id', action="store_true", default=False,
-                               help="id based deletion")
+                       help="id based deletion")
     group.add_argument('--file', action="store_true", default=False,
-                               help="file based deletion")
+                       help="file based deletion")
     parser_delete.add_argument('-f', '--force', default=False,
                                action='store_true',
                                help="delete without confirmation")
     parser_delete.set_defaults(func='delete')
-    
+
     parser_edit = subparsers.add_parser('edit', help="edit help")
     parser_edit.add_argument('entries', metavar='entry', nargs='+',
-                               help="a filename or an identifier")
+                             help="a filename or an identifier")
     group = parser_edit.add_mutually_exclusive_group()
     group.add_argument('--id', action="store_true", default=False,
-                               help="id based deletion")
+                       help="id based deletion")
     group.add_argument('--file', action="store_true", default=False,
-                               help="file based deletion")
+                       help="file based deletion")
     parser_edit.set_defaults(func='edit')
 
     parser_list = subparsers.add_parser('list', help="list help")

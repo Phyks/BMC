@@ -9,7 +9,7 @@ from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import homogeneize_latex_encoding
 
 
-def getNewName(src, bibtex):
+def getNewName(src, bibtex, tag=''):
     """
     Return the formatted name according to params for the given
     bibtex entry
@@ -35,7 +35,21 @@ def getNewName(src, bibtex):
     new_name = new_name.replace("%a", ', '.join([i.split(',')[0].strip()
                                                 for i in authors]))
 
-    new_name = params.folder+tools.slugify(new_name)+tools.getExtension(src)
+    if tag == '':
+        new_name = (params.folder + tools.slugify(new_name) +
+                    tools.getExtension(src))
+    else:
+        if not os.path.isdir(params.folder + tag):
+            try:
+                os.mkdir(params.folder + tag)
+            except:
+                tools.warning("Unable to create tag dir " +
+                              params.folder+tag+".")
+
+        new_name = (params.folder + tools.slugify(tag) +
+                    tools.slugify(new_name) + tools.getExtension(src))
+
+    return new_name
 
 
 def parsed2Bibtex(parsed):
@@ -113,6 +127,14 @@ def deleteId(ident):
     except:
         tools.warning("Unable to delete file associated to id "+ident+" : " +
                       bibtex[ident]['file'])
+
+    try:
+        if not os.listdir(os.path.dirname(bibtex[ident]['file'])):
+            os.rmdir(os.path.dirname(bibtex[ident]['file']))
+    except:
+        tools.warning("Unable to delete empty tag dir " +
+                      os.path.dirname(bibtex[ident]['file']))
+
     try:
         del(bibtex[ident])
         bibtexRewrite(bibtex)
@@ -142,6 +164,14 @@ def deleteFile(filename):
             except:
                 tools.warning("Unable to delete file associated to id " +
                               key+" : "+bibtex[key]['file'])
+
+            try:
+                if not os.listdir(os.path.dirname(filename)):
+                    os.rmdir(os.path.dirname(filename))
+            except:
+                tools.warning("Unable to delete empty tag dir " +
+                              os.path.dirname(filename))
+
             try:
                 del(bibtex[key])
             except KeyError:
@@ -181,7 +211,7 @@ def diffFilesIndex():
     return index
 
 
-def getBibtex(entry, file_id = 'both'):
+def getBibtex(entry, file_id='both'):
     """Returns the bibtex entry corresponding to entry, as a dict
 
     entry is either a filename or a bibtex ident
@@ -189,13 +219,13 @@ def getBibtex(entry, file_id = 'both'):
     """
     try:
         with open(params.folder+'index.bib', 'r') as fh:
-           bibtex = BibTexParser(fh.read(),
-                                 customization=homogeneize_latex_encoding)
+            bibtex = BibTexParser(fh.read(),
+                                  customization=homogeneize_latex_encoding)
         bibtex = bibtex.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")
         return False
-    
+
     bibtex_entry = False
     if file_id == 'both' or file_id == 'id':
         try:
@@ -204,7 +234,7 @@ def getBibtex(entry, file_id = 'both'):
             pass
     elif file_id == 'both' or file_id == 'file':
         for key in bibtex.keys():
-            if os.path.samepath(bibtex[key]['file'], filename):
+            if os.path.samepath(bibtex[key]['file'], entry):
                 bibtex_entry = bibtex[key]
                 break
     return bibtex_entry
