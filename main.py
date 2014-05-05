@@ -76,23 +76,24 @@ def addFile(src, filetype, manual):
             tools.warning("Could not determine the DOI nor the arXiv id nor " +
                           "the ISBN for "+src+"."+"Switching to manual entry.")
             doi_arxiv_isbn = ''
-            while doi_arxiv_isbn not in ['doi', 'arxiv', 'isbn']:
-                doi_arxiv_isbn = tools.rawInput("DOI / arXiv / ISBN? ").lower()
+            while doi_arxiv_isbn not in ['doi', 'arxiv', 'isbn', 'manual']:
+                doi_arxiv_isbn = tools.rawInput("DOI / arXiv " +
+                                                "/ ISBN / manual? ").lower()
             if doi_arxiv_isbn == 'doi':
                 doi = tools.rawInput('DOI? ')
             elif doi_arxiv_isbn == 'arxiv':
                 arxiv = tools.rawInput('arXiv id? ')
-            else:
+            elif doi_arxiv_isbn == 'isbn':
                 isbn = tools.rawInput('ISBN? ')
         elif filetype == 'article':
             tools.warning("Could not determine the DOI nor the arXiv id for " +
                           src+", switching to manual entry.")
             doi_arxiv = ''
-            while doi_arxiv not in ['doi', 'arxiv']:
-                doi_arxiv = tools.rawInput("DOI / arXiv? ").lower()
+            while doi_arxiv not in ['doi', 'arxiv', 'manual']:
+                doi_arxiv = tools.rawInput("DOI / arXiv / manual? ").lower()
             if doi_arxiv == 'doi':
                 doi = tools.rawInput('DOI? ')
-            else:
+            elif doi_arxiv == 'arxiv':
                 arxiv = tools.rawInput('arXiv id? ')
         elif filetype == 'book':
             tools.warning("Could not determine the ISBN for "+src +
