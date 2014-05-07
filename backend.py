@@ -263,7 +263,9 @@ def updateArXiv(entry):
         return False
 
     arxiv_id = bibtex['Eprint']
-    last_bibtex = BibTexParser(fetcher.arXiv2Bib(arxiv_id),
+    last_bibtex = BibTexParser(fetcher.arXiv2Bib(re.sub(r'v\d+\Z',
+                                                        '',
+                                                        arxiv_id)),
                                customization=homogeneize_latex_encoding)
     last_bibtex = last_bibtex.get_entry_dict()
 
