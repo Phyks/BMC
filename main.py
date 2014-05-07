@@ -31,6 +31,7 @@ def checkBibtex(filename, bibtex):
         bibtex_string = ''
     print(bibtex_string)
     check = tools.rawInput("Is it correct? [Y/n] ")
+    old_filename = bibtex['file']
 
     while check.lower() == 'n':
         with tempfile.NamedTemporaryFile(suffix=".tmp") as tmpfile:
@@ -41,15 +42,26 @@ def checkBibtex(filename, bibtex):
                                   customization=homogeneize_latex_encoding)
 
         bibtex = bibtex.get_entry_dict()
-        if len(bibtex) > 0:
-            bibtex_name = bibtex.keys()[0]
-            bibtex = bibtex[bibtex_name]
-            bibtex_string = backend.parsed2Bibtex(bibtex)
+        if 'file' not in bibtex:
+            tools.warning("Invalid bibtex entry. No filename given.")
+            tools.rawInput("Press Enter to go back to editor.")
+            check = 'n'
         else:
-            bibtex_string = ''
-        print("\nThe bibtex entry for "+filename+" is:")
-        print(bibtex_string)
-        check = tools.rawInput("Is it correct? [Y/n] ")
+            if len(bibtex) > 0:
+                bibtex_name = bibtex.keys()[0]
+                bibtex = bibtex[bibtex_name]
+                bibtex_string = backend.parsed2Bibtex(bibtex)
+            else:
+                bibtex_string = ''
+            print("\nThe bibtex entry for "+filename+" is:")
+            print(bibtex_string)
+            check = tools.rawInput("Is it correct? [Y/n] ")
+    if old_filename != bibtex['file']:
+        try:
+            shutil.move(old_filename, bibtex['file'])
+        except:
+            tools.warning("Unable to move file "+old_filename+" to " +
+                          bibtex['file']+". You should check it manually.")
     return bibtex
 
 
