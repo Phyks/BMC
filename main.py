@@ -321,6 +321,14 @@ def resync():
                               " but could not delete it.")
 
 
+def update(entries):
+    update = backend.updateArXiv(entry)
+    if update is not False:
+        print("New version found for "+entry)
+        print("Downloaded latest version "+update['Eprint'])
+        editEntry(update['file'], 'file')
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="A bibliography " +
                                      "management tool.")
@@ -384,6 +392,11 @@ if __name__ == '__main__':
 
     parser_resync = subparsers.add_parser('resync', help="resync help")
     parser_resync.set_defaults(func='resync')
+
+    parser_update = subparsers.add_parser('update', help="update help")
+    parser_delete.add_argument('--entries', metavar='entry', nargs='+',
+                               help="a filename or an identifier")
+    parser_update.set_defaults(func='update')
 
     args = parser.parse_args()
     try:
@@ -452,6 +465,15 @@ if __name__ == '__main__':
             confirm = tools.rawInput("Resync files and bibtex index? [y/N] ")
             if confirm.lower() == 'y':
                 resync()
+            sys.exit()
+
+        elif args.func == 'update':
+            if args.entries is None:
+                entries = backend.getEntries()
+            else:
+                entries = args.entries
+            for entry in entries:
+                update(entry)
             sys.exit()
 
     except KeyboardInterrupt:

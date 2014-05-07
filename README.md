@@ -66,10 +66,13 @@ TODO
 
 TODO
 
-
 ### Edit entries
 
 Run `./main.py edit PARAM` where `PARAM` should be either a path to a paper file or an ident in the bibtex index. This will open a text editor to edit the corresponding bibtex entry.
+
+### Download the latest version for papers from arXiv
+
+Run `./main.py update` to look for available updated versions of your arXiv papers. You can use the optionnal `--entries ID` argument (where ID is either a bibtex index identifier or a filename) to search only for a limited subset of papers.
 
 ### Data storage
 
@@ -107,10 +110,11 @@ Here are some sources of inspirations for this project :
 
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
-60. Automatic download of new arXiv version
+65. Look for published version in arXiv
 70. No DOI for HAL => metadata with SOAP API… don't want to handle it for now :/
 80. Search engine
-90. Webserver interface
+100. UTF-8 ?
+200. Webserver interface ? GUI ? (not likely for now…)
 
 ## Issues ?
 

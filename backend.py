@@ -4,6 +4,7 @@
 import os
 import re
 import tools
+import fetcher
 import params
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import homogeneize_latex_encoding
@@ -238,3 +239,42 @@ def getBibtex(entry, file_id='both'):
                 bibtex_entry = bibtex[key]
                 break
     return bibtex_entry
+
+
+def getEntries():
+    """Returns the list of all entries in the bibtex index"""
+    try:
+        with open(params.folder+'index.bib', 'r') as fh:
+            bibtex = BibTexParser(fh.read(),
+                                  customization=homogeneize_latex_encoding)
+        bibtex = bibtex.get_entry_dict()
+    except:
+        tools.warning("Unable to open index file.")
+        return False
+
+    return bibtex.keys()
+
+
+def updateArXiv(entry):
+    bibtex = getBibtex(entry)
+    # Check arXiv
+    if('ArchivePrefix' not in bibtex and
+       'arxiv' not in bibtex['ArchivePrefix']):
+        return False
+
+    arxiv_id = bibtex['Eprint']
+    last_bibtex = BibTexParser(fetcher.arXiv2Bib(arxiv_id),
+                               customization=homogeneize_latex_encoding)
+    last_bibtex = last_bibtex.get_entry_dict()
+
+    if last_bibtex['Eprint'] != arxiv_id:
+        # New version available
+        with open(bibtex['file'], 'w+') as fh:
+            fh.write(fetcher.download(last_bibtex['Url']))
+        bibtex['Eprint'] = last_bibtex['Eprint']
+        bibtex['URL'] = last_bibtex['URL']
+        for i in [j for j in last_bibtex.keys() if j not in bibtex.keys()]:
+            bibtex[i] = last_bibtex[i]
+        return last_bibtex
+    else:
+        return False
