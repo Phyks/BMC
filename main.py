@@ -21,7 +21,8 @@ EDITOR = os.environ.get('EDITOR') if os.environ.get('EDITOR') else 'vim'
 def checkBibtex(filename, bibtex):
     print("The bibtex entry found for "+filename+" is:")
 
-    bibtex = BibTexParser(bibtex, customization=homogeneize_latex_encoding)
+    bibtex = BibTexParser(bibtex.encode('utf-8'),
+                          customization=homogeneize_latex_encoding)
     bibtex = bibtex.get_entry_dict()
     if len(bibtex) > 0:
         bibtex_name = bibtex.keys()[0]
@@ -31,18 +32,22 @@ def checkBibtex(filename, bibtex):
         bibtex_string = ''
     print(bibtex_string)
     check = tools.rawInput("Is it correct? [Y/n] ")
-    old_filename = bibtex['file']
+    try:
+        old_filename = bibtex['file']
+    except:
+        old_filename = False
 
     while check.lower() == 'n':
         with tempfile.NamedTemporaryFile(suffix=".tmp") as tmpfile:
-            tmpfile.write(bibtex_string)
+            tmpfile.write(bibtex_string.encode('utf-8'))
             tmpfile.flush()
             subprocess.call([EDITOR, tmpfile.name])
-            bibtex = BibTexParser(tmpfile.read()+"\n",
+            tmpfile.seek(0)
+            bibtex = BibTexParser(tmpfile.read().encode('utf-8')+"\n",
                                   customization=homogeneize_latex_encoding)
 
         bibtex = bibtex.get_entry_dict()
-        if 'file' not in bibtex:
+        if old_filename is not False and 'file' not in bibtex:
             tools.warning("Invalid bibtex entry. No filename given.")
             tools.rawInput("Press Enter to go back to editor.")
             check = 'n'
@@ -56,7 +61,7 @@ def checkBibtex(filename, bibtex):
             print("\nThe bibtex entry for "+filename+" is:")
             print(bibtex_string)
             check = tools.rawInput("Is it correct? [Y/n] ")
-    if old_filename != bibtex['file']:
+    if old_filename is not False and old_filename != bibtex['file']:
         try:
             shutil.move(old_filename, bibtex['file'])
         except:
@@ -206,7 +211,7 @@ def editEntry(entry, file_id='both'):
 
     try:
         with open(params.folder+'index.bib', 'r') as fh:
-            index = BibTexParser(fh.read(),
+            index = BibTexParser(fh.read().encode('utf-8'),
                                  customization=homogeneize_latex_encoding)
         index = index.get_entry_dict()
     except:
@@ -225,7 +230,7 @@ def downloadFile(url, filetype, manual):
         tmp = tempfile.NamedTemporaryFile(suffix='.'+contenttype)
 
         with open(tmp.name, 'w+') as fh:
-            fh.write(dl)
+            fh.write(dl.encode('utf-8'))
         new_name = addFile(tmp.name, filetype, manual)
         tmp.close()
         return new_name
@@ -237,7 +242,7 @@ def downloadFile(url, filetype, manual):
 def openFile(ident):
     try:
         with open(params.folder+'index.bib', 'r') as fh:
-            bibtex = BibTexParser(fh.read(),
+            bibtex = BibTexParser(fh.read().encode('utf-8'),
                                   customization=homogeneize_latex_encoding)
         bibtex = bibtex.get_entry_dict()
     except:
@@ -409,6 +414,12 @@ if __name__ == '__main__':
     parser_delete.add_argument('--entries', metavar='entry', nargs='+',
                                help="a filename or an identifier")
     parser_update.set_defaults(func='update')
+
+    parser_search = subparsers.add_parser('search', help="search help")
+    # TODO: Check
+    parser_delete.add_argument('query', metavar='entry', nargs='+',
+                               help="your query, see README for more info.")
+    parser_search.set_defaults(func='search')
 
     args = parser.parse_args()
     try:

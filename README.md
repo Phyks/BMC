@@ -110,6 +110,7 @@ Here are some sources of inspirations for this project :
 
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
+50. Anti-duplicate ?
 65. Look for published version in arXiv
 70. No DOI for HAL => metadata with SOAP API… don't want to handle it for now :/
 80. Search engine
@@ -118,10 +119,10 @@ A list of ideas and TODO. Don't hesitate to give feedback on the ones you really
 
 ## Issues ?
 
-* Remove the watermarks on pdf files => done, some warning in okular on generated pdf, but seems ok. Seems to be a bug in Okular.
-
+* Multiplication of {{}}
 
 ## Thanks
 
 * Nathan Grigg for his [arxiv2bib](https://pypi.python.org/pypi/arxiv2bib/1.0.5#downloads) python module
 * François Boulogne for his [python-bibtexparser](https://github.com/sciunto/python-bibtexparser) python module and his integration of new requested features
+* pyparsing [search parser example](http://pyparsing.wikispaces.com/file/view/searchparser.py)

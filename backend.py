@@ -47,7 +47,7 @@ def getNewName(src, bibtex, tag=''):
                 tools.warning("Unable to create tag dir " +
                               params.folder+tag+".")
 
-        new_name = (params.folder + tools.slugify(tag) +
+        new_name = (params.folder + tools.slugify(tag) + '/' +
                     tools.slugify(new_name) + tools.getExtension(src))
 
     return new_name
@@ -256,6 +256,11 @@ def getEntries():
 
 
 def updateArXiv(entry):
+    """Look for new versions of arXiv entry `entry`
+
+    Returns False if no new versions or not an arXiv entry,
+    Updates the file and returns the new bibtex otherwise.
+    """
     bibtex = getBibtex(entry)
     # Check arXiv
     if('ArchivePrefix' not in bibtex and
@@ -280,3 +285,11 @@ def updateArXiv(entry):
         return last_bibtex
     else:
         return False
+
+
+def search(query):
+    """Performs a search in the bibtex index.
+
+    Param: query is a dict of keys and the query for these keys
+    """
+    raise Exception('TODO')

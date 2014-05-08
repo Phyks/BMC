@@ -39,12 +39,13 @@ def replaceAll(text, dic):
 def rawInput(string):
     """Flush stdin and then prompt the user for something"""
     tcflush(sys.stdin, TCIOFLUSH)
-    return raw_input(string)
+    return raw_input(string).decode('utf-8')
 
 
 def warning(*objs):
     """Write warnings to stderr"""
-    print("WARNING: ", *objs, file=sys.stderr)
+    printed = [i.encode('utf-8') for i in objs]
+    print("WARNING: ", *printed, file=sys.stderr)
 
 
 def listDir(path):
