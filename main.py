@@ -417,13 +417,13 @@ if __name__ == '__main__':
     parser_resync.set_defaults(func='resync')
 
     parser_update = subparsers.add_parser('update', help="update help")
-    parser_delete.add_argument('--entries', metavar='entry', nargs='+',
+    parser_update.add_argument('--entries', metavar='entry', nargs='+',
                                help="a filename or an identifier")
     parser_update.set_defaults(func='update')
 
     parser_search = subparsers.add_parser('search', help="search help")
     # TODO: Check
-    parser_delete.add_argument('query', metavar='entry', nargs='+',
+    parser_search.add_argument('query', metavar='entry', nargs='+',
                                help="your query, see README for more info.")
     parser_search.set_defaults(func='search')
 

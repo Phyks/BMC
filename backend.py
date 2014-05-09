@@ -159,26 +159,26 @@ def deleteFile(filename):
 
     found = False
     for key in bibtex.keys():
-        if os.path.samepath(bibtex[key]['file'], filename):
+        if os.path.samefile(bibtex[key]['file'], filename):
             found = True
             try:
                 os.remove(bibtex[key]['file'])
             except:
                 tools.warning("Unable to delete file associated to id " +
-                              key+" : "+bibtex[key]['file'])
+                            key+" : "+bibtex[key]['file'])
 
             try:
                 if not os.listdir(os.path.dirname(filename)):
                     os.rmdir(os.path.dirname(filename))
             except:
                 tools.warning("Unable to delete empty tag dir " +
-                              os.path.dirname(filename))
+                            os.path.dirname(filename))
 
             try:
                 del(bibtex[key])
             except KeyError:
-                tools.warning("No associated bibtex entry in index for file " +
-                              bibtex[key]['file'])
+                tools.warning("No associated bibtex entry in index for " +
+                                "file " + bibtex[key]['file'])
     if found:
         bibtexRewrite(bibtex)
     return found
@@ -236,7 +236,7 @@ def getBibtex(entry, file_id='both'):
             pass
     elif file_id == 'both' or file_id == 'file':
         for key in bibtex.keys():
-            if os.path.samepath(bibtex[key]['file'], entry):
+            if os.path.samefile(bibtex[key]['file'], entry):
                 bibtex_entry = bibtex[key]
                 break
     return bibtex_entry

@@ -123,6 +123,8 @@ Tree à la docear ?
 ## Issues ?
 
 * Multiplication of {{}} => solved in bibtexparser
+* UTF-8 and bibtexparser => solved upstream
+* delete
 
 ## Thanks
 
