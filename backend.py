@@ -8,6 +8,7 @@ import fetcher
 import params
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import homogeneize_latex_encoding
+from codecs import open
 
 
 def getNewName(src, bibtex, tag=''):
@@ -69,7 +70,7 @@ def bibtexAppend(data):
     data is a dict for one entry in bibtex, as the one from bibtexparser output
     """
     try:
-        with open(params.folder+'index.bib', 'a') as fh:
+        with open(params.folder+'index.bib', 'a', encoding='utf-8') as fh:
             fh.write(parsed2Bibtex(data)+"\n")
     except:
         tools.warning("Unable to open index file.")
@@ -80,7 +81,7 @@ def bibtexEdit(ident, modifs):
     """Update ident key in bibtex file, modifications are in modifs dict"""
 
     try:
-        with open(params.folder+'index.bib', 'r') as fh:
+        with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
             bibtex = BibTexParser(fh.read(),
                                   customization=homogeneize_latex_encoding)
         bibtex = bibtex.get_entry_dict()
@@ -102,7 +103,7 @@ def bibtexRewrite(data):
     for entry in data.keys():
         bibtex += parsed2Bibtex(data[entry])+"\n"
     try:
-        with open(params.folder+'index.bib', 'w') as fh:
+        with open(params.folder+'index.bib', 'w', encoding='utf-8') as fh:
             fh.write(bibtex)
     except:
         tools.warning("Unable to open index file.")
@@ -112,7 +113,7 @@ def bibtexRewrite(data):
 def deleteId(ident):
     """Delete a file based on its id in the bibtex file"""
     try:
-        with open(params.folder+'index.bib', 'r') as fh:
+        with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
             bibtex = BibTexParser(fh.read(),
                                   customization=homogeneize_latex_encoding)
         bibtex = bibtex.get_entry_dict()
@@ -148,7 +149,7 @@ def deleteId(ident):
 def deleteFile(filename):
     """Delete a file based on its filename"""
     try:
-        with open(params.folder+'index.bib', 'r') as fh:
+        with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
             bibtex = BibTexParser(fh.read(),
                                   customization=homogeneize_latex_encoding)
         bibtex = bibtex.get_entry_dict()
@@ -192,7 +193,7 @@ def diffFilesIndex():
     """
     files = tools.listDir(params.folder)
     try:
-        with open(params.folder+'index.bib', 'r') as fh:
+        with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
             index = BibTexParser(fh.read(),
                                  customization=homogeneize_latex_encoding)
         index_diff = index.get_entry_dict()
@@ -219,7 +220,7 @@ def getBibtex(entry, file_id='both'):
     file_id is file or id or both to search for a file / id / both
     """
     try:
-        with open(params.folder+'index.bib', 'r') as fh:
+        with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
             bibtex = BibTexParser(fh.read(),
                                   customization=homogeneize_latex_encoding)
         bibtex = bibtex.get_entry_dict()
@@ -244,7 +245,7 @@ def getBibtex(entry, file_id='both'):
 def getEntries():
     """Returns the list of all entries in the bibtex index"""
     try:
-        with open(params.folder+'index.bib', 'r') as fh:
+        with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
             bibtex = BibTexParser(fh.read(),
                                   customization=homogeneize_latex_encoding)
         bibtex = bibtex.get_entry_dict()

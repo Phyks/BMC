@@ -116,10 +116,13 @@ A list of ideas and TODO. Don't hesitate to give feedback on the ones you really
 80. Search engine
 100. UTF-8 ?
 200. Webserver interface ? GUI ? (not likely for now…)
+Keep multiple versions of papers
+Export of bibtex
+Tree à la docear ?
 
 ## Issues ?
 
-* Multiplication of {{}}
+* Multiplication of {{}} => solved in bibtexparser
 
 ## Thanks
 

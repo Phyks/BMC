@@ -35,7 +35,7 @@ def download(url):
 
             return r.content, contenttype
         except requests.exceptions.RequestException:
-            tools.warning("Unable to get "+url+" using roxy "+proxy+". It " +
+            tools.warning("Unable to get "+url+" using proxy "+proxy+". It " +
                           "may not be available.")
             continue
     return False

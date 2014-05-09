@@ -14,6 +14,7 @@ import tools
 import params
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import homogeneize_latex_encoding
+from codecs import open
 
 EDITOR = os.environ.get('EDITOR') if os.environ.get('EDITOR') else 'vim'
 
@@ -159,8 +160,11 @@ def addFile(src, filetype, manual):
         sys.exit("Unable to move file to library dir " + params.folder+".")
 
     # Remove first page of IOP papers
-    if 'IOP' in bibtex['publisher'] and bibtex['type'] == 'article':
-        tearpages.tearpage(new_name)
+    try:
+        if 'IOP' in bibtex['publisher'] and bibtex['type'] == 'article':
+            tearpages.tearpage(new_name)
+    except:
+        pass
 
     backend.bibtexAppend(bibtex)
     return new_name
@@ -210,8 +214,8 @@ def editEntry(entry, file_id='both'):
                           os.path.dirname(bibtex['file']))
 
     try:
-        with open(params.folder+'index.bib', 'r') as fh:
-            index = BibTexParser(fh.read().encode('utf-8'),
+        with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
+            index = BibTexParser(fh.read(),
                                  customization=homogeneize_latex_encoding)
         index = index.get_entry_dict()
     except:
@@ -224,13 +228,15 @@ def editEntry(entry, file_id='both'):
 
 
 def downloadFile(url, filetype, manual):
+    print('Downloading '+url)
     dl, contenttype = fetcher.download(url)
 
     if dl is not False:
+        print('Download finished')
         tmp = tempfile.NamedTemporaryFile(suffix='.'+contenttype)
 
         with open(tmp.name, 'w+') as fh:
-            fh.write(dl.encode('utf-8'))
+            fh.write(dl)
         new_name = addFile(tmp.name, filetype, manual)
         tmp.close()
         return new_name
@@ -241,8 +247,8 @@ def downloadFile(url, filetype, manual):
 
 def openFile(ident):
     try:
-        with open(params.folder+'index.bib', 'r') as fh:
-            bibtex = BibTexParser(fh.read().encode('utf-8'),
+        with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
+            bibtex = BibTexParser(fh.read(),
                                   customization=homogeneize_latex_encoding)
         bibtex = bibtex.get_entry_dict()
     except:
