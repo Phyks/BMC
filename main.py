@@ -466,7 +466,7 @@ if __name__ == '__main__':
                     print(filename+" successfully deleted.")
             sys.exit()
 
-        elif args.fund == 'edit':
+        elif args.func == 'edit':
             for filename in args.entries:
                 if args.file:
                     file_id = 'file'
