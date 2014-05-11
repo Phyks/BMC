@@ -22,8 +22,7 @@ EDITOR = os.environ.get('EDITOR') if os.environ.get('EDITOR') else 'vim'
 def checkBibtex(filename, bibtex):
     print("The bibtex entry found for "+filename+" is:")
 
-    bibtex = BibTexParser(bibtex.encode('utf-8'),
-                          customization=homogeneize_latex_encoding)
+    bibtex = BibTexParser(bibtex.encode('utf-8'))
     bibtex = bibtex.get_entry_dict()
     if len(bibtex) > 0:
         bibtex_name = bibtex.keys()[0]
@@ -44,8 +43,7 @@ def checkBibtex(filename, bibtex):
             tmpfile.flush()
             subprocess.call([EDITOR, tmpfile.name])
             tmpfile.seek(0)
-            bibtex = BibTexParser(tmpfile.read().encode('utf-8')+"\n",
-                                  customization=homogeneize_latex_encoding)
+            bibtex = BibTexParser(tmpfile.read().encode('utf-8')+"\n")
 
         bibtex = bibtex.get_entry_dict()
         if old_filename is not False and 'file' not in bibtex:
@@ -215,8 +213,7 @@ def editEntry(entry, file_id='both'):
 
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
-            index = BibTexParser(fh.read(),
-                                 customization=homogeneize_latex_encoding)
+            index = BibTexParser(fh.read())
         index = index.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")
@@ -248,8 +245,7 @@ def downloadFile(url, filetype, manual):
 def openFile(ident):
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
-            bibtex = BibTexParser(fh.read(),
-                                  customization=homogeneize_latex_encoding)
+            bibtex = BibTexParser(fh.read())
         bibtex = bibtex.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")

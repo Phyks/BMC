@@ -82,8 +82,7 @@ def bibtexEdit(ident, modifs):
 
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
-            bibtex = BibTexParser(fh.read(),
-                                  customization=homogeneize_latex_encoding)
+            bibtex = BibTexParser(fh.read())
         bibtex = bibtex.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")
@@ -114,8 +113,7 @@ def deleteId(ident):
     """Delete a file based on its id in the bibtex file"""
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
-            bibtex = BibTexParser(fh.read(),
-                                  customization=homogeneize_latex_encoding)
+            bibtex = BibTexParser(fh.read())
         bibtex = bibtex.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")
@@ -150,8 +148,7 @@ def deleteFile(filename):
     """Delete a file based on its filename"""
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
-            bibtex = BibTexParser(fh.read(),
-                                  customization=homogeneize_latex_encoding)
+            bibtex = BibTexParser(fh.read())
         bibtex = bibtex.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")
@@ -159,26 +156,29 @@ def deleteFile(filename):
 
     found = False
     for key in bibtex.keys():
-        if os.path.samefile(bibtex[key]['file'], filename):
-            found = True
-            try:
-                os.remove(bibtex[key]['file'])
-            except:
-                tools.warning("Unable to delete file associated to id " +
-                            key+" : "+bibtex[key]['file'])
+        try:
+            if os.path.samefile(bibtex[key]['file'], filename):
+                found = True
+                try:
+                    os.remove(bibtex[key]['file'])
+                except:
+                    tools.warning("Unable to delete file associated to id " +
+                                key+" : "+bibtex[key]['file'])
 
-            try:
-                if not os.listdir(os.path.dirname(filename)):
-                    os.rmdir(os.path.dirname(filename))
-            except:
-                tools.warning("Unable to delete empty tag dir " +
-                            os.path.dirname(filename))
+                try:
+                    if not os.listdir(os.path.dirname(filename)):
+                        os.rmdir(os.path.dirname(filename))
+                except:
+                    tools.warning("Unable to delete empty tag dir " +
+                                os.path.dirname(filename))
 
-            try:
-                del(bibtex[key])
-            except KeyError:
-                tools.warning("No associated bibtex entry in index for " +
-                                "file " + bibtex[key]['file'])
+                try:
+                    del(bibtex[key])
+                except KeyError:
+                    tools.warning("No associated bibtex entry in index for " +
+                                    "file " + bibtex[key]['file'])
+        except:
+            pass
     if found:
         bibtexRewrite(bibtex)
     return found
@@ -194,8 +194,7 @@ def diffFilesIndex():
     files = tools.listDir(params.folder)
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
-            index = BibTexParser(fh.read(),
-                                 customization=homogeneize_latex_encoding)
+            index = BibTexParser(fh.read())
         index_diff = index.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")
@@ -221,8 +220,7 @@ def getBibtex(entry, file_id='both'):
     """
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
-            bibtex = BibTexParser(fh.read(),
-                                  customization=homogeneize_latex_encoding)
+            bibtex = BibTexParser(fh.read())
         bibtex = bibtex.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")
@@ -246,8 +244,7 @@ def getEntries():
     """Returns the list of all entries in the bibtex index"""
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
-            bibtex = BibTexParser(fh.read(),
-                                  customization=homogeneize_latex_encoding)
+            bibtex = BibTexParser(fh.read())
         bibtex = bibtex.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")
@@ -271,8 +268,7 @@ def updateArXiv(entry):
     arxiv_id = bibtex['Eprint']
     last_bibtex = BibTexParser(fetcher.arXiv2Bib(re.sub(r'v\d+\Z',
                                                         '',
-                                                        arxiv_id)),
-                               customization=homogeneize_latex_encoding)
+                                                        arxiv_id)))
     last_bibtex = last_bibtex.get_entry_dict()
 
     if last_bibtex['Eprint'] != arxiv_id:
