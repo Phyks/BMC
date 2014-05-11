@@ -54,16 +54,6 @@ def getNewName(src, bibtex, tag=''):
     return new_name
 
 
-def parsed2Bibtex(parsed):
-    """Convert a single bibtex entry dict to bibtex string"""
-    bibtex = '@'+parsed['type']+'{'+parsed['id']+",\n"
-
-    for field in [i for i in sorted(parsed) if i not in ['type', 'id']]:
-        bibtex += "\t"+field+"={"+parsed[field]+"},\n"
-    bibtex += "}\n\n"
-    return bibtex
-
-
 def bibtexAppend(data):
     """Append data to the main bibtex file
 
@@ -71,7 +61,7 @@ def bibtexAppend(data):
     """
     try:
         with open(params.folder+'index.bib', 'a', encoding='utf-8') as fh:
-            fh.write(parsed2Bibtex(data)+"\n")
+            fh.write(tools.parsed2Bibtex(data)+"\n")
     except:
         tools.warning("Unable to open index file.")
         return False
@@ -100,7 +90,7 @@ def bibtexRewrite(data):
     """
     bibtex = ''
     for entry in data.keys():
-        bibtex += parsed2Bibtex(data[entry])+"\n"
+        bibtex += tools.parsed2Bibtex(data[entry])+"\n"
     try:
         with open(params.folder+'index.bib', 'w', encoding='utf-8') as fh:
             fh.write(bibtex)
@@ -113,7 +103,7 @@ def deleteId(ident):
     """Delete a file based on its id in the bibtex file"""
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
-            bibtex = BibTexParser(fh.read())
+            bibtex = BibTexParser(fh.read().decode('utf-8'))
         bibtex = bibtex.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")
@@ -148,7 +138,7 @@ def deleteFile(filename):
     """Delete a file based on its filename"""
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
-            bibtex = BibTexParser(fh.read())
+            bibtex = BibTexParser(fh.read().decode('utf-8'))
         bibtex = bibtex.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")

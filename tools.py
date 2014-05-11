@@ -24,6 +24,16 @@ def slugify(value):
     return _slugify_hyphenate_re.sub('_', value)
 
 
+def parsed2Bibtex(parsed):
+    """Convert a single bibtex entry dict to bibtex string"""
+    bibtex = '@'+parsed['type']+'{'+parsed['id']+",\n"
+
+    for field in [i for i in sorted(parsed) if i not in ['type', 'id']]:
+        bibtex += "\t"+field+"={"+parsed[field]+"},\n"
+    bibtex += "}\n\n"
+    return bibtex
+
+
 def getExtension(filename):
     """Get the extension of filename"""
     return filename[filename.rfind('.'):]

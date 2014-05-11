@@ -31,6 +31,13 @@ Should be almost working and usable now, although still to be considered as **ex
 **Important note :** I use it for personal use, but I don't read articles from many journals. If you find any file which is not working, please fill an issue or send me an e-mail with the relevant information. There are alternative ways to get the metadata for example, and I didn't know really which one was the best one as writing this code.
 
 
+* Import
+    * working : all (file / tags / bibtex modification / bibtex retrieval / remove watermark pages)
+* Download
+    * working : all
+* Delete
+    * working : all (by file and by id)
+
 ## Installation
 
 * Clone this git repository where you want : `git clone https://github.com/Phyks/BMC`
@@ -123,8 +130,8 @@ Tree à la docear ?
 ## Issues ?
 
 * Multiplication of {{}} => solved in bibtexparser
-* UTF-8 and bibtexparser => solved upstream
-* delete / edit => problem with filename encoding
+* UTF-8 and bibtexparser => solved upstream in bibtexparser
+===> TODO : update bibtexparser when available in pip
 
 ## Thanks
 

@@ -27,7 +27,7 @@ def checkBibtex(filename, bibtex):
     if len(bibtex) > 0:
         bibtex_name = bibtex.keys()[0]
         bibtex = bibtex[bibtex_name]
-        bibtex_string = backend.parsed2Bibtex(bibtex)
+        bibtex_string = tools.parsed2Bibtex(bibtex)
     else:
         bibtex_string = ''
     print(bibtex_string)
@@ -54,7 +54,7 @@ def checkBibtex(filename, bibtex):
             if len(bibtex) > 0:
                 bibtex_name = bibtex.keys()[0]
                 bibtex = bibtex[bibtex_name]
-                bibtex_string = backend.parsed2Bibtex(bibtex)
+                bibtex_string = tools.parsed2Bibtex(bibtex)
             else:
                 bibtex_string = ''
             print("\nThe bibtex entry for "+filename+" is:")
@@ -80,17 +80,17 @@ def addFile(src, filetype, manual):
     if not manual:
         if filetype == 'article' or filetype is None:
             doi = fetcher.findDOI(src)
-        if (filetype == 'article' or filetype is None) and doi is False:
+        if doi is False and (filetype == 'article' or filetype is None):
             arxiv = fetcher.findArXivId(src)
 
-        if filetype == 'book' or (filetype is None and doi is False and
-                                  arxiv is False):
+        if filetype == 'book' or (doi is False and arxiv is False and
+                                  filetype is None):
             isbn = fetcher.findISBN(src)
 
     if doi is False and isbn is False and arxiv is False:
         if filetype is None:
             tools.warning("Could not determine the DOI nor the arXiv id nor " +
-                          "the ISBN for "+src+"."+"Switching to manual entry.")
+                          "the ISBN for "+src+". Switching to manual entry.")
             doi_arxiv_isbn = ''
             while doi_arxiv_isbn not in ['doi', 'arxiv', 'isbn', 'manual']:
                 doi_arxiv_isbn = tools.rawInput("DOI / arXiv " +

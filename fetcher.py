@@ -8,6 +8,8 @@ import subprocess
 import arxiv2bib as arxiv_metadata
 import tools
 import params
+from bibtexparser.bparser import BibTexParser
+from isbntools.dev.fmt import fmtbib
 
 
 def download(url):
@@ -41,7 +43,8 @@ def download(url):
     return False
 
 
-isbn_re = re.compile(r"isbn (([0-9]{3}[ -])?[0-9][ -][0-9]{2}[ -][0-9]{6}[-][0-9])")
+isbn_re = re.compile(r"isbn (([0-9]{3}[ -])?[0-9][ -][0-9]{2}[ -][0-9]{6}[ -][0-9])",
+                    re.IGNORECASE)
 
 
 def findISBN(src):
@@ -84,17 +87,13 @@ def findISBN(src):
 
 def isbn2Bib(isbn):
     """Tries to get bibtex entry from an ISBN number"""
-    try:
-        # Default merges results from worldcat.org and google books
-        return isbntools.dev.fmt.fmtbib('bibtex',
-                                        isbntools.meta(isbn, 'default'))
-    except:
-        return ''
+    # Default merges results from worldcat.org and google books
+    return fmtbib('bibtex', isbntools.meta(isbn, 'default'))
 
 
-doi_re = re.compile('(?<=doi)/?:?\s?[0-9\.]{7}/\S*[0-9]')
-doi_pnas_re = re.compile('(?<=doi).?10.1073/pnas\.\d+')
-doi_jsb_re = re.compile('10\.1083/jcb\.\d{9}')
+doi_re = re.compile('(?<=doi)/?:?\s?[0-9\.]{7}/\S*[0-9]', re.IGNORECASE)
+doi_pnas_re = re.compile('(?<=doi).?10.1073/pnas\.\d+', re.IGNORECASE)
+doi_jsb_re = re.compile('10\.1083/jcb\.\d{9}', re.IGNORECASE)
 clean_doi_re = re.compile('^/')
 clean_doi_fabse_re = re.compile('^10.1096')
 clean_doi_jcb_re = re.compile('^10.1083')
@@ -183,7 +182,7 @@ def doi2Bib(doi):
         return ''
 
 
-arXiv_re = re.compile(r'arXiv:\s*([\w\.\/\-]+)')
+arXiv_re = re.compile(r'arXiv:\s*([\w\.\/\-]+)', re.IGNORECASE)
 
 
 def findArXivId(src):
@@ -215,8 +214,10 @@ def findArXivId(src):
         # Error happened
         tools.warning(err)
         return False
-    else:
+    elif extractID is not None:
         return extractID.group(1)
+    else:
+        return False
 
 
 def arXiv2Bib(arxiv):
@@ -229,7 +230,14 @@ def arXiv2Bib(arxiv):
         if isinstance(bib, arxiv_metadata.ReferenceErrorInfo):
             continue
         else:
-            return bib.bibtex()
+            fetched_bibtex = BibTexParser(bib.bibtex())
+            fetched_bibtex = fetched_bibtex.get_entry_dict()
+            fetched_bibtex = fetched_bibtex[fetched_bibtex.keys()[0]]
+            try:
+                del(fetched_bibtex['file'])
+            except:
+                pass
+            return tools.parsed2Bibtex(fetched_bibtex)
     return False
 
 
