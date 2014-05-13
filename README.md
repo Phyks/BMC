@@ -32,11 +32,21 @@ Should be almost working and usable now, although still to be considered as **ex
 
 
 * Import
-    * working : all (file / tags / bibtex modification / bibtex retrieval / remove watermark pages)
+    * working: all (file / tags / bibtex modification / bibtex retrieval / remove watermark pages)
 * Download
-    * working : all
+    * working: all
 * Delete
-    * working : all (by file and by id)
+    * working: all (by file and by id)
+* List
+    * TODO
+* Search
+    * TODO
+* Open
+    * working: all
+* Resync
+    * Testing
+* Update
+    * Testing
 
 ## Installation
 

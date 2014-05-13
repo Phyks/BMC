@@ -245,7 +245,7 @@ def downloadFile(url, filetype, manual):
 def openFile(ident):
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
-            bibtex = BibTexParser(fh.read())
+            bibtex = BibTexParser(fh.read().encode('utf-8'))
         bibtex = bibtex.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")
