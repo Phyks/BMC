@@ -5,6 +5,7 @@ import isbntools
 import re
 import requesocks as requests  # Requesocks is requests with SOCKS support
 import subprocess
+import sys
 import arxiv2bib as arxiv_metadata
 import tools
 import params
@@ -26,6 +27,17 @@ def download(url):
         }
         try:
             r = requests.get(url, proxies=r_proxy)
+            size = int(r.headers['Content-Length'].strip())
+            dl = ""
+            dl_size = 0
+            for buf in r.iter_content(1024):
+                if buf:
+                    dl += buf
+                    dl_size += len(buf)
+                    done = int(50 * dl_size / size)
+                    sys.stdout.write("\r[%s%s]"%('='*done,' '*(50-done)))
+                    sys.stdout.write(" "+str(int(float(done)/52*100))+"%")
+                    sys.stdout.flush()
             contenttype = False
             if 'pdf' in r.headers['content-type']:
                 contenttype = 'pdf'
@@ -35,7 +47,7 @@ def download(url):
             if r.status_code != 200 or contenttype is False:
                 continue
 
-            return r.content, contenttype
+            return dl, contenttype
         except requests.exceptions.RequestException:
             tools.warning("Unable to get "+url+" using proxy "+proxy+". It " +
                           "may not be available.")
