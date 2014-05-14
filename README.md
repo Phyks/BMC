@@ -47,12 +47,24 @@ Should be almost working and usable now, although still to be considered as **ex
 * Update
     * working
 
+
+**Error reporting :** If you have any issue with this script, please report error. If possible, send me the article responsible for the error, or at least give me the reference so that I can test and debug easily.
+
 ## Installation
 
-* Clone this git repository where you want : `git clone https://github.com/Phyks/BMC`
+* Clone this git repository where you want: 
+```
+git clone https://github.com/Phyks/BMC
+```
 * Install `requesocks`, `bibtexparser` (https://github.com/sciunto/python-bibtexparser), `PyPDF2` and `isbntools` _via_ Pypi
-* Install `pdftotext` (provided by Xpdf) and `djvulibre` _via_ your package manager the way you want
+```
+sudo pip install requesocks bibtexparser pyPDF2 isbntools
+```
+(replace pip by pip2 if your distribution ships python3 by default)
+* Install `pdftotext` (provided by Xpdf) and `djvulibre` _via_ your package manager or the way you want
 * Copy `params.py.example` to `params.py` and customize it to fit your needs
+
+*Note:* To update the script, just run `git pull` in the script dir.
 
 ## Usage
 
@@ -127,14 +139,13 @@ Here are some sources of inspirations for this project :
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
 50. Anti-duplicate ?
+60. Check stored versions when updating arxiv papers
 65. Look for published version in arXiv
-70. No DOI for HAL => metadata with SOAP API… don't want to handle it for now :/
+70. Export of bibtex
 80. Search engine
+90. No DOI for HAL => metadata with SOAP API… don't want to handle it for now :/
 200. Webserver interface ? GUI ? (not likely for now…)
-Keep multiple versions of papers
-Check stored versions when updating arxiv papers
-Export of bibtex
-Tree à la docear ?
+300. Tree à la docear ?
 
 ## Thanks
 

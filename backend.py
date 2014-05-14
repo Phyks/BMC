@@ -36,10 +36,10 @@ def getNewName(src, bibtex, tag=''):
     new_name = new_name.replace("%l", authors[-1].split(',')[0].strip())
     new_name = new_name.replace("%a", ', '.join([i.split(',')[0].strip()
                                                 for i in authors]))
-    if('archiveprefix' not in bibtex or 
-       'arXiv' not in bibtex['archiveprefix']):
+    if('archiveprefix' in bibtex and
+       'arXiv' in bibtex['archiveprefix']):
         new_name = new_name.replace("%v",
-                                    bibtex[eprint][bibtex['eprint'].rfind('v'):])
+                                    bibtex['eprint'][bibtex['eprint'].rfind('v'):])
     else:
         new_name = new_name.replace("%v", '')
 
