@@ -272,56 +272,65 @@ def openFile(ident):
 def resync():
     diff = backend.diffFilesIndex()
 
-    for entry in diff:
+    if diff is False:
+        return False
+
+    for key in diff:
+        entry = diff[key]
         if entry['file'] == '':
-            print("Found entry in index without associated file.")
-            confirm = False
-            while not confirm:
+            print("\nFound entry in index without associated file: " +
+                  entry['id'])
+            print("Title:\t"+entry['title'])
+            loop = True
+            while confirm:
                 filename = tools.rawInput("File to import for this entry " +
                                           "(leave empty to delete the " +
                                           "entry)? ")
                 if filename == '':
                     break
                 else:
-                    confirm = True
                     if 'doi' in entry.keys():
                         doi = fetcher.findDOI(filename)
                         if doi is not False and doi != entry['doi']:
-                            confirm = tools.rawInput("Found DOI does not " +
+                            loop = tools.rawInput("Found DOI does not " +
                                                      "match bibtex entry " +
                                                      "DOI, continue anyway " +
                                                      "? [y/N]")
-                            confirm = (confirm.lower() == 'y')
+                            loop = (loop.lower() != 'y')
                     if 'Eprint' in entry.keys():
                         arxiv = fetcher.findArXivId(filename)
                         if arxiv is not False and arxiv != entry['Eprint']:
-                            confirm = tools.rawInput("Found arXiv id does " +
+                            loop = tools.rawInput("Found arXiv id does " +
                                                      "not match bibtex " +
                                                      "entry arxiv id, " +
                                                      "continue anyway ? [y/N]")
-                            confirm = (confirm.lower() == 'y')
-                    elif 'isbn' in entry.keys():
+                            loop = (loop.lower() != 'y')
+                    if 'isbn' in entry.keys():
                         isbn = fetcher.findISBN(filename)
                         if isbn is not False and isbn != entry['isbn']:
-                            confirm = tools.rawInput("Found ISBN does not " +
+                            loop = tools.rawInput("Found ISBN does not " +
                                                      "match bibtex entry " +
                                                      "ISBN, continue anyway " +
                                                      "? [y/N]")
-                            confirm = (confirm.lower() == 'y')
+                            loop = (loop.lower() != 'y')
                     continue
             if filename == '':
                 backend.deleteId(entry['id'])
+                print("Deleted entry \""+entry['id']+"\".")
             else:
                 new_name = backend.getNewName(filename, entry)
                 try:
                     shutil.copy2(filename, new_name)
+                    print("Imported new file "+filename+" for entry " +
+                          entry['id']+".")
                 except IOError:
                     new_name = False
                     sys.exit("Unable to move file to library dir " +
                              params.folder+".")
                 backend.bibtexEdit(entry['id'], {'file': filename})
         else:
-            print("Found file without any associated entry in index.")
+            print("Found file without any associated entry in index:")
+            print(entry['file'])
             action = ''
             while action.lower() not in ['import', 'delete']:
                 action = tools.rawInput("What to do? [import / delete] ")

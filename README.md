@@ -46,7 +46,7 @@ Should be almost working and usable now, although still to be considered as **ex
 * Open
     * working: all
 * Resync
-    * Testing
+    * working
 * Update
     * Testing
 

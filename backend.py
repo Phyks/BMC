@@ -171,6 +171,8 @@ def deleteFile(filename):
             pass
     if found:
         bibtexRewrite(bibtex)
+    elif os.path.isfile(filename):
+        os.remove(filename)
     return found
 
 
@@ -182,9 +184,10 @@ def diffFilesIndex():
         * only file entry if file with missing bibtex entry
     """
     files = tools.listDir(params.folder)
+    files = [ i for i in files if tools.getExtension(i) in ['.pdf', '.djvu'] ]
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
-            index = BibTexParser(fh.read())
+            index = BibTexParser(fh.read().encode('utf-8'))
         index_diff = index.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")
@@ -199,7 +202,7 @@ def diffFilesIndex():
     for filename in files:
         index_diff[filename] = {'file': filename}
 
-    return index
+    return index.get_entry_dict()
 
 
 def getBibtex(entry, file_id='both'):
