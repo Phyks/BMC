@@ -24,10 +24,13 @@ def checkBibtex(filename, bibtex_string):
 
     bibtex = BibTexParser(bibtex_string)
     bibtex = bibtex.get_entry_dict()
-    bibtex = bibtex[bibtex.keys()[0]]
-    print(bibtex_string)
+    try:
+        bibtex = bibtex[bibtex.keys()[0]]
+        print(bibtex_string)
+        check = tools.rawInput("Is it correct? [Y/n] ")
+    except:
+        check = 'n'
 
-    check = tools.rawInput("Is it correct? [Y/n] ")
     try:
         old_filename = bibtex['file']
     except:
@@ -46,17 +49,23 @@ def checkBibtex(filename, bibtex_string):
             bibtex = bibtex[bibtex.keys()[0]]
         except:
             tools.warning("Invalid bibtex entry")
-            bibtex_string = False
+            bibtex_string = ''
+            tools.rawInput("Press Enter to go back to editor.")
+            continue
+        if('authors' not in bibtex and 'title' not in bibtex and 'year' not in
+           bibtex):
+            tools.warning("Invalid bibtex entry")
+            bibtex_string = ''
+            tools.rawInput("Press Enter to go back to editor.")
+            continue
+
 
         if old_filename is not False and 'file' not in bibtex:
             tools.warning("Invalid bibtex entry. No filename given.")
             tools.rawInput("Press Enter to go back to editor.")
             check = 'n'
         else:
-            if bibtex_string is not False:
-                bibtex_string = tools.parsed2Bibtex(bibtex)
-            else:
-                bibtex_string = ''
+            bibtex_string = tools.parsed2Bibtex(bibtex)
             print("\nThe bibtex entry for "+filename+" is:")
             print(bibtex_string)
             check = tools.rawInput("Is it correct? [Y/n] ")
