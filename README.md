@@ -37,6 +37,8 @@ Should be almost working and usable now, although still to be considered as **ex
     * working: all
 * Delete
     * working: all (by file and by id)
+* Edit
+    * working: all
 * List
     * TODO
 * Search

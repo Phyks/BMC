@@ -210,7 +210,7 @@ def getBibtex(entry, file_id='both'):
     """
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
-            bibtex = BibTexParser(fh.read())
+            bibtex = BibTexParser(fh.read().encode('utf-8'))
         bibtex = bibtex.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")
@@ -222,11 +222,12 @@ def getBibtex(entry, file_id='both'):
             bibtex_entry = bibtex[entry]
         except KeyError:
             pass
-    elif file_id == 'both' or file_id == 'file':
-        for key in bibtex.keys():
-            if os.path.samefile(bibtex[key]['file'], entry):
-                bibtex_entry = bibtex[key]
-                break
+    if file_id == 'both' or file_id == 'file':
+        if os.path.isfile(entry):
+            for key in bibtex.keys():
+                if os.path.samefile(bibtex[key]['file'], entry):
+                    bibtex_entry = bibtex[key]
+                    break
     return bibtex_entry
 
 

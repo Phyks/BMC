@@ -19,18 +19,14 @@ from codecs import open
 EDITOR = os.environ.get('EDITOR') if os.environ.get('EDITOR') else 'vim'
 
 
-def checkBibtex(filename, bibtex):
+def checkBibtex(filename, bibtex_string):
     print("The bibtex entry found for "+filename+" is:")
 
-    bibtex = BibTexParser(bibtex.encode('utf-8'))
+    bibtex = BibTexParser(bibtex_string.encode('utf-8'))
     bibtex = bibtex.get_entry_dict()
-    if len(bibtex) > 0:
-        bibtex_name = bibtex.keys()[0]
-        bibtex = bibtex[bibtex_name]
-        bibtex_string = tools.parsed2Bibtex(bibtex)
-    else:
-        bibtex_string = ''
+    bibtex = bibtex[bibtex.keys()[0]]
     print(bibtex_string)
+
     check = tools.rawInput("Is it correct? [Y/n] ")
     try:
         old_filename = bibtex['file']
@@ -46,14 +42,18 @@ def checkBibtex(filename, bibtex):
             bibtex = BibTexParser(tmpfile.read().encode('utf-8')+"\n")
 
         bibtex = bibtex.get_entry_dict()
+        try:
+            bibtex = bibtex[bibtex.keys()[0]]
+        except:
+            tools.warning("Invalid bibtex entry")
+            bibtex_string = False
+
         if old_filename is not False and 'file' not in bibtex:
             tools.warning("Invalid bibtex entry. No filename given.")
             tools.rawInput("Press Enter to go back to editor.")
             check = 'n'
         else:
-            if len(bibtex) > 0:
-                bibtex_name = bibtex.keys()[0]
-                bibtex = bibtex[bibtex_name]
+            if bibtex_string is not False:
                 bibtex_string = tools.parsed2Bibtex(bibtex)
             else:
                 bibtex_string = ''
@@ -62,10 +62,12 @@ def checkBibtex(filename, bibtex):
             check = tools.rawInput("Is it correct? [Y/n] ")
     if old_filename is not False and old_filename != bibtex['file']:
         try:
+            print("Moving file to new location…")
             shutil.move(old_filename, bibtex['file'])
         except:
             tools.warning("Unable to move file "+old_filename+" to " +
                           bibtex['file']+". You should check it manually.")
+
     return bibtex
 
 
@@ -133,7 +135,15 @@ def addFile(src, filetype, manual):
     else:
         bibtex = ''
 
-    bibtex = checkBibtex(src, bibtex)
+    bibtex = BibTexParser(bibtex.encode('utf-8'))
+    bibtex = bibtex.get_entry_dict()
+    if len(bibtex) > 0:
+        bibtex_name = bibtex.keys()[0]
+        bibtex = bibtex[bibtex_name]
+        bibtex_string = tools.parsed2Bibtex(bibtex)
+    else:
+        bibtex_string = ''
+    bibtex = checkBibtex(src, bibtex_string)
 
     tag = tools.rawInput("Tag for this paper (leave empty for default) ? ")
     bibtex['tag'] = tag
@@ -172,12 +182,13 @@ def editEntry(entry, file_id='both'):
     bibtex = backend.getBibtex(entry, file_id)
     if bibtex is False:
         tools.warning("Entry "+entry+" does not exist.")
+        return False
 
     if file_id == 'file':
         filename = entry
     else:
         filename = bibtex['file']
-    new_bibtex = checkBibtex(filename, bibtex)
+    new_bibtex = checkBibtex(filename, tools.parsed2Bibtex(bibtex))
 
     # Tag update
     if new_bibtex['tag'] != bibtex['tag']:
@@ -213,7 +224,7 @@ def editEntry(entry, file_id='both'):
 
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
-            index = BibTexParser(fh.read())
+            index = BibTexParser(fh.read().encode('utf-8'))
         index = index.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")
