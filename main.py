@@ -509,7 +509,13 @@ if __name__ == '__main__':
             sys.exit()
 
         elif args.func == 'list':
-            raise Exception('TODO')
+            listPapers = tools.listDir(params.folder)
+            listPapers.sort()
+
+            for paper in listPapers:
+                if tools.getExtension(paper) not in [".pdf", ".djvu"]:
+                    continue
+                print(paper)
 
         elif args.func == 'search':
             raise Exception('TODO')
