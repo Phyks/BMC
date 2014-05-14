@@ -36,6 +36,12 @@ def getNewName(src, bibtex, tag=''):
     new_name = new_name.replace("%l", authors[-1].split(',')[0].strip())
     new_name = new_name.replace("%a", ', '.join([i.split(',')[0].strip()
                                                 for i in authors]))
+    if('archiveprefix' not in bibtex or 
+       'arXiv' not in bibtex['archiveprefix']):
+        new_name = new_name.replace("%v",
+                                    bibtex[eprint][bibtex['eprint'].rfind('v'):])
+    else:
+        new_name = new_name.replace("%v", '')
 
     if tag == '':
         new_name = (params.folder + tools.slugify(new_name) +
@@ -187,7 +193,7 @@ def diffFilesIndex():
     files = [ i for i in files if tools.getExtension(i) in ['.pdf', '.djvu'] ]
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
-            index = BibTexParser(fh.read().encode('utf-8'))
+            index = BibTexParser(fh.read())
         index_diff = index.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")
@@ -213,7 +219,7 @@ def getBibtex(entry, file_id='both'):
     """
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
-            bibtex = BibTexParser(fh.read().encode('utf-8'))
+            bibtex = BibTexParser(fh.read())
         bibtex = bibtex.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")
@@ -251,28 +257,23 @@ def updateArXiv(entry):
     """Look for new versions of arXiv entry `entry`
 
     Returns False if no new versions or not an arXiv entry,
-    Updates the file and returns the new bibtex otherwise.
+    Returns the new bibtex otherwise.
     """
     bibtex = getBibtex(entry)
     # Check arXiv
-    if('ArchivePrefix' not in bibtex and
-       'arxiv' not in bibtex['ArchivePrefix']):
+    if('archiveprefix' not in bibtex or 
+       'arXiv' not in bibtex['archiveprefix']):
         return False
 
-    arxiv_id = bibtex['Eprint']
+    arxiv_id = bibtex['eprint']
     last_bibtex = BibTexParser(fetcher.arXiv2Bib(re.sub(r'v\d+\Z',
                                                         '',
                                                         arxiv_id)))
     last_bibtex = last_bibtex.get_entry_dict()
+    last_bibtex = last_bibtex[last_bibtex.keys()[0]]
 
-    if last_bibtex['Eprint'] != arxiv_id:
-        # New version available
-        with open(bibtex['file'], 'w+') as fh:
-            fh.write(fetcher.download(last_bibtex['Url']))
-        bibtex['Eprint'] = last_bibtex['Eprint']
-        bibtex['URL'] = last_bibtex['URL']
-        for i in [j for j in last_bibtex.keys() if j not in bibtex.keys()]:
-            bibtex[i] = last_bibtex[i]
+    if last_bibtex['eprint'] != arxiv_id:
+        # TODO: Check that not already imported
         return last_bibtex
     else:
         return False

@@ -15,5 +15,6 @@ proxies = [
 # %Y = published year
 # %t = title
 # %a = authors
-format_articles = "%f_%l-%j-%Y"
+# %v = arXiv version
+format_articles = "%f_%l-%j-%Y-%v"
 format_books = "%a-%t"

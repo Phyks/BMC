@@ -48,12 +48,12 @@ Should be almost working and usable now, although still to be considered as **ex
 * Resync
     * working
 * Update
-    * Testing
+    * working
 
 ## Installation
 
 * Clone this git repository where you want : `git clone https://github.com/Phyks/BMC`
-* Install `requesocks`, `PyPDF2` and `isbntools` _via_ Pypi
+* Install `requesocks`, `bibtexparser` (https://github.com/sciunto/python-bibtexparser), `PyPDF2` and `isbntools` _via_ Pypi
 * Install `pdftotext` (provided by Xpdf) and `djvulibre` _via_ your package manager the way you want
 * Copy `params.py.example` to `params.py` and customize it to fit your needs
 
@@ -133,17 +133,11 @@ A list of ideas and TODO. Don't hesitate to give feedback on the ones you really
 65. Look for published version in arXiv
 70. No DOI for HAL => metadata with SOAP API… don't want to handle it for now :/
 80. Search engine
-100. UTF-8 ?
 200. Webserver interface ? GUI ? (not likely for now…)
 Keep multiple versions of papers
+Check stored versions when updating arxiv papers
 Export of bibtex
 Tree à la docear ?
-
-## Issues ?
-
-* Multiplication of {{}} => solved in bibtexparser
-* UTF-8 and bibtexparser => solved upstream in bibtexparser
-===> TODO : update bibtexparser when available in pip
 
 ## Thanks
 

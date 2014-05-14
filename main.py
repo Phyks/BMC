@@ -22,7 +22,7 @@ EDITOR = os.environ.get('EDITOR') if os.environ.get('EDITOR') else 'vim'
 def checkBibtex(filename, bibtex_string):
     print("The bibtex entry found for "+filename+" is:")
 
-    bibtex = BibTexParser(bibtex_string.encode('utf-8'))
+    bibtex = BibTexParser(bibtex_string)
     bibtex = bibtex.get_entry_dict()
     bibtex = bibtex[bibtex.keys()[0]]
     print(bibtex_string)
@@ -35,11 +35,11 @@ def checkBibtex(filename, bibtex_string):
 
     while check.lower() == 'n':
         with tempfile.NamedTemporaryFile(suffix=".tmp") as tmpfile:
-            tmpfile.write(bibtex_string.encode('utf-8'))
+            tmpfile.write(bibtex_string)
             tmpfile.flush()
             subprocess.call([EDITOR, tmpfile.name])
             tmpfile.seek(0)
-            bibtex = BibTexParser(tmpfile.read().encode('utf-8')+"\n")
+            bibtex = BibTexParser(tmpfile.read()+"\n")
 
         bibtex = bibtex.get_entry_dict()
         try:
@@ -135,7 +135,7 @@ def addFile(src, filetype, manual):
     else:
         bibtex = ''
 
-    bibtex = BibTexParser(bibtex.encode('utf-8'))
+    bibtex = BibTexParser(bibtex)
     bibtex = bibtex.get_entry_dict()
     if len(bibtex) > 0:
         bibtex_name = bibtex.keys()[0]
@@ -224,7 +224,7 @@ def editEntry(entry, file_id='both'):
 
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
-            index = BibTexParser(fh.read().encode('utf-8'))
+            index = BibTexParser(fh.read())
         index = index.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")
@@ -256,7 +256,7 @@ def downloadFile(url, filetype, manual):
 def openFile(ident):
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
-            bibtex = BibTexParser(fh.read().encode('utf-8'))
+            bibtex = BibTexParser(fh.read())
         bibtex = bibtex.get_entry_dict()
     except:
         tools.warning("Unable to open index file.")
@@ -360,12 +360,27 @@ def resync():
                               " but could not delete it.")
 
 
-def update(entries):
+def update(entry):
     update = backend.updateArXiv(entry)
     if update is not False:
         print("New version found for "+entry)
-        print("Downloaded latest version "+update['Eprint'])
-        editEntry(update['file'], 'file')
+        print("\t Title: "+update['title'])
+        confirm = tools.rawInput("Download it ? [Y/n] ")
+        if confirm.lower() == 'n':
+            return
+        new_name = downloadFile('http://arxiv.org/pdf/'+update['eprint'],
+                                'article', False)
+        if new_name is not False:
+            print(update['eprint']+" successfully imported as "+new_name)
+        else:
+            tools.warning("An error occurred while downloading "+url)
+        confirm = tools.rawInput("Delete previous version ? [y/N] ")
+        if confirm.lower() == 'y':
+            if not backend.deleteId(entry):
+                if not backend.deleteFile(entry):
+                    tools.warning("Unable to remove previous version.")
+                    return
+            print("Previous version successfully deleted.")
 
 
 if __name__ == '__main__':
