@@ -39,7 +39,7 @@ def getNewName(src, bibtex, tag=''):
     if('archiveprefix' in bibtex and
        'arXiv' in bibtex['archiveprefix']):
         new_name = new_name.replace("%v",
-                                    bibtex['eprint'][bibtex['eprint'].rfind('v'):])
+                                    '-'+bibtex['eprint'][bibtex['eprint'].rfind('v'):])
     else:
         new_name = new_name.replace("%v", '')
 

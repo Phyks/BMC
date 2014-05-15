@@ -417,11 +417,15 @@ if __name__ == '__main__':
                                help="disable auto-download of bibtex")
     parser_import.add_argument('file',  nargs='+',
                                help="path to the file to import")
+    parser_import.add_argument('--skip',  nargs='+',
+                               help="path to files to skip")
     parser_import.set_defaults(func='import')
 
     parser_delete = subparsers.add_parser('delete', help="delete help")
     parser_delete.add_argument('entries', metavar='entry', nargs='+',
                                help="a filename or an identifier")
+    parser_delete.add_argument('--skip',  nargs='+',
+                               help="path to files to skip")
     group = parser_delete.add_mutually_exclusive_group()
     group.add_argument('--id', action="store_true", default=False,
                        help="id based deletion")
@@ -435,6 +439,8 @@ if __name__ == '__main__':
     parser_edit = subparsers.add_parser('edit', help="edit help")
     parser_edit.add_argument('entries', metavar='entry', nargs='+',
                              help="a filename or an identifier")
+    parser_edit.add_argument('--skip',  nargs='+',
+                               help="path to files to skip")
     group = parser_edit.add_mutually_exclusive_group()
     group.add_argument('--id', action="store_true", default=False,
                        help="id based deletion")
@@ -479,7 +485,7 @@ if __name__ == '__main__':
             sys.exit()
 
         if args.func == 'import':
-            for filename in args.file:
+            for filename in list(set(args.file) - set(args.skip)):
                 new_name = addFile(filename, args.type, args.manual)
                 if new_name is not False:
                     print(sys.argv[2]+" successfully imported as " +
@@ -490,7 +496,7 @@ if __name__ == '__main__':
             sys.exit()
 
         elif args.func == 'delete':
-            for filename in args.entries:
+            for filename in list(set(args.entries) - set(args.skip)):
                 if not args.force:
                     confirm = tools.rawInput("Are you sure you want to " +
                                              "delete "+filename+" ? [y/N] ")
@@ -507,7 +513,7 @@ if __name__ == '__main__':
             sys.exit()
 
         elif args.func == 'edit':
-            for filename in args.entries:
+            for filename in list(set(args.entries) - set(args.skip)):
                 if args.file:
                     file_id = 'file'
                 elif args.id:
