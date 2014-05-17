@@ -18,3 +18,8 @@ proxies = [
 # %v = arXiv version (e.g. '-v1') or nothing if not an arXiv paper
 format_articles = "%f_%l-%j-%Y%v"
 format_books = "%a-%t"
+
+# Other customization
+# List of lambda functions to apply
+# E.g. : format_custom = [lambda x: x.replace('test', 'some_expr')]
+format_custom = []

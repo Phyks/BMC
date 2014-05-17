@@ -42,6 +42,9 @@ def getNewName(src, bibtex, tag=''):
     else:
         new_name = new_name.replace("%v", '')
 
+    for custom in params.format_custom:
+        new_name = custom(new_name)
+
     if tag == '':
         new_name = (params.folder + tools.slugify(new_name) +
                     tools.getExtension(src))
