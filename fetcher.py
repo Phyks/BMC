@@ -35,7 +35,7 @@ def download(url):
                     dl += buf
                     dl_size += len(buf)
                     done = int(50 * dl_size / size)
-                    sys.stdout.write("\r[%s%s]"%('='*done,' '*(50-done)))
+                    sys.stdout.write("\r[%s%s]" % ('='*done, ' '*(50-done)))
                     sys.stdout.write(" "+str(int(float(done)/52*100))+"%")
                     sys.stdout.flush()
             contenttype = False
@@ -56,7 +56,7 @@ def download(url):
 
 
 isbn_re = re.compile(r"isbn (([0-9]{3}[ -])?[0-9][ -][0-9]{2}[ -][0-9]{6}[ -][0-9])",
-                    re.IGNORECASE)
+                     re.IGNORECASE)
 
 
 def findISBN(src):

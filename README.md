@@ -138,7 +138,6 @@ Here are some sources of inspirations for this project :
 
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
-40. Option to automatically confirm
 50. Anti-duplicate ?
 55. Customization options for naming
 60. Check stored versions when updating arxiv papers

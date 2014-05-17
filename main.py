@@ -13,7 +13,6 @@ import tearpages
 import tools
 import params
 from bibtexparser.bparser import BibTexParser
-from bibtexparser.customization import homogeneize_latex_encoding
 from codecs import open
 
 EDITOR = os.environ.get('EDITOR') if os.environ.get('EDITOR') else 'vim'
@@ -59,7 +58,6 @@ def checkBibtex(filename, bibtex_string):
             tools.rawInput("Press Enter to go back to editor.")
             continue
 
-
         if old_filename is not False and 'file' not in bibtex:
             tools.warning("Invalid bibtex entry. No filename given.")
             tools.rawInput("Press Enter to go back to editor.")
@@ -80,7 +78,7 @@ def checkBibtex(filename, bibtex_string):
     return bibtex
 
 
-def addFile(src, filetype, manual):
+def addFile(src, filetype, manual, autoconfirm, tag):
     """
     Add a file to the library
     """
@@ -152,9 +150,14 @@ def addFile(src, filetype, manual):
         bibtex_string = tools.parsed2Bibtex(bibtex)
     else:
         bibtex_string = ''
-    bibtex = checkBibtex(src, bibtex_string)
 
-    tag = tools.rawInput("Tag for this paper (leave empty for default) ? ")
+    if not autoconfirm:
+        bibtex = checkBibtex(src, bibtex_string)
+
+    if not autoconfirm:
+        tag = tools.rawInput("Tag for this paper (leave empty for default) ? ")
+    else:
+        tag = args.tag
     bibtex['tag'] = tag
 
     new_name = backend.getNewName(src, bibtex, tag)
@@ -244,7 +247,7 @@ def editEntry(entry, file_id='both'):
     return True
 
 
-def downloadFile(url, filetype, manual):
+def downloadFile(url, filetype, manual, autoconfirm, tag):
     print('Downloading '+url)
     dl, contenttype = fetcher.download(url)
 
@@ -254,7 +257,7 @@ def downloadFile(url, filetype, manual):
 
         with open(tmp.name, 'w+') as fh:
             fh.write(dl)
-        new_name = addFile(tmp.name, filetype, manual)
+        new_name = addFile(tmp.name, filetype, manual, autoconfirm, tag)
         tmp.close()
         return new_name
     else:
@@ -302,25 +305,25 @@ def resync():
                         doi = fetcher.findDOI(filename)
                         if doi is not False and doi != entry['doi']:
                             loop = tools.rawInput("Found DOI does not " +
-                                                     "match bibtex entry " +
-                                                     "DOI, continue anyway " +
-                                                     "? [y/N]")
+                                                  "match bibtex entry " +
+                                                  "DOI, continue anyway " +
+                                                  "? [y/N]")
                             loop = (loop.lower() != 'y')
                     if 'Eprint' in entry.keys():
                         arxiv = fetcher.findArXivId(filename)
                         if arxiv is not False and arxiv != entry['Eprint']:
                             loop = tools.rawInput("Found arXiv id does " +
-                                                     "not match bibtex " +
-                                                     "entry arxiv id, " +
-                                                     "continue anyway ? [y/N]")
+                                                  "not match bibtex " +
+                                                  "entry arxiv id, " +
+                                                  "continue anyway ? [y/N]")
                             loop = (loop.lower() != 'y')
                     if 'isbn' in entry.keys():
                         isbn = fetcher.findISBN(filename)
                         if isbn is not False and isbn != entry['isbn']:
                             loop = tools.rawInput("Found ISBN does not " +
-                                                     "match bibtex entry " +
-                                                     "ISBN, continue anyway " +
-                                                     "? [y/N]")
+                                                  "match bibtex entry " +
+                                                  "ISBN, continue anyway " +
+                                                  "? [y/N]")
                             loop = (loop.lower() != 'y')
                     continue
             if filename == '':
@@ -404,6 +407,9 @@ if __name__ == '__main__':
     parser_download.add_argument('-m', '--manual', default=False,
                                  action='store_true',
                                  help="disable auto-download of bibtex")
+    parser_download.add_argument('-y', default=False,
+                                 help="Confirm all")
+    parser_download.add_argument('--tag', default='', help="Tag")
     parser_download.add_argument('url',  nargs='+',
                                  help="url of the file to import")
     parser_download.set_defaults(func='download')
@@ -415,6 +421,9 @@ if __name__ == '__main__':
     parser_import.add_argument('-m', '--manual', default=False,
                                action='store_true',
                                help="disable auto-download of bibtex")
+    parser_import.add_argument('-y', default=False,
+                               help="Confirm all")
+    parser_import.add_argument('--tag', default='', help="Tag")
     parser_import.add_argument('file',  nargs='+',
                                help="path to the file to import")
     parser_import.add_argument('--skip',  nargs='+',
@@ -440,7 +449,7 @@ if __name__ == '__main__':
     parser_edit.add_argument('entries', metavar='entry', nargs='+',
                              help="a filename or an identifier")
     parser_edit.add_argument('--skip',  nargs='+',
-                               help="path to files to skip")
+                             help="path to files to skip")
     group = parser_edit.add_mutually_exclusive_group()
     group.add_argument('--id', action="store_true", default=False,
                        help="id based deletion")
@@ -468,7 +477,6 @@ if __name__ == '__main__':
     parser_update.set_defaults(func='update')
 
     parser_search = subparsers.add_parser('search', help="search help")
-    # TODO: Check
     parser_search.add_argument('query', metavar='entry', nargs='+',
                                help="your query, see README for more info.")
     parser_search.set_defaults(func='search')
@@ -477,7 +485,8 @@ if __name__ == '__main__':
     try:
         if args.func == 'download':
             for url in args.url:
-                new_name = downloadFile(url, args.type, args.manual)
+                new_name = downloadFile(url, args.type, args.manual, args.y,
+                                        args.tag)
                 if new_name is not False:
                     print(url+" successfully imported as "+new_name)
                 else:
@@ -486,7 +495,8 @@ if __name__ == '__main__':
 
         if args.func == 'import':
             for filename in list(set(args.file) - set(args.skip)):
-                new_name = addFile(filename, args.type, args.manual)
+                new_name = addFile(filename, args.type, args.manual, args.y,
+                                   args.tag)
                 if new_name is not False:
                     print(sys.argv[2]+" successfully imported as " +
                           new_name+".")

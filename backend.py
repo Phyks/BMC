@@ -7,7 +7,6 @@ import tools
 import fetcher
 import params
 from bibtexparser.bparser import BibTexParser
-from bibtexparser.customization import homogeneize_latex_encoding
 from codecs import open
 
 
@@ -159,20 +158,20 @@ def deleteFile(filename):
                     os.remove(bibtex[key]['file'])
                 except:
                     tools.warning("Unable to delete file associated to id " +
-                                key+" : "+bibtex[key]['file'])
+                                  key+" : "+bibtex[key]['file'])
 
                 try:
                     if not os.listdir(os.path.dirname(filename)):
                         os.rmdir(os.path.dirname(filename))
                 except:
                     tools.warning("Unable to delete empty tag dir " +
-                                os.path.dirname(filename))
+                                  os.path.dirname(filename))
 
                 try:
                     del(bibtex[key])
                 except KeyError:
                     tools.warning("No associated bibtex entry in index for " +
-                                    "file " + bibtex[key]['file'])
+                                  "file " + bibtex[key]['file'])
         except:
             pass
     if found:
@@ -190,7 +189,7 @@ def diffFilesIndex():
         * only file entry if file with missing bibtex entry
     """
     files = tools.listDir(params.folder)
-    files = [ i for i in files if tools.getExtension(i) in ['.pdf', '.djvu'] ]
+    files = [i for i in files if tools.getExtension(i) in ['.pdf', '.djvu']]
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
             index = BibTexParser(fh.read())
@@ -261,7 +260,7 @@ def updateArXiv(entry):
     """
     bibtex = getBibtex(entry)
     # Check arXiv
-    if('archiveprefix' not in bibtex or 
+    if('archiveprefix' not in bibtex or
        'arXiv' not in bibtex['archiveprefix']):
         return False
 
