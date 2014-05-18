@@ -268,14 +268,20 @@ def updateArXiv(entry):
         return False
 
     arxiv_id = bibtex['eprint']
-    last_bibtex = BibTexParser(fetcher.arXiv2Bib(re.sub(r'v\d+\Z',
-                                                        '',
-                                                        arxiv_id)))
+    arxiv_id_no_v = re.sub(r'v\d+\Z', '', arxiv_id)
+    ids = set(arxiv_id)
+
+    for entry in getEntries():
+        if('archiveprefix' not in bibtex or
+           'arXiv' not in bibtex['archiveprefix']):
+            continue
+        ids.add(bibtex['eprint'])
+
+    last_bibtex = BibTexParser(fetcher.arXiv2Bib(arxiv_id_no_v))
     last_bibtex = last_bibtex.get_entry_dict()
     last_bibtex = last_bibtex[last_bibtex.keys()[0]]
 
-    if last_bibtex['eprint'] != arxiv_id:
-        # TODO: Check that not already imported
+    if last_bibtex['eprint'] not in ids:
         return last_bibtex
     else:
         return False
