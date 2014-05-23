@@ -52,7 +52,7 @@ Should be almost working and usable now, although still to be considered as **ex
 
 ## Installation
 
-* Clone this git repository where you want: 
+* Clone this git repository where you want:
 ```
 git clone https://github.com/Phyks/BMC
 ```
@@ -70,13 +70,13 @@ sudo pip install requesocks bibtexparser pyPDF2 isbntools
 
 ### To import an existing PDF / Djvu file
 
-Run `./main.py import PATH_TO_FILE [article|book]`. `[article|book]` is an optional argument (article or book) to search only for DOI or ISBN and thus, speed up the import.
+Run `./bmc.py import PATH_TO_FILE [article|book]`. `[article|book]` is an optional argument (article or book) to search only for DOI or ISBN and thus, speed up the import.
 
 It will get automatically the bibtex entry corresponding to the document, and you will be prompted for confirmation. It will then copy the file to your papers dir, renaming it according to the specified mask in `params.py`.
 
 ### To download a PDF / Djvu file
 
-Run `./main.py download URL_TO_PDF [article|book]`, where `[article|book]` (article or book) is again a parameter to specify to search only for DOI or ISBN only, and thus speed up the import. The `URL_TO_PDF` parameter should be a direct link to the PDF file (meaning it should be the link to the pdf page, which may have an authentication portal and not the page with abstract on many publishers websites).
+Run `./bmc.py download URL_TO_PDF [article|book]`, where `[article|book]` (article or book) is again a parameter to specify to search only for DOI or ISBN only, and thus speed up the import. The `URL_TO_PDF` parameter should be a direct link to the PDF file (meaning it should be the link to the pdf page, which may have an authentication portal and not the page with abstract on many publishers websites).
 
 The script will try to download the file with the proxies specified in `params.py` until it manages to get the file, or runs out of available proxies.
 
@@ -84,7 +84,7 @@ It will get automatically the bibtex entry corresponding to the document, and yo
 
 ### Delete an entry
 
-Run `./main.py delete PARAM` where `PARAM` should be either a path to a paper file, or an ident in the bibtex index. This will remove the corresponding entry in the bibtex index, and will remove the file from your papers dir. Although it will prompt you for confirmation, there's no way to recover your file after deletion, so use with care.
+Run `./bmc.py delete PARAM` where `PARAM` should be either a path to a paper file, or an ident in the bibtex index. This will remove the corresponding entry in the bibtex index, and will remove the file from your papers dir. Although it will prompt you for confirmation, there's no way to recover your file after deletion, so use with care.
 
 ### Search for an entry
 
@@ -92,19 +92,19 @@ TODO
 
 ### List all entries
 
-Run `./main.py list` to list all the papers in your paper folder.
+Run `./bmc.py list` to list all the papers in your paper folder.
 
 ### Edit entries
 
-Run `./main.py edit PARAM` where `PARAM` should be either a path to a paper file or an ident in the bibtex index. This will open a text editor to edit the corresponding bibtex entry.
+Run `./bmc.py edit PARAM` where `PARAM` should be either a path to a paper file or an ident in the bibtex index. This will open a text editor to edit the corresponding bibtex entry.
 
 ### Download the latest version for papers from arXiv
 
-Run `./main.py update` to look for available updated versions of your arXiv papers. You can use the optionnal `--entries ID` argument (where ID is either a bibtex index identifier or a filename) to search only for a limited subset of papers.
+Run `./bmc.py update` to look for available updated versions of your arXiv papers. You can use the optionnal `--entries ID` argument (where ID is either a bibtex index identifier or a filename) to search only for a limited subset of papers.
 
 ### Data storage
 
-All your documents will be stored in the papers dir specified in `params.py`. All the bibtex entries will be added to the `index.bib` file. You should **not** add entries to this file (but you can edit existing entries without any problem), as this will break synchronization between documents in papers dir and the index. If you do so, you can resync the index file with `./main.py resync`.
+All your documents will be stored in the papers dir specified in `params.py`. All the bibtex entries will be added to the `index.bib` file. You should **not** add entries to this file (but you can edit existing entries without any problem), as this will break synchronization between documents in papers dir and the index. If you do so, you can resync the index file with `./bmc.py resync`.
 
 The resync option will check that all bibtex entries have a corresponding file and all file have a corresponding bibtex entry. It will prompt you what to do for unmatched entries.
 
@@ -116,8 +116,8 @@ All the source code I wrote is under a `no-alcoohol beer-ware license`. All func
 * "THE NO-ALCOHOL BEER-WARE LICENSE" (Revision 42):
 * Phyks (webmaster@phyks.me) wrote this file. As long as you retain this notice you
 * can do whatever you want with this stuff (and you can also do whatever you want
-* with this stuff without retaining it, but that's not cool...). If we meet some 
-* day, and you think this stuff is worth it, you can buy me a <del>beer</del> soda 
+* with this stuff without retaining it, but that's not cool...). If we meet some
+* day, and you think this stuff is worth it, you can buy me a <del>beer</del> soda
 * in return.
 *																		Phyks
 * ---------------------------------------------------------------------------------
