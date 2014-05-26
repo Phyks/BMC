@@ -1,5 +1,14 @@
-#!/usr/bin/env python2
-# coding=utf8
+# -*- coding: utf8 -*-
+# -----------------------------------------------------------------------------
+# "THE NO-ALCOHOL BEER-WARE LICENSE" (Revision 42):
+# Phyks (webmaster@phyks.me) wrote this file. As long as you retain this notice
+# you can do whatever you want with this stuff (and you can also do whatever
+# you want with this stuff without retaining it, but that's not cool...). If we
+# meet some day, and you think this stuff is worth it, you can buy me a
+# <del>beer</del> soda in return.
+#                                                                   Phyks
+# -----------------------------------------------------------------------------
+
 
 import isbntools
 import re
@@ -55,9 +64,9 @@ def download(url):
     return False
 
 
-isbn_re = re.compile(r"isbn (([0-9]{3}[ -])?[0-9][ -][0-9]{2}[ -][0-9]{6}[ -][0-9])",
+#isbn_re = re.compile(r"isbn (([0-9]{3}[ -])?[0-9][ -][0-9]{2}[ -][0-9]{6}[ -][0-9])",
+isbn_re = re.compile(r'isbn ((?:[0-9]{3}[ -]?)?[0-9]{1,5}[ -]?[0-9]{1,7}[ -]?[0-9]{1,6}[- ]?[0-9])',
                      re.IGNORECASE)
-
 
 def findISBN(src):
     """Search for a valid ISBN in src.
@@ -100,7 +109,10 @@ def findISBN(src):
 def isbn2Bib(isbn):
     """Tries to get bibtex entry from an ISBN number"""
     # Default merges results from worldcat.org and google books
-    return fmtbib('bibtex', isbntools.meta(isbn, 'default'))
+    try:
+        return fmtbib('bibtex', isbntools.meta(isbn, 'default'))
+    except:
+        return ''
 
 
 doi_re = re.compile('(?<=doi)/?:?\s?[0-9\.]{7}/\S*[0-9]', re.IGNORECASE)
@@ -129,8 +141,9 @@ def findDOI(src):
     else:
         return False
 
+    extractfull = ''
     while totext.poll() is None:
-        extractfull = totext.stdout.readline()
+        extractfull += totext.stdout.readline().strip()
         extractDOI = doi_re.search(extractfull.lower().replace('&#338;', '-'))
         if not extractDOI:
             # PNAS fix
@@ -214,8 +227,9 @@ def findArXivId(src):
     else:
         return False
 
+    extractfull = ''
     while totext.poll() is None:
-        extractfull = totext.stdout.readline()
+        extractfull += totext.stdout.readline().strip()
         extractID = arXiv_re.search(extractfull)
         if extractID:
             totext.terminate()
@@ -250,7 +264,7 @@ def arXiv2Bib(arxiv):
             except:
                 pass
             return tools.parsed2Bibtex(fetched_bibtex)
-    return False
+    return ''
 
 
 HAL_re = re.compile(r'(hal-\d{8}), version (\d+)')

@@ -87,14 +87,19 @@ def addFile(src, filetype, manual, autoconfirm, tag):
     isbn = False
 
     if not manual:
-        if filetype == 'article' or filetype is None:
-            doi = fetcher.findDOI(src)
-        if doi is False and (filetype == 'article' or filetype is None):
-            arxiv = fetcher.findArXivId(src)
+        try:
+            if filetype == 'article' or filetype is None:
+                doi = fetcher.findDOI(src)
+            if doi is False and (filetype == 'article' or filetype is None):
+                arxiv = fetcher.findArXivId(src)
 
-        if filetype == 'book' or (doi is False and arxiv is False and
-                                  filetype is None):
-            isbn = fetcher.findISBN(src)
+            if filetype == 'book' or (doi is False and arxiv is False and
+                                    filetype is None):
+                isbn = fetcher.findISBN(src)
+        except KeyboardInterrupt:
+            doi = False
+            arxiv = False
+            isbn = False
 
     if doi is False and isbn is False and arxiv is False:
         if filetype is None:

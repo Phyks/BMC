@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 """Search query parser
 
 Modified by Phyks, 2014-05-18. Original source code is here:
@@ -122,7 +123,11 @@ class SearchQueryParser:
             operatorAnd + Suppress(Keyword("or", caseless=True)) + operatorOr
         ).setResultsName("or") | operatorAnd)
 
-        return operatorOr.parseString
+        operatorQ = Forward()
+        operatorQ << Group(operatorOr + Suppress('=') +
+                           operatorOr).setResultsName('field')
+
+        return operatorQ.parseString
 
     def evaluateAnd(self, argument):
         return self.evaluate(argument[0]).intersection(self.evaluate(argument[1]))

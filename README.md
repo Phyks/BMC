@@ -110,7 +110,7 @@ The resync option will check that all bibtex entries have a corresponding file a
 
 ## License
 
-All the source code I wrote is under a `no-alcoohol beer-ware license`. All functions that I didn't write myself are under the original license and their origin is specified in the function itself.
+All the source code I wrote is under a `no-alcohol beer-ware license`. All functions that I didn't write myself are under the original license and their origin is specified in the function itself.
 ```
 * --------------------------------------------------------------------------------
 * "THE NO-ALCOHOL BEER-WARE LICENSE" (Revision 42):
@@ -138,6 +138,7 @@ Here are some sources of inspirations for this project :
 
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
+60. Unittest
 70. Export of bibtex
 80. Search engine
 85. Anti-duplicate ?
