@@ -94,7 +94,7 @@ def addFile(src, filetype, manual, autoconfirm, tag):
                 arxiv = fetcher.findArXivId(src)
 
             if filetype == 'book' or (doi is False and arxiv is False and
-                                    filetype is None):
+                                      filetype is None):
                 isbn = fetcher.findISBN(src)
         except KeyboardInterrupt:
             doi = False
