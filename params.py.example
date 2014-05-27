@@ -1,4 +1,5 @@
 # -*- coding: utf8 -*-
+
 # The folder in which the papers should be stored
 # /!\ Keep the trailing slash /!\
 folder = "/home/phyks/Papers/"
@@ -24,3 +25,6 @@ format_books = "%a-%t"
 # List of lambda functions to apply
 # E.g. : format_custom = [lambda x: x.replace('test', 'some_expr')]
 format_custom = []
+
+# Fields to ignore when exporting Bibtex entries
+ignore_fields = ['file', 'doi', 'tag']

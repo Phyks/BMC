@@ -473,6 +473,11 @@ if __name__ == '__main__':
                              help="an identifier")
     parser_open.set_defaults(func='open')
 
+    parser_export = subparsers.add_parser('export', help="export help")
+    parser_export.add_argument('ids', metavar='id',  nargs='+',
+                             help="an identifier")
+    parser_export.set_defaults(func='export')
+
     parser_resync = subparsers.add_parser('resync', help="resync help")
     parser_resync.set_defaults(func='resync')
 
@@ -556,6 +561,14 @@ if __name__ == '__main__':
                     sys.exit("Unable to open file associated " +
                              "to ident "+filename)
             sys.exit()
+        
+        elif args.func == 'export':
+            bibtex = ''
+            for id in args.ids:
+                bibtex += tools.parsed2Bibtex(backend.getBibtex(id,
+                                                                clean=True))
+            print(bibtex.strip())
+            sys.exit
 
         elif args.func == 'resync':
             confirm = tools.rawInput("Resync files and bibtex index? [y/N] ")

@@ -19,7 +19,7 @@ from bibtexparser.bparser import BibTexParser
 from codecs import open
 
 
-def getNewName(src, bibtex, tag=''):
+def getNewName(src, bibtex, tag='', override_format=None):
     """
     Return the formatted name according to params for the given
     bibtex entry
@@ -27,13 +27,19 @@ def getNewName(src, bibtex, tag=''):
     authors = re.split(' and ', bibtex['author'])
 
     if bibtex['type'] == 'article':
-        new_name = params.format_articles
+        if override_format is None:
+            new_name = params.format_articles
+        else:
+            new_name = override_format
         try:
             new_name = new_name.replace("%j", bibtex['journal'])
         except:
             pass
     elif bibtex['type'] == 'book':
-        new_name = params.format_books
+        if override_format is None:
+            new_name = params.format_books
+        else:
+            new_name = override_format
 
     new_name = new_name.replace("%t", bibtex['title'])
     try:
@@ -222,11 +228,12 @@ def diffFilesIndex():
     return index.get_entry_dict()
 
 
-def getBibtex(entry, file_id='both'):
+def getBibtex(entry, file_id='both', clean=False):
     """Returns the bibtex entry corresponding to entry, as a dict
 
     entry is either a filename or a bibtex ident
     file_id is file or id or both to search for a file / id / both
+    clean is to clean the ignored fields specified in params
     """
     try:
         with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
@@ -248,6 +255,12 @@ def getBibtex(entry, file_id='both'):
                 if os.path.samefile(bibtex[key]['file'], entry):
                     bibtex_entry = bibtex[key]
                     break
+    if clean:
+        for field in params.ignore_fields:
+            try:
+                del(bibtex_entry[field])
+            except KeyError:
+                pass
     return bibtex_entry
 
 
