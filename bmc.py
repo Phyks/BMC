@@ -432,14 +432,14 @@ if __name__ == '__main__':
     parser_import.add_argument('file',  nargs='+',
                                help="path to the file to import")
     parser_import.add_argument('--skip',  nargs='+',
-                               help="path to files to skip")
+                               help="path to files to skip", default=[])
     parser_import.set_defaults(func='import')
 
     parser_delete = subparsers.add_parser('delete', help="delete help")
     parser_delete.add_argument('entries', metavar='entry', nargs='+',
                                help="a filename or an identifier")
     parser_delete.add_argument('--skip',  nargs='+',
-                               help="path to files to skip")
+                               help="path to files to skip", default=[])
     group = parser_delete.add_mutually_exclusive_group()
     group.add_argument('--id', action="store_true", default=False,
                        help="id based deletion")
@@ -454,7 +454,7 @@ if __name__ == '__main__':
     parser_edit.add_argument('entries', metavar='entry', nargs='+',
                              help="a filename or an identifier")
     parser_edit.add_argument('--skip',  nargs='+',
-                             help="path to files to skip")
+                             help="path to files to skip", default=[])
     group = parser_edit.add_mutually_exclusive_group()
     group.add_argument('--id', action="store_true", default=False,
                        help="id based deletion")
@@ -561,7 +561,7 @@ if __name__ == '__main__':
                     sys.exit("Unable to open file associated " +
                              "to ident "+filename)
             sys.exit()
-        
+
         elif args.func == 'export':
             bibtex = ''
             for id in args.ids:

@@ -8,3 +8,40 @@
 # <del>beer</del> soda in return.
 #                                                                   Phyks
 # -----------------------------------------------------------------------------
+import unittest
+from backend import *
+
+
+class TestFetcher(unittest.TestCase):
+    def test_getNewName(self):
+        return
+
+    def test_bibtexAppend(self):
+        return
+
+    def test_bibtexEdit(self):
+        return
+
+    def test_bibtexRewrite(self):
+        return
+
+    def test_deleteId(self):
+        return
+
+    def test_deleteFile(self):
+        return
+
+    def test_diffFilesIndex(self):
+        return
+
+    def test_getBibtex(self):
+        return
+
+    def test_getEntries(self):
+        return
+
+    def test_updateArxiv(self):
+        return
+
+if __name__ == '__main__':
+    unittest.main()
