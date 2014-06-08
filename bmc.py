@@ -106,29 +106,37 @@ def addFile(src, filetype, manual, autoconfirm, tag):
             tools.warning("Could not determine the DOI nor the arXiv id nor " +
                           "the ISBN for "+src+". Switching to manual entry.")
             doi_arxiv_isbn = ''
-            while doi_arxiv_isbn not in ['doi', 'arxiv', 'isbn', 'manual']:
+            while doi_arxiv_isbn not in ['doi', 'arxiv', 'isbn', 'manual', 'skip']:
                 doi_arxiv_isbn = tools.rawInput("DOI / arXiv " +
-                                                "/ ISBN / manual? ").lower()
+                                                "/ ISBN / manual / skip? ").lower()
             if doi_arxiv_isbn == 'doi':
                 doi = tools.rawInput('DOI? ')
             elif doi_arxiv_isbn == 'arxiv':
                 arxiv = tools.rawInput('arXiv id? ')
             elif doi_arxiv_isbn == 'isbn':
                 isbn = tools.rawInput('ISBN? ')
+            elif doi_arxiv_isbn == 'skip':
+                return False
         elif filetype == 'article':
             tools.warning("Could not determine the DOI nor the arXiv id for " +
                           src+", switching to manual entry.")
             doi_arxiv = ''
-            while doi_arxiv not in ['doi', 'arxiv', 'manual']:
-                doi_arxiv = tools.rawInput("DOI / arXiv / manual? ").lower()
+            while doi_arxiv not in ['doi', 'arxiv', 'manual', 'skip']:
+                doi_arxiv = tools.rawInput("DOI / arXiv / manual / skip? ").lower()
             if doi_arxiv == 'doi':
                 doi = tools.rawInput('DOI? ')
             elif doi_arxiv == 'arxiv':
                 arxiv = tools.rawInput('arXiv id? ')
+            elif doi_arxiv == 'skip':
+                return False
         elif filetype == 'book':
-            tools.warning("Could not determine the ISBN for "+src +
-                          ", switching to manual entry.")
-            isbn = tools.rawInput('ISBN? ')
+            isbn_manual = ''
+            while isbn_manual not in ['isbn', 'manual', 'skip']:
+                isbn_manual = tools.rawInput("ISBN / manual / skip? ").lower()
+            if isbn_manual == 'isbn':
+                isbn = tools.rawInput('ISBN? ')
+            elif isbn_manual == 'skip':
+                return False
     elif doi is not False:
         print("DOI for "+src+" is "+doi+".")
     elif arxiv is not False:
@@ -263,6 +271,8 @@ def downloadFile(url, filetype, manual, autoconfirm, tag):
         with open(tmp.name, 'w+') as fh:
             fh.write(dl)
         new_name = addFile(tmp.name, filetype, manual, autoconfirm, tag)
+        if new_name is False:
+            return False
         tmp.close()
         return new_name
     else:
@@ -475,7 +485,7 @@ if __name__ == '__main__':
 
     parser_export = subparsers.add_parser('export', help="export help")
     parser_export.add_argument('ids', metavar='id',  nargs='+',
-                             help="an identifier")
+                               help="an identifier")
     parser_export.set_defaults(func='export')
 
     parser_resync = subparsers.add_parser('resync', help="resync help")
@@ -494,6 +504,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     try:
         if args.func == 'download':
+            skipped = []
             for url in args.url:
                 new_name = downloadFile(url, args.type, args.manual, args.y,
                                         args.tag)
@@ -501,9 +512,15 @@ if __name__ == '__main__':
                     print(url+" successfully imported as "+new_name)
                 else:
                     tools.warning("An error occurred while downloading "+url)
+                    skipped.append(url)
+            if len(skipped) > 0:
+                print("\nSkipped files:")
+                for i in skipped:
+                    print(i)
             sys.exit()
 
         if args.func == 'import':
+            skipped = []
             for filename in list(set(args.file) - set(args.skip)):
                 new_name = addFile(filename, args.type, args.manual, args.y,
                                    args.tag)
@@ -513,9 +530,15 @@ if __name__ == '__main__':
                 else:
                     tools.warning("An error occurred while importing " +
                                   filename)
+                    skipped.append(filename)
+            if len(skipped) > 0:
+                print("\nSkipped files:")
+                for i in skipped:
+                    print(i)
             sys.exit()
 
         elif args.func == 'delete':
+            skipped = []
             for filename in list(set(args.entries) - set(args.skip)):
                 if not args.force:
                     confirm = tools.rawInput("Are you sure you want to " +
@@ -530,6 +553,13 @@ if __name__ == '__main__':
                             sys.exit(1)
 
                     print(filename+" successfully deleted.")
+                else:
+                    skipped.append(filename)
+
+            if len(skipped) > 0:
+                print("\nSkipped files:")
+                for i in skipped:
+                    print(i)
             sys.exit()
 
         elif args.func == 'edit':
