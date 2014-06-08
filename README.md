@@ -102,6 +102,10 @@ Run `./bmc.py edit PARAM` where `PARAM` should be either a path to a paper file 
 
 Run `./bmc.py update` to look for available updated versions of your arXiv papers. You can use the optionnal `--entries ID` argument (where ID is either a bibtex index identifier or a filename) to search only for a limited subset of papers.
 
+### Importing long articles / books without DOI / ISBN
+
+When you import a long article without any DOI or ISBN, the script will process the whole file before finding out that there is no such information. This can take a while for long articles, and you may feel the script has entered an infinite loop. If you think it's taking too long, you can `^C` and you will be dropped to manual entry of bibtex infos.
+
 ### Data storage
 
 All your documents will be stored in the papers dir specified in `params.py`. All the bibtex entries will be added to the `index.bib` file. You should **not** add entries to this file (but you can edit existing entries without any problem), as this will break synchronization between documents in papers dir and the index. If you do so, you can resync the index file with `./bmc.py resync`.
