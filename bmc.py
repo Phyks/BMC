@@ -508,7 +508,7 @@ if __name__ == '__main__':
                 new_name = addFile(filename, args.type, args.manual, args.y,
                                    args.tag)
                 if new_name is not False:
-                    print(sys.argv[2]+" successfully imported as " +
+                    print(filename+" successfully imported as " +
                           new_name+".")
                 else:
                     tools.warning("An error occurred while importing " +
