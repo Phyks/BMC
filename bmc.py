@@ -25,7 +25,12 @@ def checkBibtex(filename, bibtex_string):
     bibtex = bibtex.get_entry_dict()
     try:
         bibtex = bibtex[bibtex.keys()[0]]
-        print(bibtex_string)
+        # Check entries are correct
+        assert bibtex['title']
+        assert bibtex['authors']
+        assert bibtex['year']
+        # Print the bibtex and confirm
+        print(parsed2Bibtex(bibtex))
         check = tools.rawInput("Is it correct? [Y/n] ")
     except:
         check = 'n'
