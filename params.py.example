@@ -1,8 +1,10 @@
 # -*- coding: utf8 -*-
 
 # The folder in which the papers should be stored
-# /!\ Keep the trailing slash /!\
 folder = "/home/phyks/Papers/"
+
+if folder[-1] != '/':
+    folder = folder+'/'
 
 # The various proxies available to retrieve the content
 proxies = [
