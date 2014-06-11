@@ -27,11 +27,16 @@ def checkBibtex(filename, bibtex_string):
         bibtex = bibtex[bibtex.keys()[0]]
         # Check entries are correct
         assert bibtex['title']
-        assert bibtex['authors']
+        if bibtex['type'] == 'article':
+            assert bibtex['authors']
+        elif bibtex['type'] == 'book':
+            assert bibtex['author']
         assert bibtex['year']
         # Print the bibtex and confirm
-        print(parsed2Bibtex(bibtex))
+        print(tools.parsed2Bibtex(bibtex))
         check = tools.rawInput("Is it correct? [Y/n] ")
+    except KeyboardInterrupt:
+        sys.exit()
     except:
         check = 'n'
 
@@ -139,7 +144,7 @@ def addFile(src, filetype, manual, autoconfirm, tag):
             while isbn_manual not in ['isbn', 'manual', 'skip']:
                 isbn_manual = tools.rawInput("ISBN / manual / skip? ").lower()
             if isbn_manual == 'isbn':
-                isbn = tools.rawInput('ISBN? ')
+                isbn = tools.rawInput('ISBN? ').replace(' ', '').replace('-', '')
             elif isbn_manual == 'skip':
                 return False
     elif doi is not False:

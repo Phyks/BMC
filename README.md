@@ -142,7 +142,6 @@ Here are some sources of inspirations for this project :
 
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
-0. Add book
 60. Unittest
 80. Search engine
 85. Anti-duplicate ?
