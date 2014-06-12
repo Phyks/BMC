@@ -11,6 +11,7 @@
 import unittest
 from backend import *
 from bibtexparser.bparser import BibTexParser
+import os
 import shutil
 import tempfile
 
@@ -45,6 +46,13 @@ Lattice},
         self.bibtex_article = self.bibtex_article[self.bibtex_article.keys()[0]]
 
         self.bibtex_book_string = """
+@book{9780521846516,
+    author={C. J. Pethick and H. Smith},
+    isbn={9780521846516},
+    publisher={Cambridge University Press},
+    title={Bose-Einstein Condensation In Dilute Gases},
+    year={2008},
+}
 """
         self.bibtex_book = BibTexParser(self.bibtex_book_string).get_entry_dict()
         self.bibtex_book = self.bibtex_book[self.bibtex_book.keys()[0]]
@@ -58,51 +66,90 @@ Lattice},
                          params.folder+"N_Bartolo.pdf")
 
     def test_getNewName_book(self):
-# TODO
         self.assertEqual(getNewName("test.pdf", self.bibtex_book),
-                         params.folder+"")
+                         params.folder+"C_J_Pethick_H_Smith-Bose-Einstein_Condensation_In_Dilute_Gases.pdf")
 
     def test_getNewName_book_override(self):
-# TODO
         self.assertEqual(getNewName("test.pdf", self.bibtex_book, override_format="%a"),
-                         params.folder+"N_Bartolo.pdf")
+                         params.folder+"C_J_Pethick_H_Smith.pdf")
 
     def test_bibtexAppend(self):
-        bibtexAppend(self.bibtex)
+        bibtexAppend(self.bibtex_article)
         with open(params.folder+'index.bib', 'r') as fh:
             self.assertEqual(fh.read(),
                              '@article{1303.3130v1,\n\tabstract={We study the role of the dipolar interaction, correctly accounting for the\nDipolar-Induced Resonance (DIR), in a quasi-one-dimensional system of ultracold\nbosons. We first show how the DIR affects the lowest-energy states of two\nparticles in a harmonic trap. Then, we consider a deep optical lattice loaded\nwith ultracold dipolar bosons. We describe this many-body system using an\natom-dimer extended Bose-Hubbard model. We analyze the impact of the DIR on the\nphase diagram at T=0 by exact diagonalization of a small-sized system. In\nparticular, the resonance strongly modifies the range of parameters for which a\nmass density wave should occur.},\n\tarchiveprefix={arXiv},\n\tauthor={N. Bartolo and D. J. Papoular and L. Barbiero and C. Menotti and A. Recati},\n\teprint={1303.3130v1},\n\tfile={/home/phyks/Papers/N_Bartolo_A_Recati-j-2013.pdf},\n\tlink={http://arxiv.org/abs/1303.3130v1},\n\tmonth={Mar},\n\tprimaryclass={cond-mat.quant-gas},\n\ttag={},\n\ttitle={Dipolar-Induced Resonance for Ultracold Bosons in a Quasi-1D Optical\nLattice},\n\tyear={2013},\n}\n\n\n')
 
     def test_bibtexEdit(self):
-# TODO
-        return
+        bibtexAppend(self.bibtex_article)
+        bibtexEdit(self.bibtex_article['id'], {'id': 'bidule'})
+        with open(params.folder+'index.bib', 'r') as fh:
+            self.assertEqual(fh.read(),
+                             '@article{bidule,\n\tabstract={We study the role of the dipolar interaction, correctly accounting for the\nDipolar-Induced Resonance (DIR), in a quasi-one-dimensional system of ultracold\nbosons. We first show how the DIR affects the lowest-energy states of two\nparticles in a harmonic trap. Then, we consider a deep optical lattice loaded\nwith ultracold dipolar bosons. We describe this many-body system using an\natom-dimer extended Bose-Hubbard model. We analyze the impact of the DIR on the\nphase diagram at T=0 by exact diagonalization of a small-sized system. In\nparticular, the resonance strongly modifies the range of parameters for which a\nmass density wave should occur.},\n\tarchiveprefix={arXiv},\n\tauthor={N. Bartolo and D. J. Papoular and L. Barbiero and C. Menotti and A. Recati},\n\teprint={1303.3130v1},\n\tfile={/home/phyks/Papers/N_Bartolo_A_Recati-j-2013.pdf},\n\tlink={http://arxiv.org/abs/1303.3130v1},\n\tmonth={Mar},\n\tprimaryclass={cond-mat.quant-gas},\n\ttag={},\n\ttitle={Dipolar-Induced Resonance for Ultracold Bosons in a Quasi-1D Optical\nLattice},\n\tyear={2013},\n}\n\n\n')
 
     def test_bibtexRewrite(self):
-# TODO
-        return
+        bibtexAppend(self.bibtex_book)
+        bibtexRewrite({0: self.bibtex_article})
+        with open(params.folder+'index.bib', 'r') as fh:
+            self.assertEqual(fh.read(),
+                             '@article{1303.3130v1,\n\tabstract={We study the role of the dipolar interaction, correctly accounting for the\nDipolar-Induced Resonance (DIR), in a quasi-one-dimensional system of ultracold\nbosons. We first show how the DIR affects the lowest-energy states of two\nparticles in a harmonic trap. Then, we consider a deep optical lattice loaded\nwith ultracold dipolar bosons. We describe this many-body system using an\natom-dimer extended Bose-Hubbard model. We analyze the impact of the DIR on the\nphase diagram at T=0 by exact diagonalization of a small-sized system. In\nparticular, the resonance strongly modifies the range of parameters for which a\nmass density wave should occur.},\n\tarchiveprefix={arXiv},\n\tauthor={N. Bartolo and D. J. Papoular and L. Barbiero and C. Menotti and A. Recati},\n\teprint={1303.3130v1},\n\tfile={/home/phyks/Papers/N_Bartolo_A_Recati-j-2013.pdf},\n\tlink={http://arxiv.org/abs/1303.3130v1},\n\tmonth={Mar},\n\tprimaryclass={cond-mat.quant-gas},\n\ttag={},\n\ttitle={Dipolar-Induced Resonance for Ultracold Bosons in a Quasi-1D Optical\nLattice},\n\tyear={2013},\n}\n\n\n')
 
     def test_deleteId(self):
-# TODO
-        return
+        self.bibtex_article['file'] = params.folder+'test.pdf'
+        bibtexAppend(self.bibtex_article)
+        open(params.folder+'test.pdf', 'w').close()
+        deleteId(self.bibtex_article['id'])
+        with open(params.folder+'index.bib', 'r') as fh:
+            self.assertEquals(fh.read().strip(), "")
+        self.assertFalse(os.path.isfile(params.folder+'test.pdf'))
 
     def test_deleteFile(self):
-# TODO
-        return
+        self.bibtex_article['file'] = params.folder+'test.pdf'
+        bibtexAppend(self.bibtex_article)
+        open(params.folder+'test.pdf', 'w').close()
+        deleteFile(self.bibtex_article['file'])
+        with open(params.folder+'index.bib', 'r') as fh:
+            self.assertEquals(fh.read().strip(), "")
+        self.assertFalse(os.path.isfile(params.folder+'test.pdf'))
 
     def test_diffFilesIndex(self):
-# TODO
+        # TODO
         return
 
     def test_getBibtex(self):
-# TODO
-        return
+        bibtexAppend(self.bibtex_article)
+        got = getBibtex(self.bibtex_article['id'])
+        self.assertEqual(got, self.bibtex_article)
+
+    def test_getBibtex_id(self):
+        bibtexAppend(self.bibtex_article)
+        got = getBibtex(self.bibtex_article['id'], file_id='id')
+        self.assertEqual(got, self.bibtex_article)
+
+    def test_getBibtex_file(self):
+        self.bibtex_article['file'] = params.folder+'test.pdf'
+        open(params.folder+'test.pdf', 'w').close()
+        bibtexAppend(self.bibtex_article)
+        got = getBibtex(self.bibtex_article['file'], file_id='file')
+        self.assertEqual(got, self.bibtex_article)
+
+    def test_getBibtex_clean(self):
+        params.ignore_fields = ['id', 'abstract']
+        bibtexAppend(self.bibtex_article)
+        got = getBibtex(self.bibtex_article['id'], clean=True)
+        for i in params.ignore_fields:
+            self.assertNotIn(i, got)
 
     def test_getEntries(self):
-# TODO
-        return
+        bibtexAppend(self.bibtex_article)
+        self.assertEqual(getEntries(),
+                         [self.bibtex_article['id']])
 
     def test_updateArxiv(self):
-# TODO
+        # TODO
+        return
+
+    def test_search(self):
+        # TODO
         return
 
     def tearDown(self):
