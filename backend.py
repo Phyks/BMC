@@ -14,21 +14,21 @@ import os
 import re
 import tools
 import fetcher
-import params
 from bibtexparser.bparser import BibTexParser
+from config import config
 from codecs import open
 
 
 def getNewName(src, bibtex, tag='', override_format=None):
     """
-    Return the formatted name according to params for the given
+    Return the formatted name according to config for the given
     bibtex entry
     """
     authors = re.split(' and ', bibtex['author'])
 
     if bibtex['type'] == 'article':
         if override_format is None:
-            new_name = params.format_articles
+            new_name = config.get("format_articles")
         else:
             new_name = override_format
         try:
@@ -37,7 +37,7 @@ def getNewName(src, bibtex, tag='', override_format=None):
             pass
     elif bibtex['type'] == 'book':
         if override_format is None:
-            new_name = params.format_books
+            new_name = config.get("format_books")
         else:
             new_name = override_format
 
@@ -53,25 +53,27 @@ def getNewName(src, bibtex, tag='', override_format=None):
     if('archiveprefix' in bibtex and
        'arXiv' in bibtex['archiveprefix']):
         new_name = new_name.replace("%v",
-                                    '-'+bibtex['eprint'][bibtex['eprint'].rfind('v'):])
+                                    '-' +
+                                    bibtex['eprint'][bibtex['eprint'].
+                                                     rfind('v'):])
     else:
         new_name = new_name.replace("%v", '')
 
-    for custom in params.format_custom:
+    for custom in config.get("format_custom"):
         new_name = custom(new_name)
 
     if tag == '':
-        new_name = (params.folder + tools.slugify(new_name) +
+        new_name = (config.get("folder") + tools.slugify(new_name) +
                     tools.getExtension(src))
     else:
-        if not os.path.isdir(params.folder + tag):
+        if not os.path.isdir(config.get("folder") + tag):
             try:
-                os.mkdir(params.folder + tag)
+                os.mkdir(config.get("folder") + tag)
             except:
                 tools.warning("Unable to create tag dir " +
-                              params.folder+tag+".")
+                              config.get("folder")+tag+".")
 
-        new_name = (params.folder + tools.slugify(tag) + '/' +
+        new_name = (config.get("folder") + tools.slugify(tag) + '/' +
                     tools.slugify(new_name) + tools.getExtension(src))
 
     return new_name
@@ -83,7 +85,8 @@ def bibtexAppend(data):
     data is a dict for one entry in bibtex, as the one from bibtexparser output
     """
     try:
-        with open(params.folder+'index.bib', 'a', encoding='utf-8') as fh:
+        with open(config.get("folder")+'index.bib', 'a', encoding='utf-8') \
+                as fh:
             fh.write(tools.parsed2Bibtex(data)+"\n")
     except:
         tools.warning("Unable to open index file.")
@@ -94,7 +97,8 @@ def bibtexEdit(ident, modifs):
     """Update ident key in bibtex file, modifications are in modifs dict"""
 
     try:
-        with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
+        with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
+                as fh:
             bibtex = BibTexParser(fh.read())
         bibtex = bibtex.get_entry_dict()
     except:
@@ -115,7 +119,8 @@ def bibtexRewrite(data):
     for entry in data.keys():
         bibtex += tools.parsed2Bibtex(data[entry])+"\n"
     try:
-        with open(params.folder+'index.bib', 'w', encoding='utf-8') as fh:
+        with open(config.get("folder")+'index.bib', 'w', encoding='utf-8') \
+                as fh:
             fh.write(bibtex)
     except:
         tools.warning("Unable to open index file.")
@@ -125,7 +130,8 @@ def bibtexRewrite(data):
 def deleteId(ident):
     """Delete a file based on its id in the bibtex file"""
     try:
-        with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
+        with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
+                as fh:
             bibtex = BibTexParser(fh.read().decode('utf-8'))
         bibtex = bibtex.get_entry_dict()
     except:
@@ -160,7 +166,8 @@ def deleteId(ident):
 def deleteFile(filename):
     """Delete a file based on its filename"""
     try:
-        with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
+        with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
+                as fh:
             bibtex = BibTexParser(fh.read().decode('utf-8'))
         bibtex = bibtex.get_entry_dict()
     except:
@@ -206,10 +213,11 @@ def diffFilesIndex():
         * full bibtex entry with file='' if file is not found
         * only file entry if file with missing bibtex entry
     """
-    files = tools.listDir(params.folder)
+    files = tools.listDir(config.get("folder"))
     files = [i for i in files if tools.getExtension(i) in ['.pdf', '.djvu']]
     try:
-        with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
+        with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
+                as fh:
             index = BibTexParser(fh.read())
         index_diff = index.get_entry_dict()
     except:
@@ -233,10 +241,11 @@ def getBibtex(entry, file_id='both', clean=False):
 
     entry is either a filename or a bibtex ident
     file_id is file or id or both to search for a file / id / both
-    clean is to clean the ignored fields specified in params
+    clean is to clean the ignored fields specified in config
     """
     try:
-        with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
+        with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
+                as fh:
             bibtex = BibTexParser(fh.read())
         bibtex = bibtex.get_entry_dict()
     except:
@@ -256,7 +265,7 @@ def getBibtex(entry, file_id='both', clean=False):
                     bibtex_entry = bibtex[key]
                     break
     if clean:
-        for field in params.ignore_fields:
+        for field in config.get("ignore_fields"):
             try:
                 del(bibtex_entry[field])
             except KeyError:
@@ -267,7 +276,8 @@ def getBibtex(entry, file_id='both', clean=False):
 def getEntries():
     """Returns the list of all entries in the bibtex index"""
     try:
-        with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
+        with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
+                as fh:
             bibtex = BibTexParser(fh.read())
         bibtex = bibtex.get_entry_dict()
     except:

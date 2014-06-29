@@ -184,8 +184,7 @@ class Reference(object):
                      ("Month", self.month),
                      ("Note", self.note),
                      ("Url", self.url),
-                     ("File", self.id + ".pdf"),
-                    ]:
+                     ("File", self.id + ".pdf")]:
             if len(v):
                 lines.append("%-13s = {%s}" % (k, v))
 
@@ -203,12 +202,12 @@ class ReferenceErrorInfo(object):
 
     def bibtex(self):
         """BibTeX comment explaining error"""
-        return "@comment{%(id)s: %(message)s}" % \
-                {'id': self.id, 'message': self.message}
+        return ("@comment{%(id)s: %(message)s}" %
+                {'id': self.id, 'message': self.message})
 
     def __str__(self):
-        return "Error: %(message)s (%(id)s)" % \
-                {'id': self.id, 'message': self.message}
+        return ("Error: %(message)s (%(id)s)" %
+                {'id': self.id, 'message': self.message})
 
 
 def arxiv2bib(id_list):
@@ -227,9 +226,9 @@ def arxiv2bib(id_list):
 def arxiv_request(ids):
     """Sends a request to the arxiv API."""
     q = urlencode([
-         ("id_list", ",".join(ids)),
-         ("max_results", len(ids))
-         ])
+        ("id_list", ",".join(ids)),
+        ("max_results", len(ids))
+    ])
     xml = urlopen("http://export.arxiv.org/api/query?" + q)
     # xml.read() returns bytes, but ElementTree.fromstring decodes
     # to unicode when needed (python2) or string (python3)
@@ -321,7 +320,7 @@ class Cli(object):
     """)
             else:
                 raise FatalError(
-                  "HTTP Connection Error: {0}".format(error.getcode()))
+                    "HTTP Connection Error: {0}".format(error.getcode()))
 
         self.create_output(bib)
         self.code = self.tally_errors(bib)
@@ -349,7 +348,7 @@ class Cli(object):
             print_bytes((output_string + os.linesep).encode('utf-8'))
             if self.args.verbose:
                 self.messages.append(
-                  'Could not use system encoding; using utf-8')
+                    'Could not use system encoding; using utf-8')
 
     def tally_errors(self, bib):
         """calculate error code"""
@@ -358,7 +357,7 @@ class Cli(object):
             return 2
         elif self.error_count > 0:
             self.messages.append("%s of %s matched succesfully" %
-              (len(bib) - self.error_count, len(bib)))
+                                 (len(bib) - self.error_count, len(bib)))
             return 1
         else:
             return 0
@@ -377,20 +376,20 @@ class Cli(object):
             sys.exit("Cannot load required module 'argparse'")
 
         parser = argparse.ArgumentParser(
-          description="Get the BibTeX for each arXiv id.",
-          epilog="""\
+            description="Get the BibTeX for each arXiv id.",
+            epilog="""\
     Returns 0 on success, 1 on partial failure, 2 on total failure.
     Valid BibTeX is written to stdout, error messages to stderr.
     If no arguments are given, ids are read from stdin, one per line.""",
-          formatter_class=argparse.RawDescriptionHelpFormatter)
+            formatter_class=argparse.RawDescriptionHelpFormatter)
         parser.add_argument('id', metavar='arxiv_id', nargs="*",
-          help="arxiv identifier, such as 1201.1213")
+                            help="arxiv identifier, such as 1201.1213")
         parser.add_argument('-c', '--comments', action='store_true',
-          help="Include @comment fields with error details")
+                            help="Include @comment fields with error details")
         parser.add_argument('-q', '--quiet', action='store_true',
-          help="Display fewer error messages")
+                            help="Display fewer error messages")
         parser.add_argument('-v', '--verbose', action="store_true",
-          help="Display more error messages")
+                            help="Display more error messages")
         return parser.parse_args(args)
 
 

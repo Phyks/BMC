@@ -17,8 +17,8 @@ import subprocess
 import sys
 import arxiv2bib as arxiv_metadata
 import tools
-import params
 from bibtexparser.bparser import BibTexParser
+from config import config
 from isbntools.dev._fmt import fmtbib
 
 
@@ -29,7 +29,7 @@ def download(url):
     available proxies sequentially. Returns the raw content of the file, or
     false if it could not be downloaded.
     """
-    for proxy in params.proxies:
+    for proxy in config.get("proxies"):
         r_proxy = {
             "http": proxy,
             "https": proxy,
@@ -150,8 +150,9 @@ def findDOI(src):
         extractDOI = doi_re.search(extractfull.lower().replace('&#338;', '-'))
         if not extractDOI:
             # PNAS fix
-            extractDOI = doi_pnas_re.search(extractfull.lower().replace('pnas',
-                                                                        '/pnas'))
+            extractDOI = doi_pnas_re.search(extractfull.
+                                            lower().
+                                            replace('pnas', '/pnas'))
             if not extractDOI:
                 # JSB fix
                 extractDOI = doi_jsb_re.search(extractfull.lower())

@@ -11,9 +11,9 @@ import backend
 import fetcher
 import tearpages
 import tools
-import params
 from bibtexparser.bparser import BibTexParser
 from codecs import open
+from config import config
 
 EDITOR = os.environ.get('EDITOR') if os.environ.get('EDITOR') else 'vim'
 
@@ -116,9 +116,11 @@ def addFile(src, filetype, manual, autoconfirm, tag):
             tools.warning("Could not determine the DOI nor the arXiv id nor " +
                           "the ISBN for "+src+". Switching to manual entry.")
             doi_arxiv_isbn = ''
-            while doi_arxiv_isbn not in ['doi', 'arxiv', 'isbn', 'manual', 'skip']:
-                doi_arxiv_isbn = tools.rawInput("DOI / arXiv " +
-                                                "/ ISBN / manual / skip? ").lower()
+            while(doi_arxiv_isbn not in
+                  ['doi', 'arxiv', 'isbn', 'manual', 'skip']):
+                doi_arxiv_isbn = (tools.rawInput("DOI / arXiv " +
+                                                 "/ ISBN / manual / skip? ").
+                                  lower())
             if doi_arxiv_isbn == 'doi':
                 doi = tools.rawInput('DOI? ')
             elif doi_arxiv_isbn == 'arxiv':
@@ -132,7 +134,8 @@ def addFile(src, filetype, manual, autoconfirm, tag):
                           src+", switching to manual entry.")
             doi_arxiv = ''
             while doi_arxiv not in ['doi', 'arxiv', 'manual', 'skip']:
-                doi_arxiv = tools.rawInput("DOI / arXiv / manual / skip? ").lower()
+                doi_arxiv = (tools.rawInput("DOI / arXiv / manual / skip? ").
+                             lower())
             if doi_arxiv == 'doi':
                 doi = tools.rawInput('DOI? ')
             elif doi_arxiv == 'arxiv':
@@ -144,7 +147,9 @@ def addFile(src, filetype, manual, autoconfirm, tag):
             while isbn_manual not in ['isbn', 'manual', 'skip']:
                 isbn_manual = tools.rawInput("ISBN / manual / skip? ").lower()
             if isbn_manual == 'isbn':
-                isbn = tools.rawInput('ISBN? ').replace(' ', '').replace('-', '')
+                isbn = (tools.rawInput('ISBN? ').
+                        replace(' ', '').
+                        replace('-', ''))
             elif isbn_manual == 'skip':
                 return False
     elif doi is not False:
@@ -200,7 +205,8 @@ def addFile(src, filetype, manual, autoconfirm, tag):
         shutil.copy2(src, new_name)
     except IOError:
         new_name = False
-        sys.exit("Unable to move file to library dir " + params.folder+".")
+        sys.exit("Unable to move file to library dir " +
+                 config.get("folder")+".")
 
     # Remove first page of IOP papers
     try:
@@ -258,7 +264,8 @@ def editEntry(entry, file_id='both'):
                           os.path.dirname(bibtex['file']))
 
     try:
-        with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
+        with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
+                as fh:
             index = BibTexParser(fh.read())
         index = index.get_entry_dict()
     except:
@@ -292,7 +299,8 @@ def downloadFile(url, filetype, manual, autoconfirm, tag):
 
 def openFile(ident):
     try:
-        with open(params.folder+'index.bib', 'r', encoding='utf-8') as fh:
+        with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
+                as fh:
             bibtex = BibTexParser(fh.read())
         bibtex = bibtex.get_entry_dict()
     except:
@@ -363,7 +371,7 @@ def resync():
                 except IOError:
                     new_name = False
                     sys.exit("Unable to move file to library dir " +
-                             params.folder+".")
+                             config.get("folder")+".")
                 backend.bibtexEdit(entry['id'], {'file': filename})
         else:
             print("Found file without any associated entry in index:")
@@ -388,12 +396,12 @@ def resync():
                 print(entry['file'] + " removed from disk and " +
                       "index.")
     # Check for empty tag dirs
-    for i in os.listdir(params.folder):
-        if os.path.isdir(i) and not os.listdir(params.folder + i):
+    for i in os.listdir(config.get("folder")):
+        if os.path.isdir(i) and not os.listdir(config.get("folder") + i):
             try:
-                os.rmdir(params.folder + i)
+                os.rmdir(config.get("folder") + i)
             except:
-                tools.warning("Found empty tag dir "+params.folder + i +
+                tools.warning("Found empty tag dir "+config.get("folder") + i +
                               " but could not delete it.")
 
 
@@ -584,7 +592,7 @@ if __name__ == '__main__':
             sys.exit()
 
         elif args.func == 'list':
-            listPapers = tools.listDir(params.folder)
+            listPapers = tools.listDir(config.get("folder"))
             listPapers.sort()
 
             for paper in listPapers:

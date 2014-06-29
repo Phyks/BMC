@@ -5,8 +5,6 @@
 *~
 .*.sw*
 
-params.py
-translation-server
 *.pdf
 *.bib
 *.djvu
