@@ -1,8 +1,6 @@
 BiblioManager
 =============
 
-[![Build Status](https://travis-ci.org/Phyks/BMC.svg?branch=master)](https://travis-ci.org/Phyks/BMC)
-
 BiblioManager is a simple script to download and store your articles. Read on if you want more info :)
 
 **Note :** This script is currently a work in progress.
