@@ -157,4 +157,5 @@ A list of ideas and TODO. Don't hesitate to give feedback on the ones you really
 
 ## Note on test files
 
-* The test files used, provided in `tests/src` are under CC-BY license, from arXiv, HAL and PhysRev.
+* The test files used, provided in `tests/src` are under CC-BY license, from arXiv, HAL, New Journal of Physics and PhysRev.
+* The `test_watermark.pdf` file originally had a first blank page, which is supposed to be teared down. For this test, I just duplicated the first page, as the original first page contained personnal information.
