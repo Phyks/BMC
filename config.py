@@ -72,7 +72,7 @@ class Config():
 
     def save(self):
         try:
-            with open(self.config_path + "bmc.json", 'r') as fh:
+            with open(self.config_path + "bmc.json", 'w') as fh:
                 fh.write(json.dumps(self.config))
         except IOError:
             tools.warning("Could not write config file.")
