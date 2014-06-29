@@ -62,7 +62,8 @@ sudo pip install arxiv2bib requesocks bibtexparser pyPDF2 isbntools
 ```
 (replace pip by pip2 if your distribution ships python3 by default)
 * Install `pdftotext` (provided by Xpdf) and `djvulibre` _via_ your package manager or the way you want
-* Copy `params.py.example` to `params.py` and customize it to fit your needs
+* Run the script to initialize the conf in `~/.config/bmc.json`.
+* Customize the configuration by editing `~/.config/bmc.json` according to your needs. A documentation of the available options can be found in file `config.py`.
 
 *Note:* To update the script, just run `git pull` in the script dir.
 
@@ -72,15 +73,15 @@ sudo pip install arxiv2bib requesocks bibtexparser pyPDF2 isbntools
 
 Run `./bmc.py import PATH_TO_FILE [article|book]`. `[article|book]` is an optional argument (article or book) to search only for DOI or ISBN and thus, speed up the import.
 
-It will get automatically the bibtex entry corresponding to the document, and you will be prompted for confirmation. It will then copy the file to your papers dir, renaming it according to the specified mask in `params.py`.
+It will get automatically the bibtex entry corresponding to the document, and you will be prompted for confirmation. It will then copy the file to your papers dir, renaming it according to the specified mask in `~/.config/bmc.json`.
 
 ### To download a PDF / Djvu file
 
 Run `./bmc.py download URL_TO_PDF [article|book]`, where `[article|book]` (article or book) is again a parameter to specify to search only for DOI or ISBN only, and thus speed up the import. The `URL_TO_PDF` parameter should be a direct link to the PDF file (meaning it should be the link to the pdf page, which may have an authentication portal and not the page with abstract on many publishers websites).
 
-The script will try to download the file with the proxies specified in `params.py` until it manages to get the file, or runs out of available proxies.
+The script will try to download the file with the proxies specified in `~/.config/bmc.json` until it manages to get the file, or runs out of available proxies.
 
-It will get automatically the bibtex entry corresponding to the document, and you will be prompted for confirmation. It will then put the file in your papers dir, renaming it according to the specified mask in `params.py`.
+It will get automatically the bibtex entry corresponding to the document, and you will be prompted for confirmation. It will then put the file in your papers dir, renaming it according to the specified mask in `~/.config/bmc.json`.
 
 ### Delete an entry
 
@@ -108,7 +109,7 @@ When you import a long article without any DOI or ISBN, the script will process 
 
 ### Data storage
 
-All your documents will be stored in the papers dir specified in `params.py`. All the bibtex entries will be added to the `index.bib` file. You should **not** add entries to this file (but you can edit existing entries without any problem), as this will break synchronization between documents in papers dir and the index. If you do so, you can resync the index file with `./bmc.py resync`.
+All your documents will be stored in the papers dir specified in `~/.config/bmc.json`. All the bibtex entries will be added to the `index.bib` file. You should **not** add entries to this file (but you can edit existing entries without any problem), as this will break synchronization between documents in papers dir and the index. If you do so, you can resync the index file with `./bmc.py resync`.
 
 The resync option will check that all bibtex entries have a corresponding file and all file have a corresponding bibtex entry. It will prompt you what to do for unmatched entries.
 
