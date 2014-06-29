@@ -19,7 +19,7 @@ import arxiv2bib as arxiv_metadata
 import tools
 import params
 from bibtexparser.bparser import BibTexParser
-from isbntools.dev.fmt import fmtbib
+from isbntools.dev._fmt import fmtbib
 
 
 def download(url):
