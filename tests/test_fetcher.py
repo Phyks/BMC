@@ -46,15 +46,16 @@ class TestFetcher(unittest.TestCase):
         self.assertEqual(isbn2Bib('0198507194'), self.isbn_bib)
 
     def test_isbn2Bib_False(self):
-        self.assertEqual(isbn2Bib('blabla'), '')
+        self.assertEqual(isbn2Bib('foo'), '')
 
     def test_findDOI_PDF(self):
         self.assertEqual(findDOI("tests/src/test.pdf"),
-                         '10.1103/physreva.88.043630')
+                         "10.1103/physrevlett.112.253201")
 
     def test_findDOI_DJVU(self):
+        # DOI is incomplete in this text because my djvu file is bad
         self.assertEqual(findDOI("tests/src/test.djvu"),
-                         '10.1103/physreva.88.043630')
+                         "10.1103/physrevlett.112")
 
     def test_findDOI_False(self):
         self.assertFalse(findDOI("tests/src/test_arxiv_multi.pdf"))

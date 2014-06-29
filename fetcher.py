@@ -146,7 +146,7 @@ def findDOI(src):
 
     extractfull = ''
     while totext.poll() is None:
-        extractfull += totext.stdout.readline().strip()
+        extractfull += "".join([i.strip() for i in totext.stdout.readlines()])
         extractDOI = doi_re.search(extractfull.lower().replace('&#338;', '-'))
         if not extractDOI:
             # PNAS fix
