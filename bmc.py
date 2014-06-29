@@ -211,7 +211,7 @@ def addFile(src, filetype, manual, autoconfirm, tag):
     # Remove first page of IOP papers
     try:
         if 'IOP' in bibtex['publisher'] and bibtex['type'] == 'article':
-            tearpages.tearpage(new_name)
+            tearpages.main(new_name)
     except:
         pass
 
