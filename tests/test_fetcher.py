@@ -34,10 +34,11 @@ class TestFetcher(unittest.TestCase):
         self.assertFalse(download('a'))
 
     def test_findISBN_DJVU(self):
-        self.assertEqual(findISBN("tests/src/test_book.djvu"), '0198507194')
+        # ISBN is incomplete in this test because my djvu file is bad
+        self.assertEqual(findISBN("tests/src/test_book.djvu"), '978295391873')
 
     def test_findISBN_PDF(self):
-        self.assertEqual(findISBN("tests/src/test_book.pdf"), '9780521846516')
+        self.assertEqual(findISBN("tests/src/test_book.pdf"), '9782953918731')
 
     def test_findISBN_False(self):
         self.assertFalse(findISBN("tests/src/test.pdf"))
@@ -53,7 +54,7 @@ class TestFetcher(unittest.TestCase):
                          "10.1103/physrevlett.112.253201")
 
     def test_findDOI_DJVU(self):
-        # DOI is incomplete in this text because my djvu file is bad
+        # DOI is incomplete in this test because my djvu file is bad
         self.assertEqual(findDOI("tests/src/test.djvu"),
                          "10.1103/physrevlett.112")
 

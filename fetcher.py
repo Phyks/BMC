@@ -67,7 +67,7 @@ def download(url):
     return False
 
 
-isbn_re = re.compile(r'isbn ((?:[0-9]{3}[ -]?)?[0-9]{1,5}[ -]?[0-9]{1,7}[ -]?[0-9]{1,6}[- ]?[0-9])',
+isbn_re = re.compile(r'isbn[\s]?:?[\s]?((?:[0-9]{3}[ -]?)?[0-9]{1,5}[ -]?[0-9]{1,7}[ -]?[0-9]{1,6}[- ]?[0-9])',
                      re.IGNORECASE)
 
 
@@ -89,7 +89,7 @@ def findISBN(src):
         return False
 
     while totext.poll() is None:
-        extractfull = totext.stdout.readline()
+        extractfull = ' '.join([i.strip() for i in totext.stdout.readlines()])
         extractISBN = isbn_re.search(extractfull.lower().replace('&#338;',
                                                                  '-'))
         if extractISBN:
@@ -146,7 +146,7 @@ def findDOI(src):
 
     extractfull = ''
     while totext.poll() is None:
-        extractfull += "".join([i.strip() for i in totext.stdout.readlines()])
+        extractfull += ' '.join([i.strip() for i in totext.stdout.readlines()])
         extractDOI = doi_re.search(extractfull.lower().replace('&#338;', '-'))
         if not extractDOI:
             # PNAS fix
@@ -232,7 +232,7 @@ def findArXivId(src):
 
     extractfull = ''
     while totext.poll() is None:
-        extractfull += totext.stdout.readline().strip()
+        extractfull += ' '.join([i.strip() for i in totext.stdout.readlines()])
         extractID = arXiv_re.search(extractfull)
         if extractID:
             totext.terminate()
@@ -291,7 +291,7 @@ def findHALId(src):
         return False
 
     while totext.poll() is None:
-        extractfull = totext.stdout.readline()
+        extractfull = ' '.join([i.strip() for i in totext.stdout.readlines()])
         extractID = HAL_re.search(extractfull)
         if extractID:
             totext.terminate()
