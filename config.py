@@ -6,12 +6,10 @@ import json
 import sys
 import tools
 
-# List of available options :
+# List of available options (in ~/.config/bmc/bmc.json file):
 # * folder : folder in which papers are stored
 # * proxies : list of proxies to use, e.g. ['', "socks5://localhost:4711"]
 # * format_articles, format_books : masks to rename files
-# * format_custom : list of lambda functions to apply to rename files.
-#    E.g. : format_custom = [lambda x: x.replace('test', 'some_expr')]
 # * ignore_fields : list of fields to ignore when returning bibtex
 
 # Available masks to rename files are
@@ -22,6 +20,10 @@ import tools
 # %t = title
 # %a = authors
 # %v = arXiv version (e.g. '-v1') or nothing if not an arXiv paper
+
+# You can add your custom masks to rename files by adding functions in
+# ~/.config/masks.py.
+#    E.g. : def f(x): x.replace('test', 'some_expr')
 
 
 def make_sure_path_exists(path):
