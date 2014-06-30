@@ -15,8 +15,11 @@ import re
 import tools
 import fetcher
 from bibtexparser.bparser import BibTexParser
-from config import config
+from config import Config
 from codecs import open
+
+
+config = Config()
 
 
 def getNewName(src, bibtex, tag='', override_format=None):
@@ -88,7 +91,8 @@ def bibtexAppend(data):
         with open(config.get("folder")+'index.bib', 'a', encoding='utf-8') \
                 as fh:
             fh.write(tools.parsed2Bibtex(data)+"\n")
-    except:
+    except Exception as e:
+        raise e
         tools.warning("Unable to open index file.")
         return False
 

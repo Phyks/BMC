@@ -1,5 +1,7 @@
 import os
 import errno
+import imp
+import inspect
 import json
 import sys
 import tools
@@ -34,10 +36,14 @@ def make_sure_path_exists(path):
 
 
 class Config():
-    def __init__(self):
-        self.config_path = os.path.expanduser("~/.config/")
+    def __init__(self, base_config_path="~/.config/bmc/"):
+        self.config_path = os.path.expanduser(base_config_path)
         self.config = {}
+        self.config["format_custom"] = []
         self.load()
+
+    def as_dict(self):
+        return self.config
 
     def get(self, param):
         return self.config.get(param, False)
@@ -73,6 +79,7 @@ class Config():
             except (ValueError, IOError):
                 tools.warning("Config file could not be read.")
                 sys.exit(1)
+        self.load_masks()
 
     def save(self):
         try:
@@ -82,4 +89,19 @@ class Config():
             tools.warning("Could not write config file.")
             sys.exit(1)
 
-config = Config()
+    def load_masks(self):
+        if os.path.isfile(self.config_path + "masks.py"):
+            try:
+                self.info = imp.find_module("masks", [self.config_path])
+                self.masks = imp.load_module("masks", *self.info)
+                for mask in inspect.getmembers(self.masks, inspect.isfunction):
+                    self.config["format_custom"].append(mask[1])
+            except ImportError:
+                self.clean()
+                tools.warning("Unable to import masks config file.")
+                pass
+            finally:
+                try:
+                    self.info[0].close()
+                except AttributeError:
+                    pass

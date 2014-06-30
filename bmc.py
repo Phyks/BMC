@@ -13,8 +13,10 @@ import tearpages
 import tools
 from bibtexparser.bparser import BibTexParser
 from codecs import open
-from config import config
+from config import Config
 
+
+config = Config()
 EDITOR = os.environ.get('EDITOR') if os.environ.get('EDITOR') else 'vim'
 
 

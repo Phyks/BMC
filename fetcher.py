@@ -18,8 +18,11 @@ import sys
 import arxiv2bib as arxiv_metadata
 import tools
 from bibtexparser.bparser import BibTexParser
-from config import config
+from config import Config
 from isbntools.dev._fmt import fmtbib
+
+
+config = Config()
 
 
 def download(url):
