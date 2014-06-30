@@ -10,6 +10,8 @@ install:
   - pip install isbntools
   - pip install bibtexparser
   - pip install coveralls
+  - apt-get install -qq poppler-utils
+  - apt-get install -qq djvulibre-bin
     #  - python setup.py install
 # command to run tests, e.g. python setup.py test
 script:
