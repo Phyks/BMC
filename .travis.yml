@@ -1,6 +1,8 @@
 language: python
 python:
   - 2.7
+before_install:
+  - sudo apt-get update
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
   - pip install arxiv2bib
@@ -10,8 +12,8 @@ install:
   - pip install isbntools
   - pip install bibtexparser
   - pip install coveralls
-  - apt-get install -qq poppler-utils
-  - apt-get install -qq djvulibre-bin
+  - sudo apt-get install -qq poppler-utils
+  - sudo apt-get install -qq djvulibre-bin
     #  - python setup.py install
 # command to run tests, e.g. python setup.py test
 script:
