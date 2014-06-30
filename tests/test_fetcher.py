@@ -28,10 +28,10 @@ class TestFetcher(unittest.TestCase):
         self.assertNotEqual(dl, '')
 
     def test_download_invalid_type(self):
-        self.assertFalse(download('http://phyks.me/'))
+        self.assertFalse(download('http://phyks.me/')[0])
 
     def test_download_invalid_url(self):
-        self.assertFalse(download('a'))
+        self.assertFalse(download('a')[0])
 
     def test_findISBN_DJVU(self):
         # ISBN is incomplete in this test because my djvu file is bad
