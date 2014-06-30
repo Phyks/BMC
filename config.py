@@ -56,7 +56,11 @@ class Config():
 
     def load(self):
         try:
-            initialized = make_sure_path_exists(self.config_path)
+            folder_exists = make_sure_path_exists(self.config_path)
+            if folder_exists and os.path.isfile(self.config.path + "bmc.json"):
+                initialized = True
+            else:
+                initialized = False
         except:
             tools.warning("Unable to create ~/.config folder.")
             sys.exit(1)
