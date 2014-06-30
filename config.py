@@ -25,12 +25,12 @@ import tools
 def make_sure_path_exists(path):
     try:
         os.makedirs(path)
-        return True
+        return False
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
         else:
-            return False
+            return True
 
 
 class Config():
@@ -40,7 +40,7 @@ class Config():
         self.load()
 
     def get(self, param):
-        return self.config[param]
+        return self.config.get(param, False)
 
     def set(self, param, value):
         self.config[param] = value
@@ -57,11 +57,11 @@ class Config():
     def load(self):
         try:
             folder_exists = make_sure_path_exists(self.config_path)
-            if folder_exists and os.path.isfile(self.config.path + "bmc.json"):
+            if folder_exists and os.path.isfile(self.config_path + "bmc.json"):
                 initialized = True
             else:
                 initialized = False
-        except:
+        except OSError:
             tools.warning("Unable to create ~/.config folder.")
             sys.exit(1)
         if not initialized:
