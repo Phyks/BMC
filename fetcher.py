@@ -59,12 +59,12 @@ def download(url):
             return dl, contenttype
         except ValueError:
             tools.warning("Invalid URL")
-            return False
+            return False, None
         except requests.exceptions.RequestException:
             tools.warning("Unable to get "+url+" using proxy "+proxy+". It " +
                           "may not be available.")
             continue
-    return False
+    return False, None
 
 
 isbn_re = re.compile(r'isbn[\s]?:?[\s]?((?:[0-9]{3}[ -]?)?[0-9]{1,5}[ -]?[0-9]{1,7}[ -]?[0-9]{1,6}[- ]?[0-9])',
