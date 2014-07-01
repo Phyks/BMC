@@ -117,7 +117,7 @@ def isbn2Bib(isbn):
     # Default merges results from worldcat.org and google books
     try:
         return fmtbib('bibtex', isbntools.meta(isbn, 'default'))
-    except:
+    except TypeError:
         return ''
 
 
@@ -268,7 +268,7 @@ def arXiv2Bib(arxiv):
             fetched_bibtex = fetched_bibtex[fetched_bibtex.keys()[0]]
             try:
                 del(fetched_bibtex['file'])
-            except:
+            except KeyError:
                 pass
             return tools.parsed2Bibtex(fetched_bibtex)
     return ''

@@ -36,7 +36,7 @@ def getNewName(src, bibtex, tag='', override_format=None):
             new_name = override_format
         try:
             new_name = new_name.replace("%j", bibtex['journal'])
-        except:
+        except KeyError:
             pass
     elif bibtex['type'] == 'book':
         if override_format is None:
@@ -47,7 +47,7 @@ def getNewName(src, bibtex, tag='', override_format=None):
     new_name = new_name.replace("%t", bibtex['title'])
     try:
         new_name = new_name.replace("%Y", bibtex['year'])
-    except:
+    except KeyError:
         pass
     new_name = new_name.replace("%f", authors[0].split(',')[0].strip())
     new_name = new_name.replace("%l", authors[-1].split(',')[0].strip())
@@ -72,7 +72,7 @@ def getNewName(src, bibtex, tag='', override_format=None):
         if not os.path.isdir(config.get("folder") + tag):
             try:
                 os.mkdir(config.get("folder") + tag)
-            except:
+            except OSError:
                 tools.warning("Unable to create tag dir " +
                               config.get("folder")+tag+".")
 
@@ -91,7 +91,7 @@ def bibtexAppend(data):
         with open(config.get("folder")+'index.bib', 'a', encoding='utf-8') \
                 as fh:
             fh.write(tools.parsed2Bibtex(data)+"\n")
-    except Exception as e:
+    except IOError as e:
         raise e
         tools.warning("Unable to open index file.")
         return False
@@ -105,7 +105,7 @@ def bibtexEdit(ident, modifs):
                 as fh:
             bibtex = BibTexParser(fh.read())
         bibtex = bibtex.get_entry_dict()
-    except:
+    except (IOError, TypeError):
         tools.warning("Unable to open index file.")
         return False
 
@@ -126,7 +126,7 @@ def bibtexRewrite(data):
         with open(config.get("folder")+'index.bib', 'w', encoding='utf-8') \
                 as fh:
             fh.write(bibtex)
-    except:
+    except (IOError, TypeError):
         tools.warning("Unable to open index file.")
         return False
 
@@ -138,7 +138,7 @@ def deleteId(ident):
                 as fh:
             bibtex = BibTexParser(fh.read().decode('utf-8'))
         bibtex = bibtex.get_entry_dict()
-    except:
+    except (IOError, TypeError):
         tools.warning("Unable to open index file.")
         return False
 
@@ -147,14 +147,14 @@ def deleteId(ident):
 
     try:
         os.remove(bibtex[ident]['file'])
-    except:
+    except (KeyError, OSError):
         tools.warning("Unable to delete file associated to id "+ident+" : " +
                       bibtex[ident]['file'])
 
     try:
         if not os.listdir(os.path.dirname(bibtex[ident]['file'])):
             os.rmdir(os.path.dirname(bibtex[ident]['file']))
-    except:
+    except (KeyError, OSError):
         tools.warning("Unable to delete empty tag dir " +
                       os.path.dirname(bibtex[ident]['file']))
 
@@ -174,7 +174,7 @@ def deleteFile(filename):
                 as fh:
             bibtex = BibTexParser(fh.read().decode('utf-8'))
         bibtex = bibtex.get_entry_dict()
-    except:
+    except (TypeError, IOError):
         tools.warning("Unable to open index file.")
         return False
 
@@ -185,14 +185,14 @@ def deleteFile(filename):
                 found = True
                 try:
                     os.remove(bibtex[key]['file'])
-                except:
+                except (KeyError, OSError):
                     tools.warning("Unable to delete file associated to id " +
                                   key+" : "+bibtex[key]['file'])
 
                 try:
                     if not os.listdir(os.path.dirname(filename)):
                         os.rmdir(os.path.dirname(filename))
-                except:
+                except OSError:
                     tools.warning("Unable to delete empty tag dir " +
                                   os.path.dirname(filename))
 
@@ -201,7 +201,7 @@ def deleteFile(filename):
                 except KeyError:
                     tools.warning("No associated bibtex entry in index for " +
                                   "file " + bibtex[key]['file'])
-        except:
+        except (KeyError, OSError):
             pass
     if found:
         bibtexRewrite(bibtex)
@@ -224,7 +224,7 @@ def diffFilesIndex():
                 as fh:
             index = BibTexParser(fh.read())
         index_diff = index.get_entry_dict()
-    except:
+    except (TypeError, IOError):
         tools.warning("Unable to open index file.")
         return False
 
@@ -252,7 +252,7 @@ def getBibtex(entry, file_id='both', clean=False):
                 as fh:
             bibtex = BibTexParser(fh.read())
         bibtex = bibtex.get_entry_dict()
-    except:
+    except (TypeError, IOError):
         tools.warning("Unable to open index file.")
         return False
 
@@ -284,7 +284,7 @@ def getEntries():
                 as fh:
             bibtex = BibTexParser(fh.read())
         bibtex = bibtex.get_entry_dict()
-    except:
+    except (TypeError, IOError):
         tools.warning("Unable to open index file.")
         return False
 

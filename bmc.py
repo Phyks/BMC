@@ -39,12 +39,12 @@ def checkBibtex(filename, bibtex_string):
         check = tools.rawInput("Is it correct? [Y/n] ")
     except KeyboardInterrupt:
         sys.exit()
-    except:
+    except (KeyError, AssertionError):
         check = 'n'
 
     try:
         old_filename = bibtex['file']
-    except:
+    except KeyError:
         old_filename = False
 
     while check.lower() == 'n':
@@ -58,7 +58,7 @@ def checkBibtex(filename, bibtex_string):
         bibtex = bibtex.get_entry_dict()
         try:
             bibtex = bibtex[bibtex.keys()[0]]
-        except:
+        except KeyError:
             tools.warning("Invalid bibtex entry")
             bibtex_string = ''
             tools.rawInput("Press Enter to go back to editor.")
@@ -83,7 +83,7 @@ def checkBibtex(filename, bibtex_string):
         try:
             print("Moving file to new location…")
             shutil.move(old_filename, bibtex['file'])
-        except:
+        except shutil.Error:
             tools.warning("Unable to move file "+old_filename+" to " +
                           bibtex['file']+". You should check it manually.")
 
@@ -205,7 +205,7 @@ def addFile(src, filetype, manual, autoconfirm, tag):
 
     try:
         shutil.copy2(src, new_name)
-    except IOError:
+    except shutil.Error:
         new_name = False
         sys.exit("Unable to move file to library dir " +
                  config.get("folder")+".")
@@ -214,7 +214,7 @@ def addFile(src, filetype, manual, autoconfirm, tag):
     try:
         if 'IOP' in bibtex['publisher'] and bibtex['type'] == 'article':
             tearpages.main(new_name)
-    except:
+    except (KeyError, shutil.Error, IOError):
         pass
 
     backend.bibtexAppend(bibtex)
@@ -254,14 +254,14 @@ def editEntry(entry, file_id='both'):
 
         try:
             shutil.move(bibtex['file'], new_bibtex['file'])
-        except:
-            raise Exception('Unable to move file '+bibtex['file']+' to ' +
-                            new_bibtex['file'] + ' according to tag edit.')
+        except shutil.Error:
+            tools.warning('Unable to move file '+bibtex['file']+' to ' +
+                          new_bibtex['file'] + ' according to tag edit.')
 
         try:
             if not os.listdir(os.path.dirname(bibtex['file'])):
                 os.rmdir(os.path.dirname(bibtex['file']))
-        except:
+        except OSError:
             tools.warning("Unable to delete empty tag dir " +
                           os.path.dirname(bibtex['file']))
 
@@ -270,7 +270,7 @@ def editEntry(entry, file_id='both'):
                 as fh:
             index = BibTexParser(fh.read())
         index = index.get_entry_dict()
-    except:
+    except (TypeError, IOError):
         tools.warning("Unable to open index file.")
         return False
 
@@ -305,7 +305,7 @@ def openFile(ident):
                 as fh:
             bibtex = BibTexParser(fh.read())
         bibtex = bibtex.get_entry_dict()
-    except:
+    except (TypeError, IOError):
         tools.warning("Unable to open index file.")
         return False
 
@@ -370,7 +370,7 @@ def resync():
                     shutil.copy2(filename, new_name)
                     print("Imported new file "+filename+" for entry " +
                           entry['id']+".")
-                except IOError:
+                except shutil.Error:
                     new_name = False
                     sys.exit("Unable to move file to library dir " +
                              config.get("folder")+".")
@@ -388,7 +388,7 @@ def resync():
                 filetype = tools.getExtension(entry['file'])
                 try:
                     os.remove(entry['file'])
-                except:
+                except OSError:
                     tools.warning("Unable to delete file "+entry['file'])
                 if not addFile(tmp.name, filetype):
                     tools.warning("Unable to reimport file "+entry['file'])
@@ -402,7 +402,7 @@ def resync():
         if os.path.isdir(i) and not os.listdir(config.get("folder") + i):
             try:
                 os.rmdir(config.get("folder") + i)
-            except:
+            except OSError:
                 tools.warning("Found empty tag dir "+config.get("folder") + i +
                               " but could not delete it.")
 
