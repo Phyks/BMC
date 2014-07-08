@@ -56,9 +56,9 @@ Should be almost working and usable now, although still to be considered as **ex
 ```
 git clone https://github.com/Phyks/BMC
 ```
-* Install `arxiv2bib`, `tear-pages`, `requesocks`, `bibtexparser` (https://github.com/sciunto/python-bibtexparser), `PyPDF2` and `isbntools` _via_ Pypi
+* Install `arxiv2bib`, `tear-pages`, `requesocks`, `bibtexparser` (https://github.com/sciunto/python-bibtexparser), `PyPDF2` and `isbnlib` _via_ Pypi
 ```
-sudo pip install arxiv2bib requesocks bibtexparser pyPDF2 isbntools
+sudo pip install arxiv2bib requesocks bibtexparser pyPDF2 isbnlib
 ```
 (replace pip by pip2 if your distribution ships python3 by default)
 * Install `pdftotext` (provided by Xpdf) and `djvulibre` _via_ your package manager or the way you want
@@ -145,6 +145,7 @@ Here are some sources of inspirations for this project :
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
 60. Unittest
+70. Python3 compatibility ?
 80. Search engine
 85. Anti-duplicate ?
 90. Look for published version in arXiv

@@ -10,7 +10,7 @@
 # -----------------------------------------------------------------------------
 
 
-import isbntools
+import isbnlib
 import re
 import requesocks as requests  # Requesocks is requests with SOCKS support
 import subprocess
@@ -19,7 +19,6 @@ import arxiv2bib as arxiv_metadata
 import tools
 from bibtexparser.bparser import BibTexParser
 from config import Config
-from isbntools.dev._fmt import fmtbib
 
 
 config = Config()
@@ -116,8 +115,9 @@ def isbn2Bib(isbn):
     """Tries to get bibtex entry from an ISBN number"""
     # Default merges results from worldcat.org and google books
     try:
-        return fmtbib('bibtex', isbntools.meta(isbn, 'default'))
-    except TypeError:
+        return isbnlib.registry.bibformatters['bibtex'](isbnlib.meta(isbn,
+                                                                     'default'))
+    except (isbnlib.ISBNLibException, isbnlib.ISBNToolsException, TypeError):
         return ''
 
 

@@ -9,7 +9,7 @@ install:
   - pip install requesocks
   - pip install pyPDF2
   - pip install tear-pages
-  - pip install isbntools
+  - pip install isbnlib
   - pip install bibtexparser
   - pip install coveralls
   - sudo apt-get install -qq poppler-utils
