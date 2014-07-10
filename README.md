@@ -92,6 +92,9 @@ Run `./bmc.py delete PARAM` where `PARAM` should be either a path to a paper fil
 
 TODO
 
+_Note :_ There is currently no search engine implemented. I will first focus on stabilizing the script, and will implement it later. The `search.py` file is not functional as of today and is only there to present a rough idea of what I expect the search engine to be. Ideally, it should understand complex expressions like `(author=foo or title=bar) or year=1111`. However, in the meantime, you can `grep` the generated `index.bib` file to have basic search features.
+
+
 ### List all entries
 
 Run `./bmc.py list` to list all the papers in your paper folder.
