@@ -7,13 +7,13 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import backend
-import fetcher
-import tearpages
-import tools
 from bibtexparser.bparser import BibTexParser
 from codecs import open
-from config import Config
+from libbmc.config import Config
+from libbmc import backend
+from libbmc import fetcher
+from libbmc import tearpages
+from libbmc import tools
 
 
 config = Config()

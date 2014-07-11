@@ -9,7 +9,7 @@
 #                                                                   Phyks
 # -----------------------------------------------------------------------------
 import unittest
-from backend import *
+from libbmc.backend import *
 from bibtexparser.bparser import BibTexParser
 import os
 import shutil

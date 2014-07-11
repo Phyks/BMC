@@ -10,7 +10,7 @@
 # -----------------------------------------------------------------------------
 
 import unittest
-from tools import *
+from libbmc.tools import *
 
 
 class TestTools(unittest.TestCase):
