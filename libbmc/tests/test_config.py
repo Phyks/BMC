@@ -9,11 +9,11 @@
 #                                                                   Phyks
 # -----------------------------------------------------------------------------
 import unittest
-from config import Config
 import json
 import os
 import tempfile
 import shutil
+from libbmc.config import Config
 
 
 class TestConfig(unittest.TestCase):

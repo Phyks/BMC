@@ -10,7 +10,7 @@
 # -----------------------------------------------------------------------------
 
 import unittest
-from fetcher import *
+from libbmc.fetcher import *
 
 
 class TestFetcher(unittest.TestCase):
