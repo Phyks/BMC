@@ -14,7 +14,7 @@ install:
   - pip install coveralls
   - sudo apt-get install -qq poppler-utils
   - sudo apt-get install -qq djvulibre-bin
-    #  - python setup.py install
+  - python setup.py install
 # command to run tests, e.g. python setup.py test
 script:
   - nosetests
