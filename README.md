@@ -56,7 +56,7 @@ Should be almost working and usable now, although still to be considered as **ex
 ```
 git clone https://github.com/Phyks/BMC
 ```
-* Install `arxiv2bib`, `tear-pages`, `requesocks`, `bibtexparser` (https://github.com/sciunto/python-bibtexparser), `PyPDF2` and `isbnlib` _via_ Pypi
+* Install `arxiv2bib`, `requesocks`, `bibtexparser` (https://github.com/sciunto/python-bibtexparser), `PyPDF2` and `isbnlib` _via_ Pypi
 ```
 sudo pip install arxiv2bib requesocks bibtexparser pyPDF2 isbnlib
 ```
@@ -132,7 +132,6 @@ All the source code I wrote is under a `no-alcohol beer-ware license`. All funct
 * ---------------------------------------------------------------------------------
 ```
 
-I used the `tearpages.py` script from sciunto, which can be found [here](https://github.com/sciunto/tear-pages) and is released under a GNU GPLv3 license.
 
 ## Inspiration
 
