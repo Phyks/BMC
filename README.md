@@ -5,6 +5,8 @@ BiblioManager is a simple script to download and store your articles. Read on if
 
 **Note :** This script is currently a work in progress.
 
+Travis build status : ![Travis build status](https://api.travis-ci.org/Phyks/BMC.svg)
+
 ## What is BiblioManager (or what it is **not**) ?
 
 I used to have a folder with poorly named papers and books and wanted something to help me handle it. I don't like Mendeley and Zotero and so on, which are heavy and overkill for my needs. I just want to feed a script with PDF files of papers and books, or URLs to PDF files, and I want it to automatically maintain a BibTeX index of these files, to help me cite them and find them back. Then, I want it to give me a way to easily retrieve a file, either by author, by title or with some other search method, and give me the associated bibtex entry.
