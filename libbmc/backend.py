@@ -12,10 +12,10 @@
 
 import os
 import re
-import tools
-import fetcher
+import libbmc.tools
+import libbmc.fetcher
 from bibtexparser.bparser import BibTexParser
-from config import Config
+from libbmc.config import Config
 from codecs import open
 
 
