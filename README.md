@@ -58,9 +58,9 @@ Should be almost working and usable now, although still to be considered as **ex
 ```
 git clone https://github.com/Phyks/BMC
 ```
-* Install `arxiv2bib`, `requesocks`, `bibtexparser` (https://github.com/sciunto/python-bibtexparser), `PyPDF2` and `isbnlib` _via_ Pypi
+* Install `arxiv2bib`, `PySocks`, `bibtexparser` (https://github.com/sciunto/python-bibtexparser), `PyPDF2` and `isbnlib` _via_ Pypi
 ```
-sudo pip install arxiv2bib requesocks bibtexparser pyPDF2 isbnlib
+sudo pip install arxiv2bib PySocks bibtexparser pyPDF2 isbnlib
 ```
 (replace pip by pip2 if your distribution ships python3 by default)
 * Install `pdftotext` (provided by Xpdf) and `djvulibre` _via_ your package manager or the way you want
