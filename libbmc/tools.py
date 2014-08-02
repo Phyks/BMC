@@ -27,10 +27,14 @@ def slugify(value):
     From Django's "django/template/defaultfilters.py".
     """
     import unicodedata
-    if not isinstance(value, unicode):
-        value = unicode(value)
-    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
-    value = unicode(_slugify_strip_re.sub('', value).strip())
+    try:
+        unicode_type = unicode
+    except NameError:
+        unicode_type = str
+    if not isinstance(value, unicode_type):
+        value = unicode_type(value)
+    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = unicode_type(_slugify_strip_re.sub('', value).strip())
     return _slugify_hyphenate_re.sub('_', value)
 
 
@@ -51,7 +55,7 @@ def getExtension(filename):
 
 def replaceAll(text, dic):
     """Replace all the dic keys by the associated item in text"""
-    for i, j in dic.iteritems():
+    for i, j in dic.items():
         text = text.replace(i, j)
     return text
 
@@ -59,7 +63,11 @@ def replaceAll(text, dic):
 def rawInput(string):
     """Flush stdin and then prompt the user for something"""
     tcflush(sys.stdin, TCIOFLUSH)
-    return raw_input(string).decode('utf-8')
+    try:
+        input = raw_input
+    except NameError:
+        pass
+    return input(string).decode('utf-8')
 
 
 def warning(*objs):
