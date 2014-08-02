@@ -24,12 +24,13 @@ except ImportError:
     # Fall back to Python 2's urllib2
     from urllib2 import urlopen, URLError
 import arxiv2bib as arxiv_metadata
-import tools
+import libbmc.tools
 from bibtexparser.bparser import BibTexParser
-from config import Config
+from libbmc.config import Config
 
 
 config = Config()
+default_socket = socket.socket
 
 
 def download(url):
@@ -51,13 +52,16 @@ def download(url):
             except ValueError:
                 port = None
             socks.set_default_proxy(proxy_type, proxy, port)
-        else: # TODO : Reset if proxy is empty
+            socket.socket = socks.socksocket
+        elif proxy == '':
+            socket.socket = default_socket
+        else:
             try:
                 proxy, port = proxy.split(':')
             except ValueError:
                 port = None
             socks.set_default_proxy(socks.HTTP, proxy, port)
-        socket.socket = socks.socksocket
+            socket.socket = socks.socksocket
         try:
             r = urlopen(url)
             size = int(r.headers.getheader('content-length').strip())

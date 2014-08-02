@@ -433,7 +433,8 @@ def update(entry):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="A bibliography " +
                                      "management tool.")
-    subparsers = parser.add_subparsers(help="sub-command help")
+    subparsers = parser.add_subparsers(help="sub-command help", dest='parser')
+    subparsers.required = True  # Fix for Python 3.3.5
 
     parser_download = subparsers.add_parser('download', help="download help")
     parser_download.add_argument('-t', '--type', default=None,
