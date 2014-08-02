@@ -12,9 +12,17 @@
 
 import isbnlib
 import re
-import requesocks as requests  # Requesocks is requests with SOCKS support
+import socket
+import socks
 import subprocess
 import sys
+try:
+    # For Python 3.0 and later
+    from urllib.request import urlopen
+    from urllib.error import URLError
+except ImportError:
+    # Fall back to Python 2's urllib2
+    from urllib2 import urlopen, URLError
 import arxiv2bib as arxiv_metadata
 import tools
 from bibtexparser.bparser import BibTexParser
@@ -32,16 +40,31 @@ def download(url):
     false if it could not be downloaded.
     """
     for proxy in config.get("proxies"):
-        r_proxy = {
-            "http": proxy,
-            "https": proxy,
-        }
+        if proxy.startswith('socks'):
+            if proxy[5] == '4':
+                proxy_type = socks.SOCKS4
+            else:
+                proxy_type = socks.SOCKS5
+            proxy = proxy[proxy.find('://')+3:]
+            try:
+                proxy, port = proxy.split(':')
+            except ValueError:
+                port = None
+            socks.set_default_proxy(proxy_type, proxy, port)
+        else: # TODO : Reset if proxy is empty
+            try:
+                proxy, port = proxy.split(':')
+            except ValueError:
+                port = None
+            socks.set_default_proxy(socks.HTTP, proxy, port)
+        socket.socket = socks.socksocket
         try:
-            r = requests.get(url, proxies=r_proxy)
-            size = int(r.headers['Content-Length'].strip())
+            r = urlopen(url)
+            size = int(r.headers.getheader('content-length').strip())
             dl = ""
             dl_size = 0
-            for buf in r.iter_content(1024):
+            while True:
+                buf = r.read(1024)
                 if buf:
                     dl += buf
                     dl_size += len(buf)
@@ -49,20 +72,22 @@ def download(url):
                     sys.stdout.write("\r[%s%s]" % ('='*done, ' '*(50-done)))
                     sys.stdout.write(" "+str(int(float(done)/52*100))+"%")
                     sys.stdout.flush()
+                else:
+                    break
             contenttype = False
-            if 'pdf' in r.headers['content-type']:
+            if 'pdf' in r.headers.getheader('content-type'):
                 contenttype = 'pdf'
-            elif 'djvu' in r.headers['content-type']:
+            elif 'djvu' in r.headers.getheader('content-type'):
                 contenttype = 'djvu'
 
-            if r.status_code != 200 or contenttype is False:
+            if r.getcode() != 200 or contenttype is False:
                 continue
 
             return dl, contenttype
         except ValueError:
             tools.warning("Invalid URL")
             return False, None
-        except requests.exceptions.RequestException:
+        except URLError:
             tools.warning("Unable to get "+url+" using proxy "+proxy+". It " +
                           "may not be available.")
             continue

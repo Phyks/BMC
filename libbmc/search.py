@@ -168,7 +168,7 @@ class SearchQueryParser:
         return self._methods[argument.getName()](argument)
 
     def Parse(self, query):
-        #print self._parser(query)[0]
+        #print(self._parser(query)[0])
         return self.evaluate(self._parser(query)[0])
 
     def GetWord(self, word):
@@ -278,21 +278,21 @@ class ParserTest(SearchQueryParser):
     def Test(self):
         all_ok = True
         for item in self.tests.keys():
-            print item
+            print(item)
             r = self.Parse(item)
             e = self.tests[item]
-            print 'Result: %s' % r
-            print 'Expect: %s' % e
+            print('Result: %s' % r)
+            print('Expect: %s' % e)
             if e == r:
-                print 'Test OK'
+                print('Test OK')
             else:
                 all_ok = False
-                print '>>>>>>>>>>>>>>>>>>>>>>Test ERROR<<<<<<<<<<<<<<<<<<<<<'
-            print ''
+                print('>>>>>>>>>>>>>>>>>>>>>>Test ERROR<<<<<<<<<<<<<<<<<<<<<')
+            print('')
         return all_ok
 
 if __name__=='__main__':
     if ParserTest().Test():
-        print 'All tests OK'
+        print('All tests OK')
     else:
-        print 'One or more tests FAILED'
+        print('One or more tests FAILED')
