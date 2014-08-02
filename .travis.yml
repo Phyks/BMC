@@ -1,12 +1,14 @@
 language: python
 python:
   - 2.7
+  - 3.2
+  - 3.3
 before_install:
   - sudo apt-get update
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
   - pip install arxiv2bib
-  - pip install requesocks
+  - pip install PySocks
   - pip install pyPDF2
   - pip install tear-pages
   - pip install isbnlib
