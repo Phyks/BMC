@@ -21,7 +21,7 @@ class TestFetcher(unittest.TestCase):
         config.set("folder", tempfile.mkdtemp()+"/")
         self.bibtex_article_string = """
 @article{1303.3130v1,
-	abstract={We study the role of the dipolar interaction, correctly accounting for the
+        abstract={We study the role of the dipolar interaction, correctly accounting for the
 Dipolar-Induced Resonance (DIR), in a quasi-one-dimensional system of ultracold
 bosons. We first show how the DIR affects the lowest-energy states of two
 particles in a harmonic trap. Then, we consider a deep optical lattice loaded
@@ -30,17 +30,17 @@ atom-dimer extended Bose-Hubbard model. We analyze the impact of the DIR on the
 phase diagram at T=0 by exact diagonalization of a small-sized system. In
 particular, the resonance strongly modifies the range of parameters for which a
 mass density wave should occur.},
-	archiveprefix={arXiv},
-	author={N. Bartolo and D. J. Papoular and L. Barbiero and C. Menotti and A. Recati},
-	eprint={1303.3130v1},
-	file={%sN_Bartolo_A_Recati-j-2013.pdf},
-	link={http://arxiv.org/abs/1303.3130v1},
-	month={Mar},
-	primaryclass={cond-mat.quant-gas},
-	tag={},
-	title={Dipolar-Induced Resonance for Ultracold Bosons in a Quasi-1D Optical
+        archiveprefix={arXiv},
+        author={N. Bartolo and D. J. Papoular and L. Barbiero and C. Menotti and A. Recati},
+        eprint={1303.3130v1},
+        file={%sN_Bartolo_A_Recati-j-2013.pdf},
+        link={http://arxiv.org/abs/1303.3130v1},
+        month={Mar},
+        primaryclass={cond-mat.quant-gas},
+        tag={},
+        title={Dipolar-Induced Resonance for Ultracold Bosons in a Quasi-1D Optical
 Lattice},
-	year={2013},
+        year={2013},
 }""" % config.get("folder")
         self.bibtex_article = BibTexParser(self.bibtex_article_string).get_entry_dict()
         self.bibtex_article = self.bibtex_article[self.bibtex_article.keys()[0]]

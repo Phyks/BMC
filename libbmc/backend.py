@@ -12,8 +12,8 @@
 
 import os
 import re
-import libbmc.tools
-import libbmc.fetcher
+import libbmc.tools as tools
+import libbmc.fetcher as fetcher
 from bibtexparser.bparser import BibTexParser
 from libbmc.config import Config
 from codecs import open

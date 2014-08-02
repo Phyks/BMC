@@ -18,13 +18,13 @@ import subprocess
 import sys
 try:
     # For Python 3.0 and later
-    from urllib.request import urlopen
+    from urllib.request import urlopen, Request
     from urllib.error import URLError
 except ImportError:
     # Fall back to Python 2's urllib2
-    from urllib2 import urlopen, URLError
+    from urllib2 import urlopen, Request, URLError
 import arxiv2bib as arxiv_metadata
-import libbmc.tools
+import libbmc.tools as tools
 from bibtexparser.bparser import BibTexParser
 from libbmc.config import Config
 
@@ -230,14 +230,15 @@ def doi2Bib(doi):
     """
     url = "http://dx.doi.org/" + doi
     headers = {"accept": "application/x-bibtex"}
+    req = Request(url, headers=headers)
     try:
-        r = requests.get(url, headers=headers)
+        r = urlopen(req)
 
-        if r.headers['content-type'] == 'application/x-bibtex':
-            return r.text
+        if r.headers.getheader('content-type') == 'application/x-bibtex':
+            return r.read()
         else:
             return ''
-    except requests.exceptions.ConnectionError:
+    except URLError:
         tools.warning('Unable to contact remote server to get the bibtex ' +
                       'entry for doi '+doi)
         return ''

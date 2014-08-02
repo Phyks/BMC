@@ -4,7 +4,7 @@ import imp
 import inspect
 import json
 import sys
-import libbmc.tools
+import libbmc.tools as tools
 
 # List of available options (in ~/.config/bmc/bmc.json file):
 # * folder : folder in which papers are stored
