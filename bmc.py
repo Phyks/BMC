@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf8 -*-
+from __future__ import unicode_literals
 
 import argparse
 import os

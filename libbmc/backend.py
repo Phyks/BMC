@@ -179,7 +179,7 @@ def deleteFile(filename):
         return False
 
     found = False
-    for key in bibtex.keys():
+    for key in list(bibtex.keys()):
         try:
             if os.path.samefile(bibtex[key]['file'], filename):
                 found = True
@@ -288,7 +288,7 @@ def getEntries():
         tools.warning("Unable to open index file.")
         return False
 
-    return bibtex.keys()
+    return list(bibtex.keys())
 
 
 def updateArXiv(entry):
