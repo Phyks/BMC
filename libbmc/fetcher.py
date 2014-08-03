@@ -70,9 +70,12 @@ def download(url):
         try:
             r = urlopen(url)
             try:
-                size = int(dict(r.info())['Content-Length'].strip())
+                size = int(dict(r.info())['content-length'].strip())
             except KeyError:
-                size = 1
+                try:
+                    size = int(dict(r.info())['Content-Length'].strip())
+                except KeyError:
+                    size = 1
             dl = b""
             dl_size = 0
             while True:
@@ -87,10 +90,18 @@ def download(url):
                 else:
                     break
             contenttype = False
+            contenttype_req = None
             try:
-                if 'pdf' in dict(r.info())['Content-Type']:
+                contenttype_req = dict(r.info())['content-type']
+            except KeyError:
+                try:
+                    contenttype_req = dict(r.info())['Content-Type']
+                except KeyError:
+                    continue
+            try:
+                if 'pdf' in contenttype_req:
                     contenttype = 'pdf'
-                elif 'djvu' in dict(r.info())['Content-Type']:
+                elif 'djvu' in contenttype_req:
                     contenttype = 'djvu'
             except KeyError:
                 pass
@@ -246,12 +257,18 @@ def doi2Bib(doi):
         r = urlopen(req)
 
         try:
-            if dict(r.info())['Content-Type'] == 'application/x-bibtex':
+            if dict(r.info())['content-type'] == 'application/x-bibtex':
                 return r.read().decode('utf-8')
             else:
                 return ''
         except KeyError:
-            return ''
+            try:
+                if dict(r.info())['Content-Type'] == 'application/x-bibtex':
+                    return r.read().decode('utf-8')
+                else:
+                    return ''
+            except KeyError:
+                return ''
     except URLError:
         tools.warning('Unable to contact remote server to get the bibtex ' +
                       'entry for doi '+doi)
