@@ -31,8 +31,10 @@ from libbmc.config import Config
 
 config = Config()
 default_socket = socket.socket
-stdout_encoding = sys.stdout.encoding
-if stdout_encoding is None:
+try:
+    stdout_encoding = sys.stdout.encoding
+    assert(stdout_encoding is not None)
+except (AttributeError, AssertionError):
     stdout_encoding = 'UTF-8'
 
 
