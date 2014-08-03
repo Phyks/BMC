@@ -8,6 +8,7 @@
 # <del>beer</del> soda in return.
 #                                                                   Phyks
 # -----------------------------------------------------------------------------
+from __future__ import unicode_literals
 import unittest
 from libbmc.backend import *
 from bibtexparser.bparser import BibTexParser
@@ -43,7 +44,7 @@ Lattice},
         year={2013},
 }""" % config.get("folder")
         self.bibtex_article = BibTexParser(self.bibtex_article_string).get_entry_dict()
-        self.bibtex_article = self.bibtex_article[self.bibtex_article.keys()[0]]
+        self.bibtex_article = self.bibtex_article[list(self.bibtex_article.keys())[0]]
 
         self.bibtex_book_string = """
 @book{9780521846516,
@@ -55,7 +56,7 @@ Lattice},
 }
 """
         self.bibtex_book = BibTexParser(self.bibtex_book_string).get_entry_dict()
-        self.bibtex_book = self.bibtex_book[self.bibtex_book.keys()[0]]
+        self.bibtex_book = self.bibtex_book[list(self.bibtex_book.keys())[0]]
 
     def test_getNewName_article(self):
         self.assertEqual(getNewName("test.pdf", self.bibtex_article),
@@ -99,7 +100,7 @@ Lattice},
         open(config.get("folder")+'test.pdf', 'w').close()
         deleteId(self.bibtex_article['id'])
         with open(config.get("folder")+'index.bib', 'r') as fh:
-            self.assertEquals(fh.read().strip(), "")
+            self.assertEqual(fh.read().strip(), "")
         self.assertFalse(os.path.isfile(config.get("folder")+'test.pdf'))
 
     def test_deleteFile(self):
@@ -108,7 +109,7 @@ Lattice},
         open(config.get("folder")+'test.pdf', 'w').close()
         deleteFile(self.bibtex_article['file'])
         with open(config.get("folder")+'index.bib', 'r') as fh:
-            self.assertEquals(fh.read().strip(), "")
+            self.assertEqual(fh.read().strip(), "")
         self.assertFalse(os.path.isfile(config.get("folder")+'test.pdf'))
 
     def test_diffFilesIndex(self):

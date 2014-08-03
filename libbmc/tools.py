@@ -10,7 +10,7 @@
 # -----------------------------------------------------------------------------
 
 
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 import os
 import re
 import sys
@@ -72,8 +72,7 @@ def rawInput(string):
 
 def warning(*objs):
     """Write warnings to stderr"""
-    printed = [i.encode('utf-8') for i in objs]
-    print("WARNING: ", *printed, file=sys.stderr)
+    print("WARNING: ", *objs, file=sys.stderr)
 
 
 def listDir(path):

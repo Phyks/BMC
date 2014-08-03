@@ -8,6 +8,7 @@
 # <del>beer</del> soda in return.
 #                                                                   Phyks
 # -----------------------------------------------------------------------------
+from __future__ import unicode_literals
 
 import unittest
 from libbmc.tools import *

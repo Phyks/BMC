@@ -9,7 +9,7 @@
 #                                                                   Phyks
 # -----------------------------------------------------------------------------
 
-
+from __future__ import unicode_literals
 import os
 import re
 import libbmc.tools as tools
@@ -136,7 +136,7 @@ def deleteId(ident):
     try:
         with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
                 as fh:
-            bibtex = BibTexParser(fh.read().decode('utf-8'))
+            bibtex = BibTexParser(fh.read())
         bibtex = bibtex.get_entry_dict()
     except (IOError, TypeError):
         tools.warning("Unable to open index file.")
@@ -172,7 +172,7 @@ def deleteFile(filename):
     try:
         with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
                 as fh:
-            bibtex = BibTexParser(fh.read().decode('utf-8'))
+            bibtex = BibTexParser(fh.read())
         bibtex = bibtex.get_entry_dict()
     except (TypeError, IOError):
         tools.warning("Unable to open index file.")
@@ -315,7 +315,7 @@ def updateArXiv(entry):
 
     last_bibtex = BibTexParser(fetcher.arXiv2Bib(arxiv_id_no_v))
     last_bibtex = last_bibtex.get_entry_dict()
-    last_bibtex = last_bibtex[last_bibtex.keys()[0]]
+    last_bibtex = last_bibtex[list(last_bibtex.keys())[0]]
 
     if last_bibtex['eprint'] not in ids:
         return last_bibtex
