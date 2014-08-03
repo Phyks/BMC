@@ -5,7 +5,7 @@ BiblioManager is a simple script to download and store your articles. Read on if
 
 **Note :** This script is currently a work in progress.
 
-Travis build status : ![Travis build status](https://api.travis-ci.org/Phyks/BMC.svg)
+Travis build status : [![Build Status](https://travis-ci.org/Phyks/BMC.svg?branch=master)](https://travis-ci.org/Phyks/BMC)
 
 ## What is BiblioManager (or what it is **not**) ?
 
