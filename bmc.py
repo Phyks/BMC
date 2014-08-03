@@ -50,11 +50,11 @@ def checkBibtex(filename, bibtex_string):
 
     while check.lower() == 'n':
         with tempfile.NamedTemporaryFile(suffix=".tmp") as tmpfile:
-            tmpfile.write(bibtex_string)
+            tmpfile.write(bibtex_string.encode('utf-8'))
             tmpfile.flush()
             subprocess.call([EDITOR, tmpfile.name])
             tmpfile.seek(0)
-            bibtex = BibTexParser(tmpfile.read()+"\n")
+            bibtex = BibTexParser(tmpfile.read().decode('utf-8')+"\n")
 
         bibtex = bibtex.get_entry_dict()
         try:
@@ -176,7 +176,7 @@ def addFile(src, filetype, manual, autoconfirm, tag):
     bibtex = BibTexParser(bibtex)
     bibtex = bibtex.get_entry_dict()
     if len(bibtex) > 0:
-        bibtex_name = list(bibtex.keys()[0]
+        bibtex_name = list(bibtex.keys())[0]
         bibtex = bibtex[bibtex_name]
         bibtex_string = tools.parsed2Bibtex(bibtex)
     else:
@@ -214,7 +214,7 @@ def addFile(src, filetype, manual, autoconfirm, tag):
     # Remove first page of IOP papers
     try:
         if 'IOP' in bibtex['publisher'] and bibtex['type'] == 'article':
-            tearpages.main(new_name)
+            tearpages.tearpage(new_name)
     except (KeyError, shutil.Error, IOError):
         pass
 
@@ -288,7 +288,7 @@ def downloadFile(url, filetype, manual, autoconfirm, tag):
         print('Download finished')
         tmp = tempfile.NamedTemporaryFile(suffix='.'+contenttype)
 
-        with open(tmp.name, 'w+') as fh:
+        with open(tmp.name, 'w+', encoding='utf-8') as fh:
             fh.write(dl)
         new_name = addFile(tmp.name, filetype, manual, autoconfirm, tag)
         if new_name is False:

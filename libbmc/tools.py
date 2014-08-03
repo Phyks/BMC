@@ -16,6 +16,11 @@ import re
 import sys
 from termios import tcflush, TCIOFLUSH
 
+try:
+    input = raw_input
+except NameError:
+    pass
+
 _slugify_strip_re = re.compile(r'[^\w\s-]')
 _slugify_hyphenate_re = re.compile(r'[\s]+')
 
@@ -63,11 +68,7 @@ def replaceAll(text, dic):
 def rawInput(string):
     """Flush stdin and then prompt the user for something"""
     tcflush(sys.stdin, TCIOFLUSH)
-    try:
-        input = raw_input
-    except NameError:
-        pass
-    return input(string).decode('utf-8')
+    return input(string)
 
 
 def warning(*objs):

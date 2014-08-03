@@ -75,7 +75,7 @@ def download(url):
                 try:
                     size = int(dict(r.info())['Content-Length'].strip())
                 except KeyError:
-                    size = 1
+                    size = 0
             dl = b""
             dl_size = 0
             while True:
@@ -83,10 +83,11 @@ def download(url):
                 if buf:
                     dl += buf
                     dl_size += len(buf)
-                    done = int(50 * dl_size / size)
-                    sys.stdout.write("\r[%s%s]" % ('='*done, ' '*(50-done)))
-                    sys.stdout.write(" "+str(int(float(done)/52*100))+"%")
-                    sys.stdout.flush()
+                    if size != 0:
+                        done = int(50 * dl_size / size)
+                        sys.stdout.write("\r[%s%s]" % ('='*done, ' '*(50-done)))
+                        sys.stdout.write(" "+str(int(float(done)/52*100))+"%")
+                        sys.stdout.flush()
                 else:
                     break
             contenttype = False
