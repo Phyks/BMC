@@ -31,6 +31,9 @@ from libbmc.config import Config
 
 config = Config()
 default_socket = socket.socket
+stdout_encoding = sys.stdout.encoding
+if stdout_encoding is None:
+    stdout_encoding = 'UTF-8'
 
 
 def download(url):
@@ -64,8 +67,11 @@ def download(url):
             socket.socket = socks.socksocket
         try:
             r = urlopen(url)
-            size = int(r.headers.getheader('content-length').strip())
-            dl = ""
+            try:
+                size = int(dict(r.info())['Content-Length'].strip())
+            except KeyError:
+                size = 1
+            dl = b""
             dl_size = 0
             while True:
                 buf = r.read(1024)
@@ -79,10 +85,13 @@ def download(url):
                 else:
                     break
             contenttype = False
-            if 'pdf' in r.headers.getheader('content-type'):
-                contenttype = 'pdf'
-            elif 'djvu' in r.headers.getheader('content-type'):
-                contenttype = 'djvu'
+            try:
+                if 'pdf' in dict(r.info())['Content-Type']:
+                    contenttype = 'pdf'
+                elif 'djvu' in dict(r.info())['Content-Type']:
+                    contenttype = 'djvu'
+            except KeyError:
+                pass
 
             if r.getcode() != 200 or contenttype is False:
                 continue
@@ -120,7 +129,7 @@ def findISBN(src):
         return False
 
     while totext.poll() is None:
-        extractfull = ' '.join([i.strip() for i in totext.stdout.readlines()])
+        extractfull = ' '.join([i.decode(stdout_encoding).strip() for i in totext.stdout.readlines()])
         extractISBN = isbn_re.search(extractfull.lower().replace('&#338;',
                                                                  '-'))
         if extractISBN:
@@ -178,7 +187,7 @@ def findDOI(src):
 
     extractfull = ''
     while totext.poll() is None:
-        extractfull += ' '.join([i.strip() for i in totext.stdout.readlines()])
+        extractfull += ' '.join([i.decode(stdout_encoding).strip() for i in totext.stdout.readlines()])
         extractDOI = doi_re.search(extractfull.lower().replace('&#338;', '-'))
         if not extractDOI:
             # PNAS fix
@@ -234,9 +243,12 @@ def doi2Bib(doi):
     try:
         r = urlopen(req)
 
-        if r.headers.getheader('content-type') == 'application/x-bibtex':
-            return r.read()
-        else:
+        try:
+            if dict(r.info())['Content-Type'] == 'application/x-bibtex':
+                return r.read()
+            else:
+                return ''
+        except KeyError:
             return ''
     except URLError:
         tools.warning('Unable to contact remote server to get the bibtex ' +
@@ -266,7 +278,7 @@ def findArXivId(src):
 
     extractfull = ''
     while totext.poll() is None:
-        extractfull += ' '.join([i.strip() for i in totext.stdout.readlines()])
+        extractfull += ' '.join([i.decode(stdout_encoding).strip() for i in totext.stdout.readlines()])
         extractID = arXiv_re.search(extractfull)
         if extractID:
             totext.terminate()
@@ -295,7 +307,7 @@ def arXiv2Bib(arxiv):
         else:
             fetched_bibtex = BibTexParser(bib.bibtex())
             fetched_bibtex = fetched_bibtex.get_entry_dict()
-            fetched_bibtex = fetched_bibtex[fetched_bibtex.keys()[0]]
+            fetched_bibtex = fetched_bibtex[list(fetched_bibtex.keys())[0]]
             try:
                 del(fetched_bibtex['file'])
             except KeyError:
@@ -325,7 +337,7 @@ def findHALId(src):
         return False
 
     while totext.poll() is None:
-        extractfull = ' '.join([i.strip() for i in totext.stdout.readlines()])
+        extractfull = ' '.join([i.decode(stdout_encoding).strip() for i in totext.stdout.readlines()])
         extractID = HAL_re.search(extractfull)
         if extractID:
             totext.terminate()
