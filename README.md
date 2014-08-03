@@ -62,7 +62,7 @@ git clone https://github.com/Phyks/BMC
 ```
 sudo pip install arxiv2bib PySocks bibtexparser pyPDF2 isbnlib
 ```
-(replace pip by pip2 if your distribution ships python3 by default)
+(this script should be compatible with Python 2 and Python 3)
 * Install `pdftotext` (provided by Xpdf) and `djvulibre` _via_ your package manager or the way you want
 * Run the script to initialize the conf in `~/.config/bmc/bmc.json`.
 * Customize the configuration by editing `~/.config/bmc/bmc.json` according to your needs. A documentation of the available options can be found in file `config.py`.
@@ -149,7 +149,6 @@ Here are some sources of inspirations for this project :
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
 60. Unittest
-70. Python3 compatibility ?
 80. Search engine
 85. Anti-duplicate ?
 90. Look for published version in arXiv
