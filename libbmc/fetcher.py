@@ -247,7 +247,7 @@ def doi2Bib(doi):
 
         try:
             if dict(r.info())['Content-Type'] == 'application/x-bibtex':
-                return r.read()
+                return r.read().decode('utf-8')
             else:
                 return ''
         except KeyError:

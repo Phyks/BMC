@@ -27,7 +27,7 @@ def checkBibtex(filename, bibtex_string):
     bibtex = BibTexParser(bibtex_string)
     bibtex = bibtex.get_entry_dict()
     try:
-        bibtex = bibtex[bibtex.keys()[0]]
+        bibtex = bibtex[list(bibtex.keys())[0]]
         # Check entries are correct
         assert bibtex['title']
         if bibtex['type'] == 'article':
@@ -58,7 +58,7 @@ def checkBibtex(filename, bibtex_string):
 
         bibtex = bibtex.get_entry_dict()
         try:
-            bibtex = bibtex[bibtex.keys()[0]]
+            bibtex = bibtex[list(bibtex.keys())[0]]
         except KeyError:
             tools.warning("Invalid bibtex entry")
             bibtex_string = ''
@@ -176,7 +176,7 @@ def addFile(src, filetype, manual, autoconfirm, tag):
     bibtex = BibTexParser(bibtex)
     bibtex = bibtex.get_entry_dict()
     if len(bibtex) > 0:
-        bibtex_name = bibtex.keys()[0]
+        bibtex_name = list(bibtex.keys()[0]
         bibtex = bibtex[bibtex_name]
         bibtex_string = tools.parsed2Bibtex(bibtex)
     else:
@@ -310,7 +310,7 @@ def openFile(ident):
         tools.warning("Unable to open index file.")
         return False
 
-    if ident not in bibtex.keys():
+    if ident not in list(bibtex.keys()):
         return False
     else:
         subprocess.Popen(['xdg-open', bibtex[ident]['file']])
@@ -337,7 +337,7 @@ def resync():
                 if filename == '':
                     break
                 else:
-                    if 'doi' in entry.keys():
+                    if 'doi' in list(entry.keys()):
                         doi = fetcher.findDOI(filename)
                         if doi is not False and doi != entry['doi']:
                             loop = tools.rawInput("Found DOI does not " +
@@ -345,7 +345,7 @@ def resync():
                                                   "DOI, continue anyway " +
                                                   "? [y/N]")
                             loop = (loop.lower() != 'y')
-                    if 'Eprint' in entry.keys():
+                    if 'Eprint' in list(entry.keys()):
                         arxiv = fetcher.findArXivId(filename)
                         if arxiv is not False and arxiv != entry['Eprint']:
                             loop = tools.rawInput("Found arXiv id does " +
@@ -353,7 +353,7 @@ def resync():
                                                   "entry arxiv id, " +
                                                   "continue anyway ? [y/N]")
                             loop = (loop.lower() != 'y')
-                    if 'isbn' in entry.keys():
+                    if 'isbn' in list(entry.keys()):
                         isbn = fetcher.findISBN(filename)
                         if isbn is not False and isbn != entry['isbn']:
                             loop = tools.rawInput("Found ISBN does not " +
