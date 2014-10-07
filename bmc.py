@@ -288,7 +288,7 @@ def downloadFile(url, filetype, manual, autoconfirm, tag):
         print('Download finished')
         tmp = tempfile.NamedTemporaryFile(suffix='.'+contenttype)
 
-        with open(tmp.name, 'w+', encoding='utf-8') as fh:
+        with open(tmp.name, 'wb+') as fh:
             fh.write(dl)
         new_name = addFile(tmp.name, filetype, manual, autoconfirm, tag)
         if new_name is False:
