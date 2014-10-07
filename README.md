@@ -64,6 +64,7 @@ sudo pip install arxiv2bib PySocks bibtexparser pyPDF2 isbnlib
 ```
 (this script should be compatible with Python 2 and Python 3)
 * Install `pdftotext` (provided by Xpdf) and `djvulibre` _via_ your package manager or the way you want
+* Install the script _via_ `python setup.py install`.
 * Run the script to initialize the conf in `~/.config/bmc/bmc.json`.
 * Customize the configuration by editing `~/.config/bmc/bmc.json` according to your needs. A documentation of the available options can be found in file `config.py`.
 * _Power users :_ Add your custom masks in `~/.config/bmc/masks.py`.
