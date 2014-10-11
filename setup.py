@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name         = 'BMC',
-    version      = "0.2dev",
+    version      = "0.3dev",
     url          = "https://github.com/Phyks/BMC",
     author       = "",
     license      = "no-alcohol beer-ware license",
