@@ -114,9 +114,13 @@ def download(url):
         except ValueError:
             tools.warning("Invalid URL")
             return False, None
-        except URLError:
-            tools.warning("Unable to get "+url+" using proxy "+proxy+". It " +
-                          "may not be available.")
+        except (URLError, socket.error):
+            if proxy != "":
+                proxy_txt = "using proxy "+proxy
+            else:
+                proxy_txt = "without using any proxy"
+            tools.warning("Unable to get "+url+" "+proxy_txt+". It " +
+                          "may not be available at the moment.")
             continue
     return False, None
 
