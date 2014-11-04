@@ -102,7 +102,7 @@ def addFile(src, filetype, manual, autoconfirm, tag):
     if not manual:
         try:
             if filetype == 'article' or filetype is None:
-                id_type, article_id = fetcher.findID(src)
+                id_type, article_id = fetcher.findArticleID(src)
                 if id_type == "DOI":
                     doi = article_id
                 elif id_type == "arXiv":
@@ -340,7 +340,7 @@ def resync():
                     break
                 else:
                     if 'doi' in list(entry.keys()):
-                        doi = fetcher.findID(filename, only=["DOI"])
+                        doi = fetcher.findArticleID(filename, only=["DOI"])
                         if doi is not False and doi != entry['doi']:
                             loop = tools.rawInput("Found DOI does not " +
                                                   "match bibtex entry " +
@@ -348,7 +348,7 @@ def resync():
                                                   "? [y/N]")
                             loop = (loop.lower() != 'y')
                     if 'Eprint' in list(entry.keys()):
-                        arxiv = fetcher.findID(filename, only=["arXiv"])
+                        arxiv = fetcher.findArticleID(filename, only=["arXiv"])
                         if arxiv is not False and arxiv != entry['Eprint']:
                             loop = tools.rawInput("Found arXiv id does " +
                                                   "not match bibtex " +
