@@ -180,13 +180,16 @@ clean_doi_re = re.compile('^/')
 clean_doi_fabse_re = re.compile('^10.1096')
 clean_doi_jcb_re = re.compile('^10.1083')
 clean_doi_len_re = re.compile(r'\d\.\d')
+arXiv_re = re.compile(r'arXiv:\s*([\w\.\/\-]+)', re.IGNORECASE)
 
 
-def findDOI(src):
-    """Search for a valid DOI in src.
+def findArticleID(src, only=["DOI", "arXiv"]):
+    """Search for a valid article ID (DOI or ArXiv) in src.
 
-    Returns the DOI or False if not found or an error occurred.
+    Returns a tuple (type, first matching ID) or False if not found
+    or an error occurred.
     From : http://en.dogeno.us/2010/02/release-a-python-script-for-organizing-scientific-papers-pyrenamepdf-py/
+    and https://github.com/minad/bibsync/blob/3fdf121016f6187a2fffc66a73cd33b45a20e55d/lib/bibsync/utils.rb
     """
     if src.endswith(".pdf"):
         totext = subprocess.Popen(["pdftotext", src, "-"],
@@ -197,33 +200,49 @@ def findDOI(src):
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE)
     else:
-        return False
+        return (False, False)
 
     extractfull = ''
+    extract_type = False
+    extractID = None
     while totext.poll() is None:
         extractfull += ' '.join([i.decode(stdout_encoding).strip() for i in totext.stdout.readlines()])
-        extractDOI = doi_re.search(extractfull.lower().replace('&#338;', '-'))
-        if not extractDOI:
-            # PNAS fix
-            extractDOI = doi_pnas_re.search(extractfull.
-                                            lower().
-                                            replace('pnas', '/pnas'))
-            if not extractDOI:
-                # JSB fix
-                extractDOI = doi_jsb_re.search(extractfull.lower())
-        if extractDOI:
-            totext.terminate()
+        # Try to extract DOI
+        if "DOI" in only:
+            extractID = doi_re.search(extractfull.lower().replace('&#338;', '-'))
+            if not extractID:
+                # PNAS fix
+                extractID = doi_pnas_re.search(extractfull.
+                                               lower().
+                                               replace('pnas', '/pnas'))
+                if not extractID:
+                    # JSB fix
+                    extractID = doi_jsb_re.search(extractfull.lower())
+            if extractID:
+                extract_type = "DOI"
+                totext.terminate()
+        # Try to extract arXiv
+        if "arXiv" in only:
+            tmp_extractID = arXiv_re.search(extractfull)
+            if tmp_extractID:
+                if not extractID or extractID.start(0) > tmp_extractID.start(1):
+                    # Only use arXiv id if it is before the DOI in the pdf
+                    extractID = tmp_extractID
+                    extract_type = "arXiv"
+                    totext.terminate()
+        if extract_type is not False:
             break
 
     err = totext.communicate()[1]
     if totext.returncode > 0:
         # Error happened
         tools.warning(err)
-        return False
+        return (False, False)
 
-    cleanDOI = False
-    if extractDOI:
-        cleanDOI = extractDOI.group(0).replace(':', '').replace(' ', '')
+    if extractID is not None and extract_type == "DOI":
+        # If DOI extracted, clean it and return it
+        cleanDOI = False
+        cleanDOI = extractID.group(0).replace(':', '').replace(' ', '')
         if clean_doi_re.search(cleanDOI):
             cleanDOI = cleanDOI[1:]
         # FABSE J fix
@@ -243,7 +262,11 @@ def findDOI(src):
                     if cleanDOItemp[i].isalpha() and digitStart:
                         break
             cleanDOI = cleanDOI[0:(8+i)]
-    return cleanDOI
+        return ("DOI", cleanDOI)
+    elif extractID is not None and extract_type == "arXiv":
+        # If arXiv id is extracted, return it
+        return ("arXiv", extractID.group(1))
+    return (False, False)
 
 
 def doi2Bib(doi):
@@ -274,45 +297,6 @@ def doi2Bib(doi):
         tools.warning('Unable to contact remote server to get the bibtex ' +
                       'entry for doi '+doi)
         return ''
-
-
-arXiv_re = re.compile(r'arXiv:\s*([\w\.\/\-]+)', re.IGNORECASE)
-
-
-def findArXivId(src):
-    """Searches for a valid arXiv id in src.
-
-    Returns the arXiv id or False if not found or an error occurred.
-    From : https://github.com/minad/bibsync/blob/3fdf121016f6187a2fffc66a73cd33b45a20e55d/lib/bibsync/utils.rb
-    """
-    if src.endswith(".pdf"):
-        totext = subprocess.Popen(["pdftotext", src, "-"],
-                                  stdout=subprocess.PIPE,
-                                  stderr=subprocess.PIPE)
-    elif src.endswith(".djvu"):
-        totext = subprocess.Popen(["djvutxt", src],
-                                  stdout=subprocess.PIPE,
-                                  stderr=subprocess.PIPE)
-    else:
-        return False
-
-    extractfull = ''
-    while totext.poll() is None:
-        extractfull += ' '.join([i.decode(stdout_encoding).strip() for i in totext.stdout.readlines()])
-        extractID = arXiv_re.search(extractfull)
-        if extractID:
-            totext.terminate()
-            break
-
-    err = totext.communicate()[1]
-    if totext.returncode > 0:
-        # Error happened
-        tools.warning(err)
-        return False
-    elif extractID is not None:
-        return extractID.group(1)
-    else:
-        return False
 
 
 def arXiv2Bib(arxiv):
