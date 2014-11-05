@@ -88,7 +88,7 @@ class Config():
         try:
             with open(self.config_path + "bmc.json", 'w') as fh:
                 fh.write(json.dumps(self.config,
-                                    sort_keys=True
+                                    sort_keys=True,
                                     indent=4,
                                     separators=(',', ': ')))
         except IOError:
