@@ -8,3 +8,6 @@
 *.pdf
 *.bib
 *.djvu
+
+# build
+build/
