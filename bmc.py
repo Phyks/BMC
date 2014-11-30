@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf8 -*-
+
 from __future__ import unicode_literals
 
 import argparse
@@ -40,7 +41,7 @@ def checkBibtex(filename, bibtex_string):
         check = tools.rawInput("Is it correct? [Y/n] ")
     except KeyboardInterrupt:
         sys.exit()
-    except (KeyError, AssertionError):
+    except (IndexError, KeyError, AssertionError):
         check = 'n'
 
     try:
@@ -59,7 +60,7 @@ def checkBibtex(filename, bibtex_string):
         bibtex = bibtex.get_entry_dict()
         try:
             bibtex = bibtex[list(bibtex.keys())[0]]
-        except KeyError:
+        except (IndexError, KeyError):
             tools.warning("Invalid bibtex entry")
             bibtex_string = ''
             tools.rawInput("Press Enter to go back to editor.")
@@ -433,6 +434,15 @@ def update(entry):
             print("Previous version successfully deleted.")
 
 
+def commandline_arg(bytestring):
+    # UTF-8 encoding for python2
+    if sys.version_info >= (3, 0):
+        unicode_string = bytestring
+    else:
+        unicode_string = bytestring.decode(sys.getfilesystemencoding())
+    return unicode_string
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="A bibliography " +
                                      "management tool.")
@@ -442,38 +452,47 @@ if __name__ == '__main__':
     parser_download = subparsers.add_parser('download', help="download help")
     parser_download.add_argument('-t', '--type', default=None,
                                  choices=['article', 'book'],
-                                 help="type of the file to download")
+                                 help="type of the file to download",
+                                 type=commandline_arg)
     parser_download.add_argument('-m', '--manual', default=False,
                                  action='store_true',
                                  help="disable auto-download of bibtex")
     parser_download.add_argument('-y', default=False,
                                  help="Confirm all")
-    parser_download.add_argument('--tag', default='', help="Tag")
+    parser_download.add_argument('--tag', default='',
+                                 help="Tag", type=commandline_arg)
     parser_download.add_argument('url',  nargs='+',
-                                 help="url of the file to import")
+                                 help="url of the file to import",
+                                 type=commandline_arg)
     parser_download.set_defaults(func='download')
 
     parser_import = subparsers.add_parser('import', help="import help")
     parser_import.add_argument('-t', '--type', default=None,
                                choices=['article', 'book'],
-                               help="type of the file to import")
+                               help="type of the file to import",
+                               type=commandline_arg)
     parser_import.add_argument('-m', '--manual', default=False,
                                action='store_true',
                                help="disable auto-download of bibtex")
     parser_import.add_argument('-y', default=False,
                                help="Confirm all")
-    parser_import.add_argument('--tag', default='', help="Tag")
+    parser_import.add_argument('--tag', default='', help="Tag",
+                               type=commandline_arg)
     parser_import.add_argument('file',  nargs='+',
-                               help="path to the file to import")
+                               help="path to the file to import",
+                               type=commandline_arg)
     parser_import.add_argument('--skip',  nargs='+',
-                               help="path to files to skip", default=[])
+                               help="path to files to skip", default=[],
+                               type=commandline_arg)
     parser_import.set_defaults(func='import')
 
     parser_delete = subparsers.add_parser('delete', help="delete help")
     parser_delete.add_argument('entries', metavar='entry', nargs='+',
-                               help="a filename or an identifier")
+                               help="a filename or an identifier",
+                               type=commandline_arg)
     parser_delete.add_argument('--skip',  nargs='+',
-                               help="path to files to skip", default=[])
+                               help="path to files to skip", default=[],
+                               type=commandline_arg)
     group = parser_delete.add_mutually_exclusive_group()
     group.add_argument('--id', action="store_true", default=False,
                        help="id based deletion")
@@ -486,9 +505,11 @@ if __name__ == '__main__':
 
     parser_edit = subparsers.add_parser('edit', help="edit help")
     parser_edit.add_argument('entries', metavar='entry', nargs='+',
-                             help="a filename or an identifier")
+                             help="a filename or an identifier",
+                             type=commandline_arg)
     parser_edit.add_argument('--skip',  nargs='+',
-                             help="path to files to skip", default=[])
+                             help="path to files to skip", default=[],
+                             type=commandline_arg)
     group = parser_edit.add_mutually_exclusive_group()
     group.add_argument('--id', action="store_true", default=False,
                        help="id based deletion")
@@ -504,12 +525,14 @@ if __name__ == '__main__':
 
     parser_open = subparsers.add_parser('open', help="open help")
     parser_open.add_argument('ids', metavar='id',  nargs='+',
-                             help="an identifier")
+                             help="an identifier",
+                             type=commandline_arg)
     parser_open.set_defaults(func='open')
 
     parser_export = subparsers.add_parser('export', help="export help")
     parser_export.add_argument('ids', metavar='id',  nargs='+',
-                               help="an identifier")
+                               help="an identifier",
+                               type=commandline_arg)
     parser_export.set_defaults(func='export')
 
     parser_resync = subparsers.add_parser('resync', help="resync help")
@@ -517,12 +540,14 @@ if __name__ == '__main__':
 
     parser_update = subparsers.add_parser('update', help="update help")
     parser_update.add_argument('--entries', metavar='entry', nargs='+',
-                               help="a filename or an identifier")
+                               help="a filename or an identifier",
+                               type=commandline_arg)
     parser_update.set_defaults(func='update')
 
     parser_search = subparsers.add_parser('search', help="search help")
     parser_search.add_argument('query', metavar='entry', nargs='+',
-                               help="your query, see README for more info.")
+                               help="your query, see README for more info.",
+                               type=commandline_arg)
     parser_search.set_defaults(func='search')
 
     args = parser.parse_args()
