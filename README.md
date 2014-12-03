@@ -120,6 +120,12 @@ All your documents will be stored in the papers dir specified in `~/.config/bmc/
 
 The resync option will check that all bibtex entries have a corresponding file and all file have a corresponding bibtex entry. It will prompt you what to do for unmatched entries.
 
+
+## Unittests
+
+Unittests are available for all the files in the `lib/`. You can simply run the tests using `nosetests`. Builds are run after each commit on [Travis](https://travis-ci.org/Phyks/BMC).
+
+
 ## License
 
 All the source code I wrote is under a `no-alcohol beer-ware license`. All functions that I didn't write myself are under the original license and their origin is specified in the function itself.
@@ -149,7 +155,6 @@ Here are some sources of inspirations for this project :
 
 A list of ideas and TODO. Don't hesitate to give feedback on the ones you really want or to propose your owns.
 
-60. Unittest
 80. Search engine
 85. Anti-duplicate ?
 90. Look for published version in arXiv
