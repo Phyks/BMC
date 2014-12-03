@@ -25,7 +25,7 @@ except ImportError:
     from urllib2 import urlopen, Request, URLError
 import arxiv2bib as arxiv_metadata
 import libbmc.tools as tools
-from bibtexparser.bparser import BibTexParser
+import bibtexparser
 from libbmc.config import Config
 
 
@@ -313,8 +313,8 @@ def arXiv2Bib(arxiv):
         if isinstance(bib, arxiv_metadata.ReferenceErrorInfo):
             continue
         else:
-            fetched_bibtex = BibTexParser(bib.bibtex())
-            fetched_bibtex = fetched_bibtex.get_entry_dict()
+            fetched_bibtex = bibtexparser.loads(bib.bibtex())
+            fetched_bibtex = fetched_bibtex.entries_dict
             fetched_bibtex = fetched_bibtex[list(fetched_bibtex.keys())[0]]
             try:
                 del(fetched_bibtex['file'])

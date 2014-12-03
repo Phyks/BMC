@@ -11,7 +11,7 @@
 from __future__ import unicode_literals
 import unittest
 from libbmc.backend import *
-from bibtexparser.bparser import BibTexParser
+import bibtexparser
 import os
 import shutil
 import tempfile
@@ -43,7 +43,7 @@ mass density wave should occur.},
 Lattice},
         year={2013},
 }""" % config.get("folder")
-        self.bibtex_article = BibTexParser(self.bibtex_article_string).get_entry_dict()
+        self.bibtex_article = bibtexparser.loads(self.bibtex_article_string).entries_dict
         self.bibtex_article = self.bibtex_article[list(self.bibtex_article.keys())[0]]
 
         self.bibtex_book_string = """
@@ -55,7 +55,7 @@ Lattice},
     year={2008},
 }
 """
-        self.bibtex_book = BibTexParser(self.bibtex_book_string).get_entry_dict()
+        self.bibtex_book = bibtexparser.loads(self.bibtex_book_string).entries_dict
         self.bibtex_book = self.bibtex_book[list(self.bibtex_book.keys())[0]]
 
     def test_getNewName_article(self):

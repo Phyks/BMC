@@ -9,7 +9,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from bibtexparser.bparser import BibTexParser
+import bibtexparser
 from codecs import open
 from libbmc.config import Config
 from libbmc import backend
@@ -25,8 +25,8 @@ EDITOR = os.environ.get('EDITOR') if os.environ.get('EDITOR') else 'vim'
 def checkBibtex(filename, bibtex_string):
     print("The bibtex entry found for "+filename+" is:")
 
-    bibtex = BibTexParser(bibtex_string)
-    bibtex = bibtex.get_entry_dict()
+    bibtex = bibtexparser.loads(bibtex_string)
+    bibtex = bibtex.entries_dict
     try:
         bibtex = bibtex[list(bibtex.keys())[0]]
         # Check entries are correct
@@ -55,9 +55,9 @@ def checkBibtex(filename, bibtex_string):
             tmpfile.flush()
             subprocess.call([EDITOR, tmpfile.name])
             tmpfile.seek(0)
-            bibtex = BibTexParser(tmpfile.read().decode('utf-8')+"\n")
+            bibtex = bibtexparser.loads(tmpfile.read().decode('utf-8')+"\n")
 
-        bibtex = bibtex.get_entry_dict()
+        bibtex = bibtex.entries_dict
         try:
             bibtex = bibtex[list(bibtex.keys())[0]]
         except (IndexError, KeyError):
@@ -176,8 +176,8 @@ def addFile(src, filetype, manual, autoconfirm, tag):
     else:
         bibtex = ''
 
-    bibtex = BibTexParser(bibtex)
-    bibtex = bibtex.get_entry_dict()
+    bibtex = bibtexparser.loads(bibtex)
+    bibtex = bibtex.entries_dict
     if len(bibtex) > 0:
         bibtex_name = list(bibtex.keys())[0]
         bibtex = bibtex[bibtex_name]
@@ -272,8 +272,8 @@ def editEntry(entry, file_id='both'):
     try:
         with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
                 as fh:
-            index = BibTexParser(fh.read())
-        index = index.get_entry_dict()
+            index = bibtexparser.load(fh)
+        index = index.entries_dict
     except (TypeError, IOError):
         tools.warning("Unable to open index file.")
         return False
@@ -307,8 +307,8 @@ def openFile(ident):
     try:
         with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
                 as fh:
-            bibtex = BibTexParser(fh.read())
-        bibtex = bibtex.get_entry_dict()
+            bibtex = bibtexparser.load(fh)
+        bibtex = bibtex.entries_dict
     except (TypeError, IOError):
         tools.warning("Unable to open index file.")
         return False

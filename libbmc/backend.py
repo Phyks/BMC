@@ -14,7 +14,7 @@ import os
 import re
 import libbmc.tools as tools
 import libbmc.fetcher as fetcher
-from bibtexparser.bparser import BibTexParser
+import bibtexparser
 from libbmc.config import Config
 from codecs import open
 
@@ -103,8 +103,8 @@ def bibtexEdit(ident, modifs):
     try:
         with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
                 as fh:
-            bibtex = BibTexParser(fh.read())
-        bibtex = bibtex.get_entry_dict()
+            bibtex = bibtexparser.load(fh)
+        bibtex = bibtex.entries_dict
     except (IOError, TypeError):
         tools.warning("Unable to open index file.")
         return False
@@ -136,8 +136,8 @@ def deleteId(ident):
     try:
         with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
                 as fh:
-            bibtex = BibTexParser(fh.read())
-        bibtex = bibtex.get_entry_dict()
+            bibtex = bibtexparser.load(fh)
+        bibtex = bibtex.entries_dict
     except (IOError, TypeError):
         tools.warning("Unable to open index file.")
         return False
@@ -172,8 +172,8 @@ def deleteFile(filename):
     try:
         with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
                 as fh:
-            bibtex = BibTexParser(fh.read())
-        bibtex = bibtex.get_entry_dict()
+            bibtex = bibtexparser.load(fh)
+        bibtex = bibtex.entries_dict
     except (TypeError, IOError):
         tools.warning("Unable to open index file.")
         return False
@@ -222,8 +222,8 @@ def diffFilesIndex():
     try:
         with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
                 as fh:
-            index = BibTexParser(fh.read())
-        index_diff = index.get_entry_dict()
+            index = bibtexparser.load(fh)
+        index_diff = index.entries_dict
     except (TypeError, IOError):
         tools.warning("Unable to open index file.")
         return False
@@ -237,7 +237,7 @@ def diffFilesIndex():
     for filename in files:
         index_diff[filename] = {'file': filename}
 
-    return index.get_entry_dict()
+    return index.entries_dict
 
 
 def getBibtex(entry, file_id='both', clean=False):
@@ -250,8 +250,8 @@ def getBibtex(entry, file_id='both', clean=False):
     try:
         with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
                 as fh:
-            bibtex = BibTexParser(fh.read())
-        bibtex = bibtex.get_entry_dict()
+            bibtex = bibtexparser.load(fh)
+        bibtex = bibtex.entries_dict
     except (TypeError, IOError):
         tools.warning("Unable to open index file.")
         return False
@@ -282,8 +282,8 @@ def getEntries():
     try:
         with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
                 as fh:
-            bibtex = BibTexParser(fh.read())
-        bibtex = bibtex.get_entry_dict()
+            bibtex = bibtexparser.load(fh)
+        bibtex = bibtex.entries_dict
     except (TypeError, IOError):
         tools.warning("Unable to open index file.")
         return False
@@ -313,8 +313,8 @@ def updateArXiv(entry):
             continue
         ids.add(bibtex['eprint'])
 
-    last_bibtex = BibTexParser(fetcher.arXiv2Bib(arxiv_id_no_v))
-    last_bibtex = last_bibtex.get_entry_dict()
+    last_bibtex = bibtexparser.loads(fetcher.arXiv2Bib(arxiv_id_no_v))
+    last_bibtex = last_bibtex.entries_dict
     last_bibtex = last_bibtex[list(last_bibtex.keys())[0]]
 
     if last_bibtex['eprint'] not in ids:
