@@ -92,7 +92,7 @@ def checkBibtex(filename, bibtex_string):
     return bibtex
 
 
-def addFile(src, filetype, manual, autoconfirm, tag):
+def addFile(src, filetype, manual, autoconfirm, tag, rename=True):
     """
     Add a file to the library
     """
@@ -194,17 +194,21 @@ def addFile(src, filetype, manual, autoconfirm, tag):
         tag = args.tag
     bibtex['tag'] = tag
 
-    new_name = backend.getNewName(src, bibtex, tag)
+    if rename:
+        new_name = backend.getNewName(src, bibtex, tag)
 
-    while os.path.exists(new_name):
-        tools.warning("file "+new_name+" already exists.")
-        default_rename = new_name.replace(tools.getExtension(new_name),
-                                          " (2)"+tools.getExtension(new_name))
-        rename = tools.rawInput("New name ["+default_rename+"]? ")
-        if rename == '':
-            new_name = default_rename
-        else:
-            new_name = rename
+        while os.path.exists(new_name):
+            tools.warning("file "+new_name+" already exists.")
+            default_rename = new_name.replace(tools.getExtension(new_name),
+                                              " (2)" +
+                                              tools.getExtension(new_name))
+            rename = tools.rawInput("New name ["+default_rename+"]? ")
+            if rename == '':
+                new_name = default_rename
+            else:
+                new_name = rename
+    else:
+        new_name = src
     bibtex['file'] = new_name
 
     try:
@@ -478,6 +482,9 @@ if __name__ == '__main__':
                                help="Confirm all")
     parser_import.add_argument('--tag', default='', help="Tag",
                                type=commandline_arg)
+    parser_download.add_argument('--in-place', default=False,
+                                 dest="inplace", action='store_true',
+                                 help="Leave the imported file in place",)
     parser_import.add_argument('file',  nargs='+',
                                help="path to the file to import",
                                type=commandline_arg)
@@ -572,7 +579,7 @@ if __name__ == '__main__':
             skipped = []
             for filename in list(set(args.file) - set(args.skip)):
                 new_name = addFile(filename, args.type, args.manual, args.y,
-                                   args.tag)
+                                   args.tag, args.inplace)
                 if new_name is not False:
                     print(filename+" successfully imported as " +
                           new_name+".")
