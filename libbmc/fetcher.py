@@ -173,7 +173,7 @@ def isbn2Bib(isbn):
     try:
         return isbnlib.registry.bibformatters['bibtex'](isbnlib.meta(isbn,
                                                                      'default'))
-    except (isbnlib.ISBNLibException, isbnlib.ISBNToolsException, TypeError):
+    except (isbnlib.ISBNLibException, TypeError):
         return ''
 
 
