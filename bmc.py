@@ -30,18 +30,19 @@ def checkBibtex(filename, bibtex_string):
     try:
         bibtex = bibtex[list(bibtex.keys())[0]]
         # Check entries are correct
-        assert bibtex['title']
-        if bibtex['type'] == 'article':
-            assert bibtex['authors']
-        elif bibtex['type'] == 'book':
-            assert bibtex['author']
-        assert bibtex['year']
+        if "title" not in bibtex:
+            raise AssertionError
+        if "authors" not in bibtex and "author" not in bibtex:
+            raise AssertionError
+        if "year" not in bibtex:
+            raise AssertionError
         # Print the bibtex and confirm
         print(tools.parsed2Bibtex(bibtex))
         check = tools.rawInput("Is it correct? [Y/n] ")
     except KeyboardInterrupt:
         sys.exit()
     except (IndexError, KeyError, AssertionError):
+        print("Missing author, year or title in bibtex.")
         check = 'n'
 
     try:
@@ -207,16 +208,15 @@ def addFile(src, filetype, manual, autoconfirm, tag, rename=True):
                 new_name = default_rename
             else:
                 new_name = rename
+        try:
+            shutil.copy2(src, new_name)
+        except shutil.Error:
+            new_name = False
+            sys.exit("Unable to move file to library dir " +
+                     config.get("folder")+".")
     else:
         new_name = src
     bibtex['file'] = new_name
-
-    try:
-        shutil.copy2(src, new_name)
-    except shutil.Error:
-        new_name = False
-        sys.exit("Unable to move file to library dir " +
-                 config.get("folder")+".")
 
     # Remove first page of IOP papers
     try:
@@ -482,7 +482,7 @@ if __name__ == '__main__':
                                help="Confirm all")
     parser_import.add_argument('--tag', default='', help="Tag",
                                type=commandline_arg)
-    parser_download.add_argument('--in-place', default=False,
+    parser_import.add_argument('--in-place', default=False,
                                  dest="inplace", action='store_true',
                                  help="Leave the imported file in place",)
     parser_import.add_argument('file',  nargs='+',
@@ -579,7 +579,7 @@ if __name__ == '__main__':
             skipped = []
             for filename in list(set(args.file) - set(args.skip)):
                 new_name = addFile(filename, args.type, args.manual, args.y,
-                                   args.tag, args.inplace)
+                                   args.tag, not args.inplace)
                 if new_name is not False:
                     print(filename+" successfully imported as " +
                           new_name+".")
