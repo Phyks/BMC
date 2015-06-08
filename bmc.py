@@ -216,7 +216,7 @@ def addFile(src, filetype, manual, autoconfirm, tag, rename=True):
                      config.get("folder")+".")
     else:
         new_name = src
-    bibtex['file'] = new_name
+    bibtex['file'] = os.path.abspath(new_name)
 
     # Remove first page of IOP papers
     try:
