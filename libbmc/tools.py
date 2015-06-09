@@ -14,7 +14,8 @@ from __future__ import print_function, unicode_literals
 import os
 import re
 import sys
-from termios import tcflush, TCIOFLUSH
+if os.name == "posix":
+    from termios import tcflush, TCIOFLUSH
 
 try:
     input = raw_input
@@ -67,7 +68,8 @@ def replaceAll(text, dic):
 
 def rawInput(string):
     """Flush stdin and then prompt the user for something"""
-    tcflush(sys.stdin, TCIOFLUSH)
+    if os.name == "posix":
+        tcflush(sys.stdin, TCIOFLUSH)
     return input(string)
 
 

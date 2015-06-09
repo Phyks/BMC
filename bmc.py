@@ -630,13 +630,14 @@ if __name__ == '__main__':
             sys.exit()
 
         elif args.func == 'list':
-            listPapers = tools.listDir(config.get("folder"))
+            listPapers = backend.getEntries(full=True)
+            if not listPapers:
+                sys.exit()
+            listPapers = [v["file"] for k, v in listPapers.items()]
             listPapers.sort()
-
             for paper in listPapers:
-                if tools.getExtension(paper) not in [".pdf", ".djvu"]:
-                    continue
                 print(paper)
+            sys.exit()
 
         elif args.func == 'search':
             raise Exception('TODO')

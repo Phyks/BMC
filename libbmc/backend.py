@@ -277,7 +277,7 @@ def getBibtex(entry, file_id='both', clean=False):
     return bibtex_entry
 
 
-def getEntries():
+def getEntries(full=False):
     """Returns the list of all entries in the bibtex index"""
     try:
         with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
@@ -288,7 +288,10 @@ def getEntries():
         tools.warning("Unable to open index file.")
         return False
 
-    return list(bibtex.keys())
+    if full:
+        return bibtex
+    else:
+        return list(bibtex.keys())
 
 
 def updateArXiv(entry):
