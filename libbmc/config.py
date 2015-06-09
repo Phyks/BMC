@@ -82,6 +82,11 @@ class Config():
             except (ValueError, IOError):
                 tools.warning("Config file could not be read.")
                 sys.exit(1)
+            try:
+                folder_exists = make_sure_path_exists(self.get("folder"))
+            except OSError:
+                tools.warning("Unable to create paper storage folder.")
+                sys.exit(1)
         self.load_masks()
 
     def save(self):
