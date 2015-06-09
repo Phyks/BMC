@@ -465,6 +465,8 @@ if __name__ == '__main__':
                                  help="Confirm all")
     parser_download.add_argument('--tag', default='',
                                  help="Tag", type=commandline_arg)
+    parser_download.add_argument('--keep', default=False,
+                                 help="Do not remove the file")
     parser_download.add_argument('url',  nargs='+',
                                  help="url of the file to import",
                                  type=commandline_arg)
@@ -483,8 +485,8 @@ if __name__ == '__main__':
     parser_import.add_argument('--tag', default='', help="Tag",
                                type=commandline_arg)
     parser_import.add_argument('--in-place', default=False,
-                                 dest="inplace", action='store_true',
-                                 help="Leave the imported file in place",)
+                               dest="inplace", action='store_true',
+                               help="Leave the imported file in place",)
     parser_import.add_argument('file',  nargs='+',
                                help="path to the file to import",
                                type=commandline_arg)
@@ -603,8 +605,9 @@ if __name__ == '__main__':
                     confirm = 'y'
 
                 if confirm.lower() == 'y':
-                    if args.file or not backend.deleteId(filename):
-                        if args.id or not backend.deleteFile(filename):
+                    if args.file or not backend.deleteId(filename, args.keep):
+                        if(args.id or
+                           not backend.deleteFile(filename, args.keep)):
                             tools.warning("Unable to delete "+filename)
                             sys.exit(1)
 

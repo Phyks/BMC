@@ -131,7 +131,7 @@ def bibtexRewrite(data):
         return False
 
 
-def deleteId(ident):
+def deleteId(ident, keep=False):
     """Delete a file based on its id in the bibtex file"""
     try:
         with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
@@ -145,11 +145,12 @@ def deleteId(ident):
     if ident not in bibtex.keys():
         return False
 
-    try:
-        os.remove(bibtex[ident]['file'])
-    except (KeyError, OSError):
-        tools.warning("Unable to delete file associated to id "+ident+" : " +
-                      bibtex[ident]['file'])
+    if not keep:
+        try:
+            os.remove(bibtex[ident]['file'])
+        except (KeyError, OSError):
+            tools.warning("Unable to delete file associated to id " + ident +
+                          " : " + bibtex[ident]['file'])
 
     try:
         if not os.listdir(os.path.dirname(bibtex[ident]['file'])):
@@ -167,7 +168,7 @@ def deleteId(ident):
     return True
 
 
-def deleteFile(filename):
+def deleteFile(filename, keep=False):
     """Delete a file based on its filename"""
     try:
         with open(config.get("folder")+'index.bib', 'r', encoding='utf-8') \
@@ -183,11 +184,12 @@ def deleteFile(filename):
         try:
             if os.path.samefile(bibtex[key]['file'], filename):
                 found = True
-                try:
-                    os.remove(bibtex[key]['file'])
-                except (KeyError, OSError):
-                    tools.warning("Unable to delete file associated to id " +
-                                  key+" : "+bibtex[key]['file'])
+                if not keep:
+                    try:
+                        os.remove(bibtex[key]['file'])
+                    except (KeyError, OSError):
+                        tools.warning("Unable to delete file associated " +
+                                      "to id " + key+" : "+bibtex[key]['file'])
 
                 try:
                     if not os.listdir(os.path.dirname(filename)):
