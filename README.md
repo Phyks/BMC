@@ -58,7 +58,7 @@ Should be almost working and usable now, although still to be considered as **ex
 ```
 git clone https://github.com/Phyks/BMC
 ```
-* Install `arxiv2bib`, `PySocks`, `bibtexparser` (https://github.com/sciunto/python-bibtexparser), `PyPDF2` and `isbnlib` _via_ Pypi
+* Install `arxiv2bib`, `PySocks`, `bibtexparser` (https://github.com/sciunto/python-bibtexparser), `PyPDF2` and `isbnlib` _via_ Pypi (or better, in a virtualenv, or using your package manager, according to your preferences)
 ```
 sudo pip install arxiv2bib PySocks bibtexparser pyPDF2 isbnlib
 ```
