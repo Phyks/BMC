@@ -29,7 +29,7 @@ def getNewName(src, bibtex, tag='', override_format=None):
     """
     authors = re.split(' and ', bibtex['author'])
 
-    if bibtex['type'] == 'article':
+    if bibtex['entrytype'] == 'article':
         if override_format is None:
             new_name = config.get("format_articles")
         else:
@@ -38,7 +38,7 @@ def getNewName(src, bibtex, tag='', override_format=None):
             new_name = new_name.replace("%j", bibtex['journal'])
         except KeyError:
             pass
-    elif bibtex['type'] == 'book':
+    elif bibtex['entrytype'] == 'book':
         if override_format is None:
             new_name = config.get("format_books")
         else:

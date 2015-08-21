@@ -46,9 +46,9 @@ def slugify(value):
 
 def parsed2Bibtex(parsed):
     """Convert a single bibtex entry dict to bibtex string"""
-    bibtex = '@'+parsed['type']+'{'+parsed['id']+",\n"
+    bibtex = '@'+parsed['entrytype']+'{'+parsed['id']+",\n"
 
-    for field in [i for i in sorted(parsed) if i not in ['type', 'id']]:
+    for field in [i for i in sorted(parsed) if i not in ['entrytype', 'id']]:
         bibtex += "\t"+field+"={"+parsed[field]+"},\n"
     bibtex += "}\n\n"
     return bibtex
