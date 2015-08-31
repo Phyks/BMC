@@ -82,7 +82,7 @@ Lattice},
 
     def test_bibtexEdit(self):
         bibtexAppend(self.bibtex_article)
-        bibtexEdit(self.bibtex_article['id'], {'id': 'bidule'})
+        bibtexEdit(self.bibtex_article['ID'], {'ID': 'bidule'})
         with open(config.get("folder")+'index.bib', 'r') as fh:
             self.assertEqual(fh.read(),
                              '@article{bidule,\n\tabstract={We study the role of the dipolar interaction, correctly accounting for the\nDipolar-Induced Resonance (DIR), in a quasi-one-dimensional system of ultracold\nbosons. We first show how the DIR affects the lowest-energy states of two\nparticles in a harmonic trap. Then, we consider a deep optical lattice loaded\nwith ultracold dipolar bosons. We describe this many-body system using an\natom-dimer extended Bose-Hubbard model. We analyze the impact of the DIR on the\nphase diagram at T=0 by exact diagonalization of a small-sized system. In\nparticular, the resonance strongly modifies the range of parameters for which a\nmass density wave should occur.},\n\tarchiveprefix={arXiv},\n\tauthor={N. Bartolo and D. J. Papoular and L. Barbiero and C. Menotti and A. Recati},\n\teprint={1303.3130v1},\n\tfile={'+config.get("folder")+'N_Bartolo_A_Recati-j-2013.pdf},\n\tlink={http://arxiv.org/abs/1303.3130v1},\n\tmonth={Mar},\n\tprimaryclass={cond-mat.quant-gas},\n\ttag={},\n\ttitle={Dipolar-Induced Resonance for Ultracold Bosons in a Quasi-1D Optical\nLattice},\n\tyear={2013},\n}\n\n\n')
@@ -98,7 +98,7 @@ Lattice},
         self.bibtex_article['file'] = config.get("folder")+'test.pdf'
         bibtexAppend(self.bibtex_article)
         open(config.get("folder")+'test.pdf', 'w').close()
-        deleteId(self.bibtex_article['id'])
+        deleteId(self.bibtex_article['ID'])
         with open(config.get("folder")+'index.bib', 'r') as fh:
             self.assertEqual(fh.read().strip(), "")
         self.assertFalse(os.path.isfile(config.get("folder")+'test.pdf'))
@@ -118,12 +118,12 @@ Lattice},
 
     def test_getBibtex(self):
         bibtexAppend(self.bibtex_article)
-        got = getBibtex(self.bibtex_article['id'])
+        got = getBibtex(self.bibtex_article['ID'])
         self.assertEqual(got, self.bibtex_article)
 
     def test_getBibtex_id(self):
         bibtexAppend(self.bibtex_article)
-        got = getBibtex(self.bibtex_article['id'], file_id='id')
+        got = getBibtex(self.bibtex_article['ID'], file_id='ID')
         self.assertEqual(got, self.bibtex_article)
 
     def test_getBibtex_file(self):
@@ -134,16 +134,16 @@ Lattice},
         self.assertEqual(got, self.bibtex_article)
 
     def test_getBibtex_clean(self):
-        config.set("ignore_fields", ['id', 'abstract'])
+        config.set("ignore_fields", ['ID', 'abstract'])
         bibtexAppend(self.bibtex_article)
-        got = getBibtex(self.bibtex_article['id'], clean=True)
+        got = getBibtex(self.bibtex_article['ID'], clean=True)
         for i in config.get("ignore_fields"):
             self.assertNotIn(i, got)
 
     def test_getEntries(self):
         bibtexAppend(self.bibtex_article)
         self.assertEqual(getEntries(),
-                         [self.bibtex_article['id']])
+                         [self.bibtex_article['ID']])
 
     def test_updateArxiv(self):
         # TODO

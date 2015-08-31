@@ -220,7 +220,7 @@ def addFile(src, filetype, manual, autoconfirm, tag, rename=True):
 
     # Remove first page of IOP papers
     try:
-        if 'IOP' in bibtex['publisher'] and bibtex['entrytype'] == 'article':
+        if 'IOP' in bibtex['publisher'] and bibtex['ENTRYTYPE'] == 'article':
             tearpages.tearpage(new_name)
     except (KeyError, shutil.Error, IOError):
         pass
@@ -282,7 +282,7 @@ def editEntry(entry, file_id='both'):
         tools.warning("Unable to open index file.")
         return False
 
-    index[new_bibtex['id']] = new_bibtex
+    index[new_bibtex['ID']] = new_bibtex
     backend.bibtexRewrite(index)
     return True
 
@@ -334,7 +334,7 @@ def resync():
         entry = diff[key]
         if entry['file'] == '':
             print("\nFound entry in index without associated file: " +
-                  entry['id'])
+                  entry['ID'])
             print("Title:\t"+entry['title'])
             loop = True
             while confirm:
@@ -370,19 +370,19 @@ def resync():
                             loop = (loop.lower() != 'y')
                     continue
             if filename == '':
-                backend.deleteId(entry['id'])
-                print("Deleted entry \""+entry['id']+"\".")
+                backend.deleteId(entry['ID'])
+                print("Deleted entry \""+entry['ID']+"\".")
             else:
                 new_name = backend.getNewName(filename, entry)
                 try:
                     shutil.copy2(filename, new_name)
                     print("Imported new file "+filename+" for entry " +
-                          entry['id']+".")
+                          entry['ID']+".")
                 except shutil.Error:
                     new_name = False
                     sys.exit("Unable to move file to library dir " +
                              config.get("folder")+".")
-                backend.bibtexEdit(entry['id'], {'file': filename})
+                backend.bibtexEdit(entry['ID'], {'file': filename})
         else:
             print("Found file without any associated entry in index:")
             print(entry['file'])
