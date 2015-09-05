@@ -22,9 +22,7 @@ try:
     from urllib.error import URLError
 except ImportError:
     # Fall back to Python 2's urllib2
-    from urllib2 import urlopen, Request
-    class URLError(Exception):
-        pass
+    from urllib2 import urlopen, Request, URLError
 import arxiv2bib as arxiv_metadata
 import libbmc.tools as tools
 import bibtexparser
