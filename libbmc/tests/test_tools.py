@@ -19,7 +19,7 @@ class TestTools(unittest.TestCase):
         self.assertEqual(slugify(u"à&é_truc.pdf"), "ae_trucpdf")
 
     def test_parsed2Bibtex(self):
-        parsed = {'type': 'article', 'id': 'test', 'field1': 'test1',
+        parsed = {'ENTRYTYPE': 'article', 'ID': 'test', 'field1': 'test1',
                   'field2': 'test2'}
         expected = ('@article{test,\n\tfield1={test1},\n' +
                     '\tfield2={test2},\n}\n\n')

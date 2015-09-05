@@ -123,7 +123,7 @@ Lattice},
 
     def test_getBibtex_id(self):
         bibtexAppend(self.bibtex_article)
-        got = getBibtex(self.bibtex_article['ID'], file_id='ID')
+        got = getBibtex(self.bibtex_article['ID'], file_id='id')
         self.assertEqual(got, self.bibtex_article)
 
     def test_getBibtex_file(self):
