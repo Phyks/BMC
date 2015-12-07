@@ -213,15 +213,14 @@ def findArticleID(src, only=["DOI", "arXiv"]):
         extractfull += ' '.join([i.decode(stdout_encoding).strip() for i in totext.stdout.readlines()])
         # Try to extract DOI
         if "DOI" in only:
-            extractID = doi_re.search(extractfull.lower().replace('&#338;', '-'))
+            extractlower = extractfull.lower().replace('digital object identifier', 'doi')
+            extractID = doi_re.search(extractlower.replace('&#338;', '-'))
             if not extractID:
                 # PNAS fix
-                extractID = doi_pnas_re.search(extractfull.
-                                               lower().
-                                               replace('pnas', '/pnas'))
+                extractID = doi_pnas_re.search(extractlower.replace('pnas', '/pnas'))
                 if not extractID:
                     # JSB fix
-                    extractID = doi_jsb_re.search(extractfull.lower())
+                    extractID = doi_jsb_re.search(extractlower)
             if extractID:
                 extract_type = "DOI"
                 totext.terminate()
