@@ -1,12 +1,3 @@
-from __future__ import unicode_literals
-import os
-import errno
-import imp
-import inspect
-import json
-import sys
-import libbmc.tools as tools
-
 # List of available options (in ~/.config/bmc/bmc.json file):
 # * folder : folder in which papers are stored
 # * proxies : list of proxies to use, e.g. ['', "socks5://localhost:4711"]
@@ -23,9 +14,17 @@ import libbmc.tools as tools
 # %v = arXiv version (e.g. '-v1') or nothing if not an arXiv paper
 
 # You can add your custom masks to rename files by adding functions in
-# ~/.config/masks.py.
+# ~/.config/bmc/masks.py.
 #    E.g. : def f(x): x.replace('test', 'some_expr')
 
+import os
+import errno
+import imp
+import inspect
+import json
+import sys
+
+from backend import tools
 
 def make_sure_path_exists(path):
     try:
@@ -86,7 +85,7 @@ class Config():
                 folder_exists = make_sure_path_exists(self.get("folder"))
             except OSError:
                 tools.warning("Unable to create paper storage folder.")
-                sys.exit(1)
+                raise
         self.load_masks()
 
     def save(self):
@@ -98,7 +97,7 @@ class Config():
                                     separators=(',', ': ')))
         except IOError:
             tools.warning("Could not write config file.")
-            sys.exit(1)
+            raise
 
     def load_masks(self):
         if os.path.isfile(self.config_path + "masks.py"):
