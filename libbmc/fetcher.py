@@ -265,7 +265,7 @@ def findArticleID(src, only=["DOI", "arXiv"]):
                     if cleanDOItemp[i].isalpha() and digitStart:
                         break
             cleanDOI = cleanDOI[0:(8+i)]
-        return ("DOI", cleanDOI)
+        return ("DOI", cleanDOI.strip())
     elif extractID is not None and extract_type == "arXiv":
         # If arXiv id is extracted, return it
         return ("arXiv", extractID.group(1))
