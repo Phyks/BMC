@@ -55,6 +55,7 @@ class Config():
 
     def initialize(self):
         self.set("folder", os.path.expanduser("~/Papers/"))
+        self.set("index", os.path.expanduser("~/Papers/index.bib"))
         self.set("proxies", [''])
         self.set("format_articles", "%f_%l-%j-%Y%v")
         self.set("format_books", "%a-%t")
